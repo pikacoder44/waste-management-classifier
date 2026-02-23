@@ -35,7 +35,7 @@ async def predict(file: UploadFile = File(...)):
     class_index = np.argmax(prediction)
     confidence = float(np.max(prediction))
 
-    class_labels = ["Organic", "Plastic", "Glass", "Metal"]
+    class_labels = ["Cardboard", "Glass", "Metal", "Paper", "Plastic", "Trash"]
 
     predicted_class = class_labels[class_index]
 
