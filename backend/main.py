@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import io
 from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 
 app = FastAPI()
 
@@ -26,7 +27,8 @@ async def predict(file: UploadFile = File(...)):
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     image = image.resize((224, 224))
 
-    image_array = np.array(image) / 255.0
+    image_array = np.array(image).astype("float32")
+    image_array = preprocess_input(image_array)
     image_array = np.expand_dims(image_array, axis=0)
 
     # 🔥 This is the important part
