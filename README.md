@@ -86,6 +86,7 @@ The project is built with a **full-stack architecture**:
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **FastAPI** - Modern Python web framework for building APIs
 - **Uvicorn** - ASGI server for running the FastAPI application
 - **TensorFlow/Keras** - Deep learning framework for the ML model
@@ -94,6 +95,7 @@ The project is built with a **full-stack architecture**:
 - **Pydantic** - Data validation using Python type hints
 
 ### Frontend
+
 - **Next.js** - React framework for production
 - **TypeScript** - Type-safe JavaScript
 - **React** - UI library
@@ -102,21 +104,23 @@ The project is built with a **full-stack architecture**:
 
 ## 📋 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/predict` | Upload image and get waste classification |
-| GET | `/evaluation` | Get model evaluation metrics |
-| GET | `/model-info` | Get model information and details |
+| Method | Endpoint      | Description                               |
+| ------ | ------------- | ----------------------------------------- |
+| POST   | `/predict`    | Upload image and get waste classification |
+| GET    | `/evaluation` | Get model evaluation metrics              |
+| GET    | `/model-info` | Get model information and details         |
 
 ### Example Request/Response
 
 **POST /predict**
+
 ```bash
 curl -X POST "http://localhost:8000/predict" \
   -F "file=@image.jpg"
 ```
 
 **Response:**
+
 ```json
 {
   "predicted_class": "plastic",
@@ -127,6 +131,7 @@ curl -X POST "http://localhost:8000/predict" \
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.8+ (for backend)
 - Node.js 18+ (for frontend)
 - pip (Python package manager)
@@ -135,22 +140,26 @@ curl -X POST "http://localhost:8000/predict" \
 ### Backend Setup
 
 1. Navigate to the backend directory:
+
 ```bash
 cd backend
 ```
 
 2. Create a virtual environment (recommended):
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 3. Install Python dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 4. Run the FastAPI server:
+
 ```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -160,16 +169,19 @@ The backend API will be available at `http://localhost:8000`
 ### Frontend Setup
 
 1. Navigate to the frontend directory:
+
 ```bash
 cd frontend
 ```
 
 2. Install Node.js dependencies:
+
 ```bash
 npm install
 ```
 
 3. Run the development server:
+
 ```bash
 npm run dev
 ```
@@ -188,6 +200,7 @@ The frontend will be available at `http://localhost:3000`
 ## 📈 Evaluation Results
 
 Model evaluation metrics are stored in `backend/utils/evaluation_results.json`. This includes:
+
 - Accuracy
 - Precision
 - Recall
@@ -198,6 +211,7 @@ Model evaluation metrics are stored in `backend/utils/evaluation_results.json`. 
 ## 🔧 Development & Testing
 
 ### Running Tests
+
 ```bash
 # Backend tests (if available)
 pytest backend/
@@ -209,10 +223,12 @@ npm test --prefix frontend
 ### Code Quality
 
 **Backend**:
+
 - Follows PEP 8 style guidelines
 - Type hints with Pydantic validation
 
 **Frontend**:
+
 - ESLint configuration included
 - TypeScript for type safety
 - Prettier for code formatting
@@ -233,7 +249,7 @@ This project is provided as-is for educational purposes as part of a Final Year 
 
 ## 👨‍💻 Author
 
-**FYP Student** - Final Year Project
+**Syed Muhammad Hashir Ali** - Virtual University of Pakistan
 
 ## 📚 References
 
