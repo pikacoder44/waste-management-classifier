@@ -60,7 +60,6 @@ export default function Home() {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
     ctx.drawImage(video, 0, 0, width, height);
 
     canvas.toBlob((blob) => {
