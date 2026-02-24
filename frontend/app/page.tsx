@@ -1,12 +1,14 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import Loader from "./components/Loader";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null); // newly selected file
   const [submittedFile, setSubmittedFile] = useState<File | null>(null); // file actually submitted
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const openWebcam = async () => {
     try {
@@ -31,6 +33,11 @@ export default function Home() {
   const upload_image = async () => {
     if (!file) return;
 
+    setIsLoading(true);
+    setResult(null);
+    setConfidence(null);
+    setSubmittedFile(null);
+
     const formData = new FormData();
     formData.append("file", file);
 
@@ -51,6 +58,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error uploading image:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -158,7 +167,7 @@ export default function Home() {
               <button
                 type="submit"
                 className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-2.5 text-sm sm:text-base font-medium text-white shadow-lg shadow-slate-300/60 transition-all duration-300 hover:bg-slate-800 hover:shadow-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={!file}
+                disabled={!file || isLoading}
               >
                 Analyze image
                 <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] text-slate-900 shadow-inner shadow-slate-200">
@@ -173,78 +182,84 @@ export default function Home() {
 
           <div
             className={`relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
-              hasResult
+              hasResult || isLoading
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
             }`}
           >
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Result
-                </p>
-                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
-                  Prediction overview
-                </h2>
-              </div>
-            </div>
-
-            {hasResult ? (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-                  <div className="relative mx-auto sm:mx-0 h-40 w-40 overflow-hidden rounded-2xl border border-amber-100 bg-amber-50 shadow-lg shadow-blue-100">
-                    <Image
-                      src={URL.createObjectURL(submittedFile as File)}
-                      alt="Uploaded Image"
-                      width={200}
-                      height={200}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-rose-200/35 via-transparent to-transparent" />
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Result
+                    </p>
+                    <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
+                      Prediction overview
+                    </h2>
                   </div>
+                </div>
 
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                        Predicted class
-                      </p>
-                      <p className="mt-1 inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-600">
-                        {result}
-                      </p>
-                    </div>
+                {hasResult ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                      <div className="relative mx-auto sm:mx-0 h-40 w-40 overflow-hidden rounded-2xl border border-amber-100 bg-amber-50 shadow-lg shadow-blue-100">
+                        <Image
+                          src={URL.createObjectURL(submittedFile as File)}
+                          alt="Uploaded Image"
+                          width={200}
+                          height={200}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-rose-200/35 via-transparent to-transparent" />
+                      </div>
 
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
-                        Confidence
-                      </p>
-                      <div className="mt-1 flex items-center gap-3">
-                        <p className="text-base font-semibold text-emerald-600">
-                          {(confidence * 100).toFixed(2)}%
-                        </p>
-                        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-200 border border-gray-200">
-                          <div
-                            className="h-full rounded-full bg-emerald-400 transition-all duration-500"
-                            style={{
-                              width: `${Math.min(
-                                100,
-                                Math.max(0, confidence * 100),
-                              ).toFixed(1)}%`,
-                            }}
-                          />
+                      <div className="flex-1 space-y-3">
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                            Predicted class
+                          </p>
+                          <p className="mt-1 inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-emerald-600">
+                            {result}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+                            Confidence
+                          </p>
+                          <div className="mt-1 flex items-center gap-3">
+                            <p className="text-base font-semibold text-emerald-600">
+                              {(confidence * 100).toFixed(2)}%
+                            </p>
+                            <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-200 border border-gray-200">
+                              <div
+                                className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    Math.max(0, confidence * 100),
+                                  ).toFixed(1)}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center text-center text-sm text-slate-500">
-                <p>No prediction yet.</p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Upload an image and submit it to see the result here with a
-                  smooth reveal animation.
-                </p>
-              </div>
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-center text-sm text-slate-500">
+                    <p>No prediction yet.</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Upload an image and submit it to see the result here with
+                      a smooth reveal animation.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
