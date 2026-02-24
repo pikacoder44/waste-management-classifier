@@ -37,7 +37,7 @@ export default function Home() {
   const hasResult = result && submittedFile;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 flex items-center justify-center px-4 py-10 font-sans">
+    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 flex items-center justify-center px-4 py-10 font-sans">
       <div className="w-full max-w-3xl">
         <div className="mb-7 text-center space-y-3">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
