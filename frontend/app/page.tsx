@@ -37,46 +37,38 @@ export default function Home() {
   const hasResult = result && submittedFile;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex items-center justify-center px-4 py-10 font-sans">
+    <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 flex items-center justify-center px-4 py-10 font-sans">
       <div className="w-full max-w-3xl">
-        <div className="mb-10 text-center space-y-3">
-          <p className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.25em] text-indigo-300">
-            Smart Skin Analyzer
-          </p>
+        <div className="mb-7 text-center space-y-3">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
             Upload a picture to{" "}
-            <span className="bg-linear-to-r from-indigo-300 via-sky-400 to-emerald-300 bg-clip-text text-transparent">
-              get instant results
+            <span className="bg-linear-to-r from-rose-500 via-amber-500 to-sky-500 bg-clip-text text-transparent">
+              get prediction
             </span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
             Choose an image from your device or capture one using your camera.
-            Our model will analyze it and show the prediction with confidence
-            score.
+            
           </p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
           <form
-            className="relative overflow-hidden rounded-3xl border border-slate-700/70 bg-slate-900/70 p-6 sm:p-8 shadow-2xl shadow-slate-950/60 backdrop-blur-xl flex flex-col gap-6"
+            className="relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
               upload_image();
             }}
           >
             <div className="space-y-2">
-              <h2 className="text-lg sm:text-xl font-semibold text-slate-50">
+              <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
                 Upload your image
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Supported formats: JPG, PNG. For best results, use a clear and
-                well-lit image.
-              </p>
             </div>
 
-            <label className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-600 bg-slate-900/60 px-4 py-8 text-center transition-all duration-300 hover:border-indigo-400/80 hover:bg-slate-900/90">
+            <label className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-8 text-center transition-all duration-300 hover:border-amber-300 hover:bg-white">
               <div className="pointer-events-none space-y-3">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-300 shadow-inner shadow-indigo-500/30 transition-transform duration-300 group-hover:scale-110">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 shadow-inner shadow-rose-100 transition-transform duration-300 group-hover:scale-110">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -93,14 +85,14 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm sm:text-base font-medium text-slate-100">
+                  <p className="text-sm sm:text-base font-medium text-slate-900">
                     Click to choose an image
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     or drag and drop it here
                   </p>
                   {file && (
-                    <p className="mt-2 text-xs text-emerald-300">
+                    <p className="mt-2 text-xs text-emerald-600">
                       Selected: {file.name}
                     </p>
                   )}
@@ -117,25 +109,22 @@ export default function Home() {
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-linear-to-r from-indigo-500 via-sky-500 to-emerald-400 px-6 py-2.5 text-sm sm:text-base font-medium text-slate-950 shadow-lg shadow-indigo-500/40 transition-all duration-300 hover:brightness-110 hover:shadow-indigo-400/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-2.5 text-sm sm:text-base font-medium text-white shadow-lg shadow-slate-300/60 transition-all duration-300 hover:bg-slate-800 hover:shadow-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               disabled={!file}
             >
               Analyze image
-              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-950/70 text-[10px] text-indigo-200 shadow-inner shadow-slate-900/80">
+              <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] text-slate-900 shadow-inner shadow-slate-200">
                 AI
               </span>
             </button>
 
-            <p className="text-[11px] text-slate-500">
-              Your image is processed securely and never stored permanently.
-            </p>
 
-            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-emerald-400/5 blur-3xl" />
+            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-amber-200/35 blur-3xl" />
           </form>
 
           <div
-            className={`relative transform rounded-3xl border border-slate-700/70 bg-slate-900/80 p-6 sm:p-7 shadow-2xl shadow-slate-950/60 backdrop-blur-xl transition-all duration-500 ease-out ${
+            className={`relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
               hasResult
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
@@ -143,15 +132,15 @@ export default function Home() {
           >
             <div className="flex items-center justify-between gap-3 mb-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
                   Result
                 </p>
-                <h2 className="text-lg sm:text-xl font-semibold text-slate-50">
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
                   Prediction overview
                 </h2>
               </div>
               {hasResult && (
-                <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-medium text-emerald-300 border border-emerald-400/40">
+                <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-600 border border-emerald-200">
                   Ready
                 </span>
               )}
@@ -160,7 +149,7 @@ export default function Home() {
             {hasResult ? (
               <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-                  <div className="relative mx-auto sm:mx-0 h-40 w-40 overflow-hidden rounded-2xl border border-slate-600/80 bg-slate-900/80 shadow-lg shadow-slate-950/80">
+                  <div className="relative mx-auto sm:mx-0 h-40 w-40 overflow-hidden rounded-2xl border border-amber-100 bg-amber-50 shadow-lg shadow-amber-100">
                     <Image
                       src={URL.createObjectURL(submittedFile as File)}
                       alt="Uploaded Image"
@@ -168,30 +157,30 @@ export default function Home() {
                       height={200}
                       className="h-full w-full object-cover"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/50 via-transparent to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-rose-200/35 via-transparent to-transparent" />
                   </div>
 
                   <div className="flex-1 space-y-3">
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
                         Predicted class
                       </p>
-                      <p className="mt-1 inline-flex items-center rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-indigo-200">
+                      <p className="mt-1 inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-600">
                         {result}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
                         Confidence
                       </p>
                       <div className="mt-1 flex items-center gap-3">
-                        <p className="text-base font-semibold text-emerald-300">
+                        <p className="text-base font-semibold text-emerald-600">
                           {(confidence * 100).toFixed(2)}%
                         </p>
-                        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
+                        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
                           <div
-                            className="h-full rounded-full bg-linear-to-r from-emerald-400 via-sky-400 to-indigo-400 transition-all duration-500"
+                            className="h-full rounded-full bg-linear-to-r from-emerald-400 via-amber-400 to-rose-400 transition-all duration-500"
                             style={{
                               width: `${Math.min(
                                 100,
