@@ -1,11 +1,13 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null); // newly selected file
   const [submittedFile, setSubmittedFile] = useState<File | null>(null); // file actually submitted
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
+
   const openWebcam = async () => {
     try {
       const response = await fetch("http://localhost:8000/capture-image", {
@@ -14,7 +16,7 @@ export default function Home() {
       if (response.ok) {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        
+
         console.log("Image captured:", url);
         setFile(new File([blob], "captured_image.jpg", { type: "image/jpeg" }));
       } else {
@@ -125,9 +127,9 @@ export default function Home() {
             </label>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <button
+              <button
                 type="button"
-                onClick={ () => openWebcam() }
+                onClick={() => openWebcam()}
                 className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600 shadow-sm shadow-rose-100 transition-all duration-300 hover:bg-rose-100 hover:border-rose-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 focus-visible:ring-offset-rose-50"
               >
                 <svg
@@ -163,8 +165,6 @@ export default function Home() {
                   AI
                 </span>
               </button>
-
-              
             </div>
 
             <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-3xl" />
