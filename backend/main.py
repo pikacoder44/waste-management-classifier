@@ -10,7 +10,6 @@ app = FastAPI()
 
 model = load_model("model/waste_classifier_model.keras")
 
-# Allow Next.js frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Next.js dev server
@@ -31,7 +30,6 @@ async def predict(file: UploadFile = File(...)):
     image_array = preprocess_input(image_array)
     image_array = np.expand_dims(image_array, axis=0)
 
-    # 🔥 This is the important part
     prediction = model.predict(image_array)
 
     class_index = np.argmax(prediction)
