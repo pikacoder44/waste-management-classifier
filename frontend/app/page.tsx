@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
 
@@ -9,26 +9,78 @@ export default function Home() {
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const openWebcam = async () => {
+  const startCamera = async () => {
     try {
-      const response = await fetch("http://localhost:8000/capture-image", {
-        method: "GET",
-      });
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-
-        console.log("Image captured:", url);
-        setFile(new File([blob], "captured_image.jpg", { type: "image/jpeg" }));
-      } else {
-        console.error("Error capturing image:", response.statusText);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
       }
+      setIsCameraOn(true);
     } catch (error) {
-      console.error("Error opening webcam:", error);
-      alert("Error opening webcam. Please try again.");
+      console.error("Error starting camera:", error);
+      alert("Error starting camera. Please allow camera permissions.");
     }
   };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject instanceof MediaStream) {
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOn(false);
+  };
+
+  const openCameraOverlay = async () => {
+    setIsCameraOverlayOpen(true);
+    await startCamera();
+  };
+
+  const closeCameraOverlay = () => {
+    stopCamera();
+    setIsCameraOverlayOpen(false);
+  };
+
+  const captureFromCamera = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    if (!width || !height) return;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, width, height);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const capturedFile = new File([blob], "webcam_capture.jpg", {
+        type: "image/jpeg",
+      });
+      setFile(capturedFile);
+      setSubmittedFile(null);
+      setResult(null);
+      setConfidence(null);
+      closeCameraOverlay();
+    }, "image/jpeg");
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   const upload_image = async () => {
     if (!file) return;
@@ -138,7 +190,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <button
                 type="button"
-                onClick={() => openWebcam()}
+                onClick={openCameraOverlay}
                 className="inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-600 shadow-sm shadow-rose-100 transition-all duration-300 hover:bg-rose-100 hover:border-rose-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 focus-visible:ring-offset-rose-50"
               >
                 <svg
@@ -264,6 +316,55 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {isCameraOverlayOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="relative w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl">
+            <button
+              type="button"
+              onClick={closeCameraOverlay}
+              className="absolute right-3 top-3 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200"
+            >
+              Close
+            </button>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Camera preview
+              </h2>
+              <p className="text-xs text-slate-500">
+                Position the waste item in the frame, then capture an image.
+              </p>
+            </div>
+            <div className="overflow-hidden rounded-xl bg-black/80">
+              <video
+                ref={videoRef}
+                className="h-64 w-full object-cover"
+                autoPlay
+                playsInline
+                muted
+              />
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+            <div className="mt-4 flex flex-wrap justify-between gap-3">
+              <button
+                type="button"
+                onClick={isCameraOn ? stopCamera : startCamera}
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
+              >
+                {isCameraOn ? "Stop camera" : "Start camera"}
+              </button>
+              <button
+                type="button"
+                onClick={captureFromCamera}
+                disabled={!isCameraOn}
+                className="inline-flex items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Capture image
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
