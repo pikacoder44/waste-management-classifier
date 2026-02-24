@@ -34,14 +34,14 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center text-black bg-zinc-50 font-sans">
+    <div className="flex flex-col min-h-screen items-center justify-center text-[#BF4646] bg-[#FFF4EA] font-sans">
       <h3 className="text-3xl font-semibold  pb-0 mb-0">
         Please Upload the picture
       </h3>
       <h5 className=" text-gray-500">or capture it using your camera</h5>
 
       <form
-        className="flex flex-col items-center gap-4 bg-gray-100 p-6 rounded-lg shadow-md"
+        className="flex flex-col items-center gap-4 bg-[#3A9AFF] p-6 rounded-lg shadow-md"
         onSubmit={(e) => {
           e.preventDefault();
           upload_image();
@@ -52,12 +52,12 @@ export default function Home() {
           name="file"
           accept="image/*"
           onChange={(e) => setFile(e.target.files[0])}
-          className="border border-gray-300 bg-gray-500 text-white rounded-lg p-2 cursor-pointer"
+          className=" bg-[#261CC1] text-white rounded-lg p-2 cursor-pointer hover:p-3 transition-all duration-300"
         />
       
         <button
           type="submit"
-          className="bg-green-600 px-4 py-2 rounded-2xl hover:bg-green-800 hover:text-white cursor-pointer"
+          className="bg-[#F1FF5E] text-black px-4 py-2 rounded-2xl hover:bg-green-700 hover:text-white hover:px-5 cursor-pointer border-[#F1FF5E] transition-all duration-300"
         >
           Submit
         </button>
