@@ -4,16 +4,28 @@ import Image from "next/image";
 import Loader from "./components/Loader";
 
 export default function Home() {
+  // ========================================
+  // STATE MANAGEMENT
+  // ========================================
+  // File handling states
   const [file, setFile] = useState<File | null>(null); // newly selected file
   const [submittedFile, setSubmittedFile] = useState<File | null>(null); // file actually submitted
+
+  // Prediction result states
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Camera states
   const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // ========================================
+  // CAMERA FUNCTIONS
+  // ========================================
+  // Start the device camera and set up video stream
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -36,16 +48,19 @@ export default function Home() {
     setIsCameraOn(false);
   };
 
+  // Open camera overlay modal and initialize camera
   const openCameraOverlay = async () => {
     setIsCameraOverlayOpen(true);
     await startCamera();
   };
 
+  // Close camera overlay modal and stop camera
   const closeCameraOverlay = () => {
     stopCamera();
     setIsCameraOverlayOpen(false);
   };
 
+  // Capture image from camera stream and convert to file
   const captureFromCamera = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -75,12 +90,20 @@ export default function Home() {
     }, "image/jpeg");
   };
 
+  // ========================================
+  // LIFECYCLE & CLEANUP
+  // ========================================
+  // Cleanup: Stop camera when component unmounts
   useEffect(() => {
     return () => {
       stopCamera();
     };
   }, []);
 
+  // ========================================
+  // IMAGE UPLOAD & PREDICTION
+  // ========================================
+  // Upload image to backend and get waste classification prediction
   const upload_image = async () => {
     if (!file) return;
 
@@ -116,6 +139,9 @@ export default function Home() {
 
   const hasResult = result && submittedFile;
 
+  // ========================================
+  // RENDER: MAIN COMPONENT UI
+  // ========================================
   return (
     <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 flex items-center justify-center px-4 py-10 font-sans">
       <div className="w-full max-w-3xl">
@@ -132,6 +158,9 @@ export default function Home() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
+          {/* ========================================
+              UPLOAD FORM SECTION
+              ======================================== */}
           <form
             className="relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
             onSubmit={(e) => {
@@ -145,6 +174,7 @@ export default function Home() {
               </h2>
             </div>
 
+            {/* File upload drag-and-drop area */}
             <label className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50 px-4 py-8 text-center transition-all duration-300 hover:border-amber-300 hover:bg-white">
               <div className="pointer-events-none space-y-3">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 shadow-inner shadow-rose-100 transition-transform duration-300 group-hover:scale-110">
@@ -186,6 +216,7 @@ export default function Home() {
               />
             </label>
 
+            {/* Action buttons: Camera and Submit */}
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
               <button
                 type="button"
@@ -227,10 +258,14 @@ export default function Home() {
               </button>
             </div>
 
+            {/* Decorative background blurs */}
             <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-amber-200/35 blur-3xl" />
           </form>
 
+          {/* ========================================
+              RESULTS DISPLAY SECTION
+              ======================================== */}
           <div
             className={`relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
               hasResult || isLoading
@@ -238,10 +273,12 @@ export default function Home() {
                 : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
             }`}
           >
+            {/* Show loading spinner or results */}
             {isLoading ? (
               <Loader />
             ) : (
               <>
+                {/* Results header */}
                 <div className="flex items-center justify-between gap-3 mb-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -255,6 +292,7 @@ export default function Home() {
 
                 {hasResult ? (
                   <div className="space-y-4">
+                    {/* Image preview and prediction details */}
                     <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                       <div className="relative mx-auto sm:mx-0 h-40 w-40 overflow-hidden rounded-2xl border border-amber-100 bg-amber-50 shadow-lg shadow-blue-100">
                         <Image
@@ -267,6 +305,7 @@ export default function Home() {
                         <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-rose-200/35 via-transparent to-transparent" />
                       </div>
 
+                      {/* Predicted class and confidence score */}
                       <div className="flex-1 space-y-3">
                         <div>
                           <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
@@ -302,6 +341,7 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
+                  // Empty state - no results yet
                   <div className="flex h-full flex-col items-center justify-center text-center text-sm text-slate-500">
                     <p>No prediction yet.</p>
                     <p className="mt-1 text-xs text-slate-500">
@@ -316,9 +356,13 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ========================================
+          CAMERA OVERLAY MODAL
+          ======================================== */}
       {isCameraOverlayOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="relative w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl">
+            {/* Close button */}
             <button
               type="button"
               onClick={closeCameraOverlay}
@@ -326,6 +370,7 @@ export default function Home() {
             >
               Close
             </button>
+            {/* Camera preview header */}
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-slate-900">
                 Camera preview
@@ -334,6 +379,7 @@ export default function Home() {
                 Position the waste item in the frame, then capture an image.
               </p>
             </div>
+            {/* Video stream preview */}
             <div className="overflow-hidden rounded-xl bg-black/80">
               <video
                 ref={videoRef}
@@ -344,6 +390,7 @@ export default function Home() {
               />
               <canvas ref={canvasRef} className="hidden" />
             </div>
+            {/* Camera control buttons */}
             <div className="mt-4 flex flex-wrap justify-between gap-3">
               <button
                 type="button"
