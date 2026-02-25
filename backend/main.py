@@ -6,7 +6,6 @@ import numpy as np
 import io
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from capture_image import capture_image
 
 app = FastAPI()
 
@@ -43,11 +42,3 @@ async def predict(file: UploadFile = File(...)):
 
     return {"predicted_class": predicted_class, "confidence": round(confidence, 4)}
 
-
-@app.get("/capture-image")
-async def capture_image_endpoint():
-    """
-    Capture a single image from the server's webcam and return it as JPEG.
-    """
-    image_bytes = capture_image()
-    return StreamingResponse(io.BytesIO(image_bytes), media_type="image/jpeg")
