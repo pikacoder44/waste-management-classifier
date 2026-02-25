@@ -17,7 +17,7 @@ The model classifies waste into the following categories:
 ## Dataset
 
 - **Source:** [TrashNet dataset](https://www.kaggle.com/datasets/feyzazkefe/trashnet) from Kaggle
-- **Size:** 2,527 classified images across 6 waste categories
+- **Size:** ``2,527`` classified images across 6 waste categories
 - **Preprocessing:** Images resized to 224x224 pixels, normalized (pixel values scaled to 0–1)
 - **Augmentation:** Rotation (20°), width/height shift (0.2), zoom (0.2), horizontal flip
 
@@ -82,6 +82,12 @@ The model classifies waste into the following categories:
 - `npm install`
 - `npm run dev`
 
+## Ports
+
+- Backend: `http://localhost:8000`
+- Frontend: `http://localhost:3000`
+
+
 ## Model Training & Evaluation
 
 ### Training the Model
@@ -118,19 +124,12 @@ This script will:
 - Create a **Confusion Matrix** heatmap visualization
 - Save results to `frontend/utils/evaluation_results.json` for frontend display
 
-## Ports
 
-- Backend: `http://localhost:8000`
-- Frontend: `http://localhost:3000`
 
 ## API Endpoints
 
 - `POST /predict` — classify an image
 
-## Notes
-
-- Model file: `backend/model/waste_classifier_model.keras`
-- Status: Prototype (Feb 2026)
 
 # Conclusion
 
