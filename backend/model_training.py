@@ -1,6 +1,7 @@
 # type: ignore
 import os
 import json
+from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -58,7 +59,7 @@ print(f"  Number of classes: {train_data.num_classes}")
 print(f"  Classes: {list(train_data.class_indices.keys())}")
 
 
-with open("class_indices.json", "w") as f:
+with open(os.path.join(SCRIPT_DIR, "utils", "class_indices.json"), "w") as f:
     json.dump(train_data.class_indices, f, indent=2)
 
 # ===============================
@@ -161,7 +162,7 @@ print("Training history plot saved!")
 # 8️⃣ Save Model
 # ===============================
 
-model_path = os.path.join(SCRIPT_DIR, "waste_classifier_model.keras")
+model_path = os.path.join(SCRIPT_DIR, "model", "waste_classifier_model.keras")
 model.save(model_path)
 
 print(f"\n✅ Model saved successfully to: {model_path}")
