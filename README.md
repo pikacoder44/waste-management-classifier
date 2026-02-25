@@ -6,6 +6,15 @@ A machine learning–powered web app that classifies waste images and returns pr
 
 This prototype combines a FastAPI backend, a Next.js frontend, and a TensorFlow/Keras CNN model to perform image-based waste classification.
 
+## Waste Categories
+The model classifies waste into the following categories:
+- Cardboard
+- Paper
+- Metal
+- Glass
+- Plastic
+- Trash
+
 ## Tech Stack
 
 - **Backend:** FastAPI (Python), TensorFlow/Keras, Uvicorn, Pillow, NumPy, scikit-learn
@@ -35,11 +44,14 @@ This prototype combines a FastAPI backend, a Next.js frontend, and a TensorFlow/
 - `npm install`
 - `npm run dev`
 
+## Ports
+- Backend: `http://localhost:8000`
+- Frontend: `http://localhost:3000`
+
 ## API Endpoints
 
 - `POST /predict` — classify an image
-- `GET /evaluation` — model metrics
-- `GET /about` — model details
+
 
 ## Notes
 
@@ -49,4 +61,7 @@ This prototype combines a FastAPI backend, a Next.js frontend, and a TensorFlow/
 # Conclusion
 
 
-This is a prototype of my CS619 Final Year Project. The requirements were given to me by my supervisor, and I implemented the project based on those requirements. The project is a waste classification system that uses a machine learning model to classify images of waste into different categories. The backend is built using FastAPI, and the frontend is built using Next.js with Tailwind CSS for styling. The machine learning model is a convolutional neural network (CNN) built using TensorFlow/Keras.`
+This is a prototype of my CS619 Final Year Project. The requirements were given to me by my supervisor, and I implemented the project based on those requirements. The project is a waste classification system that uses a machine learning model to classify images of waste into different categories. The backend is built using FastAPI, and the frontend is built using Next.js with Tailwind CSS for styling. The machine learning model is a convolutional neural network (CNN) built using TensorFlow/Keras.
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details
