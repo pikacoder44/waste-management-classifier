@@ -12,7 +12,6 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Waste Management System",
   description: "A web application for managing waste collection and disposal.",
-  // logo
   icons: {
     icon: "/favicon.ico",
   },
