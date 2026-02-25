@@ -157,12 +157,14 @@ export default function Home() {
           </p>
         </div>
 
-        <div className={`grid items-start transition-all duration-500 ${hasResult || isLoading ? "gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" : "gap-8 md:gap-0 md:grid-cols-[1fr_0fr]"}`}>
+        <div
+          className={`grid items-start transition-all duration-500 ${hasResult || isLoading ? "gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" : "gap-8 md:gap-0 md:grid-cols-[1fr_0fr]"}`}
+        >
           {/* ========================================
               UPLOAD FORM SECTION
               ======================================== */}
           <form
-            className="w-full md:max-w-[26rem] md:justify-self-center relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
+            className="w-full md:max-w-104 md:justify-self-center relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
               upload_image();
