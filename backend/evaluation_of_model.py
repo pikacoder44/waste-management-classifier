@@ -1,4 +1,5 @@
 # type: ignore
+import os
 import numpy as np
 import json
 import matplotlib.pyplot as plt
@@ -7,10 +8,12 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.metrics import classification_report, confusion_matrix
 
+# Get the directory of this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 1. Load your winning model (.keras format)
 
-model_path = "waste_classifier_model.keras"
+model_path = os.path.join(SCRIPT_DIR, "model", "waste_classifier_model.keras")
 
 model = load_model(model_path)
 
@@ -19,7 +22,7 @@ model = load_model(model_path)
 
 # Make sure this path points to where your TEST images are stored
 
-test_dir = "dataset/test"
+test_dir = os.path.join(SCRIPT_DIR, "dataset", "test")
 
 
 IMG_SIZE = (224, 224)
@@ -77,7 +80,11 @@ results = {
     "class_labels": class_labels,
 }
 
-json.dump(results, open("evaluation_results.json", "w"))
+frontend_utils_dir = os.path.join(SCRIPT_DIR, "..", "frontend", "utils")
+os.makedirs(frontend_utils_dir, exist_ok=True)
+json.dump(
+    results, open(os.path.join(frontend_utils_dir, "evaluation_results.json"), "w")
+)
 
 plt.figure(figsize=(10, 8))
 
