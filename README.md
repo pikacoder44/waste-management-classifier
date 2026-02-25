@@ -1,9 +1,6 @@
 # Waste Classification System (FYP Prototype)
 
-A machine learning–powered web app that classifies waste images and returns predicted class with confidence.
-
-## Overview
-
+A machine learning–powered web app that classifies waste images and returns predicted class with confidence. It uses a convolutional neural network (CNN) trained on the TrashNet dataset to classify waste into 6 categories: cardboard, paper, metal, glass, plastic, and trash.
 This prototype combines a FastAPI backend, a Next.js frontend, and a TensorFlow/Keras CNN model to perform image-based waste classification.
 
 ## Waste Categories
@@ -42,12 +39,32 @@ The model classifies waste into the following categories:
 - **Frontend:** Next.js (TypeScript/React), Tailwind CSS, Fetch API
 - **Model:** TensorFlow/Keras
 
-## Project Structure (high level)
+## Project Structure
 
-- `backend/` — API, model loading, evaluation metrics
-- `frontend/` — UI, image upload, results display
-- `gitignore` — ignores virtual environments, node_modules, and other non-essential files
-- `README.md` — project overview
+### Backend Files
+
+- `main.py` — FastAPI application with `/predict` endpoint for image classification
+- `model_training.py` — Script to train the MobileNetV2 model on the TrashNet dataset with data augmentation
+- `evaluation_of_model.py` — Script to evaluate the trained model on test data and generate metrics (accuracy, precision, recall, F1-score, confusion matrix)
+- `requirements.txt` — Python dependencies
+- `dataset/` — Training and test image directories - not included in the repository due to size (download from Kaggle)
+- `model/` — Trained model file (`waste_classifier_model.keras`)
+- `utils/` — Utility files (class indices JSON)
+
+### Frontend Files
+
+- `app/` — Next.js pages and components
+  - `page.tsx` — Home page with image upload
+  - `about/page.tsx` — About page
+  - `evaluation/page.tsx` — Evaluation metrics display page
+  - `components/` — Reusable React components
+- `utils/` — Utility files including evaluation results
+- `package.json` — Node.js dependencies
+
+### Project Root
+
+- `LICENSE` — MIT License
+- `README.md` — Project documentation
 
 ## Run Locally
 
@@ -64,6 +81,42 @@ The model classifies waste into the following categories:
 - `cd frontend`
 - `npm install`
 - `npm run dev`
+
+## Model Training & Evaluation
+
+### Training the Model
+
+To train the model on the TrashNet dataset:
+
+```bash
+cd backend
+python model_training.py
+```
+
+This script will:
+
+- Load images from `dataset/train/` and `dataset/test/`
+- Apply data augmentation (rotation, shift, zoom, flip)
+- Train a MobileNetV2-based CNN for waste classification
+- Save the trained model to `model/waste_classifier_model.keras`
+- Display training and validation loss/accuracy plots
+
+### Evaluating the Model
+
+To evaluate the trained model on test data:
+
+```bash
+cd backend
+python evaluation_of_model.py
+```
+
+This script will:
+
+- Load the trained model from `model/waste_classifier_model.keras`
+- Run predictions on test images in `dataset/test/`
+- Generate evaluation metrics: **Accuracy**, **Precision**, **Recall**, **F1-Score**
+- Create a **Confusion Matrix** heatmap visualization
+- Save results to `frontend/utils/evaluation_results.json` for frontend display
 
 ## Ports
 
