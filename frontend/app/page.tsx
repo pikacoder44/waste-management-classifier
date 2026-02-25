@@ -157,12 +157,12 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] items-start">
+        <div className={`grid items-start transition-all duration-500 ${hasResult || isLoading ? "gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" : "gap-8 md:gap-0 md:grid-cols-[1fr_0fr]"}`}>
           {/* ========================================
               UPLOAD FORM SECTION
               ======================================== */}
           <form
-            className="relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
+            className="w-full md:max-w-[26rem] md:justify-self-center relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
               upload_image();
@@ -267,7 +267,7 @@ export default function Home() {
               RESULTS DISPLAY SECTION
               ======================================== */}
           <div
-            className={`relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
+            className={`min-w-0 overflow-hidden relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
               hasResult || isLoading
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
