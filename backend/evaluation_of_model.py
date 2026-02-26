@@ -103,4 +103,9 @@ plt.ylabel("Actual Category")
 
 plt.xlabel("Predicted Category")
 
-plt.show()
+frontend_public_dir = os.path.join(SCRIPT_DIR, "..", "frontend", "public")
+os.makedirs(frontend_public_dir, exist_ok=True)
+confusion_matrix_path = os.path.join(frontend_public_dir, "Confusion_Matrix.PNG")
+plt.tight_layout()
+plt.savefig(confusion_matrix_path, dpi=150)
+plt.close()
