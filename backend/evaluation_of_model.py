@@ -8,26 +8,16 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.metrics import classification_report, confusion_matrix
 
-# Get the directory of this script
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# 1. Load your winning model (.keras format)
 
 model_path = os.path.join(SCRIPT_DIR, "model", "waste_classifier_model.keras")
 
 model = load_model(model_path)
 
-
-# 2. Prepare the Test Data
-
-# Make sure this path points to where your TEST images are stored
-
 test_dir = os.path.join(SCRIPT_DIR, "dataset", "test")
-
 
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 32
-
 
 test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
@@ -39,9 +29,6 @@ test_generator = test_datagen.flow_from_directory(
     shuffle=False,
 )
 
-
-# 3. Get Predictions
-
 print("Calculating predictions...")
 
 predictions = model.predict(test_generator)
@@ -51,9 +38,6 @@ y_pred = np.argmax(predictions, axis=1)
 y_true = test_generator.classes
 
 class_labels = list(test_generator.class_indices.keys())
-
-
-# 4. Show the "Big Four" Metrics (Req 4.2)
 
 print("\n" + "=" * 30)
 
@@ -65,11 +49,7 @@ report = classification_report(
     y_true, y_pred, target_names=class_labels, output_dict=True
 )
 
-
-# 5. Generate and analyze Confusion Matrix (Req 4.3)
-
 cm = confusion_matrix(y_true, y_pred)
-
 
 results = {
     "accuracy": report["accuracy"],
