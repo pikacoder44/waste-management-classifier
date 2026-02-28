@@ -12,13 +12,12 @@ model = load_model("model/waste_classifier_model.keras")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js dev server
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load class indices from JSON file
 with open("utils/class_indices.json") as f:
     class_indices = json.load(f)
 
