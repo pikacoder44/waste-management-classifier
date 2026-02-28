@@ -16,6 +16,9 @@ export default function Home() {
   const [confidence, setConfidence] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Error state
+  const [error, setError] = useState<string | null>(null);
+
   // Camera states
   const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -101,6 +104,31 @@ export default function Home() {
   }, []);
 
   // ========================================
+  // ERROR HANDLING
+  // ========================================
+  const showError = (message: string) => {
+    setError(message);
+    setTimeout(() => setError(null), 5000);
+  };
+
+  // Validate selected file and update state
+  const handleFileSelect = (selectedFile: File | null) => {
+    if (!selectedFile) {
+      setFile(null);
+      return;
+    }
+    if (!selectedFile.type.startsWith("image/")) {
+      showError(
+        "Invalid file format. Please upload an image file (e.g. JPG, PNG, WEBP).",
+      );
+      setFile(null);
+      return;
+    }
+    setError(null);
+    setFile(selectedFile);
+  };
+
+  // ========================================
   // IMAGE UPLOAD & PREDICTION
   // ========================================
   // Upload image to backend and get waste classification prediction
@@ -123,15 +151,24 @@ export default function Home() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Prediction result:", data);
-        setResult(data.predicted_class);
-        setConfidence(data.confidence);
-        setSubmittedFile(file); // store the file that gave this result
+        if (data.error) {
+          showError(
+            "The file could not be processed. Please upload a valid image.",
+          );
+        } else {
+          console.log("Prediction result:", data);
+          setResult(data.predicted_class);
+          setConfidence(data.confidence);
+          setSubmittedFile(file);
+        }
       } else {
-        console.error("Error uploading image:", response.statusText);
+        showError("Something went wrong while uploading. Please try again.");
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
+      showError(
+        "Could not connect to the server. Please make sure the backend is running.",
+        error,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -213,7 +250,7 @@ export default function Home() {
                 type="file"
                 name="file"
                 accept="image/*"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
             </label>
@@ -357,6 +394,51 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ========================================
+          ERROR MODAL
+          ======================================== */}
+      {error && (
+        <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 w-[90%] max-w-md animate-[slideDown_0.3s_ease-out]">
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-white/95 px-5 py-4 shadow-xl shadow-red-100/60 backdrop-blur-xl">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-5 w-5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-700">Invalid file</p>
+              <p className="mt-0.5 text-xs text-red-600/80">{error}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="shrink-0 rounded-full p-1 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-4 w-4"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ========================================
           CAMERA OVERLAY MODAL
