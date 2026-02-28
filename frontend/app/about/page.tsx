@@ -2,7 +2,6 @@ const Page = () => {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 font-sans">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* Header */}
         <div className="text-center space-y-3 mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Learn More
@@ -19,7 +18,6 @@ const Page = () => {
           </p>
         </div>
 
-        {/* Overview */}
         <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-rose-100/80 backdrop-blur-xl mb-10">
           <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
@@ -43,7 +41,6 @@ const Page = () => {
           <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-amber-200/35 blur-3xl" />
         </div>
 
-        {/* How It Works */}
         <div className="relative overflow-hidden rounded-3xl border border-sky-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-sky-100/80 backdrop-blur-xl">
           <div className="mb-5">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">

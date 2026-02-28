@@ -2,13 +2,9 @@ import * as data from "@/utils/evaluation_results.json";
 import Image from "next/image";
 
 const Page = () => {
-
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 font-sans">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* ========================================
-            HEADER SECTION
-            ======================================== */}
         <div className="text-center space-y-3 mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
             Performance Analysis
@@ -25,11 +21,7 @@ const Page = () => {
           </p>
         </div>
 
-        {/* ========================================
-            METRIC CARDS
-            ======================================== */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-10">
-          {/* Accuracy */}
           <div className="relative overflow-hidden rounded-2xl border border-rose-100 bg-white/90 p-5 shadow-lg shadow-rose-100/60 backdrop-blur-xl">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-50 text-rose-500 shadow-inner shadow-rose-100">
@@ -64,7 +56,6 @@ const Page = () => {
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-rose-200/30 blur-2xl" />
           </div>
 
-          {/* Precision */}
           <div className="relative overflow-hidden rounded-2xl border border-amber-100 bg-white/90 p-5 shadow-lg shadow-amber-100/60 backdrop-blur-xl">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-500 shadow-inner shadow-amber-100">
@@ -99,7 +90,6 @@ const Page = () => {
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-amber-200/30 blur-2xl" />
           </div>
 
-          {/* Recall */}
           <div className="relative overflow-hidden rounded-2xl border border-sky-100 bg-white/90 p-5 shadow-lg shadow-sky-100/60 backdrop-blur-xl">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-500 shadow-inner shadow-sky-100">
@@ -134,7 +124,6 @@ const Page = () => {
             <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-200/30 blur-2xl" />
           </div>
 
-          {/* F1 Score */}
           <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-white/90 p-5 shadow-lg shadow-emerald-100/60 backdrop-blur-xl">
             <div className="flex items-center gap-3 mb-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 shadow-inner shadow-emerald-100">
@@ -170,9 +159,6 @@ const Page = () => {
           </div>
         </div>
 
-        {/* ========================================
-            CONFUSION MATRIX
-            ======================================== */}
         <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-rose-100/80 backdrop-blur-xl">
           <div className="mb-6">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
