@@ -9,11 +9,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 import matplotlib.pyplot as plt
 
-# ===============================
-# 1️⃣ Define Dataset Paths
-# ===============================
-
-# Get the directory of this script
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 train_dir = os.path.join(SCRIPT_DIR, "dataset", "train")
 test_dir = os.path.join(SCRIPT_DIR, "dataset", "test")
@@ -25,10 +20,6 @@ EPOCHS = 20
 print(f"Dataset paths:")
 print(f"  Train: {train_dir}")
 print(f"  Test: {test_dir}")
-
-# ===============================
-# 2️⃣ Data Preprocessing with Augmentation
-# ===============================
 
 train_datagen = ImageDataGenerator(
     rescale=1.0 / 255,
@@ -62,19 +53,11 @@ print(f"  Classes: {list(train_data.class_indices.keys())}")
 with open(os.path.join(SCRIPT_DIR, "utils", "class_indices.json"), "w") as f:
     json.dump(train_data.class_indices, f, indent=2)
 
-# ===============================
-# 3️⃣ Load Pretrained Model (Transfer Learning)
-# ===============================
-
 base_model = MobileNetV2(
     weights="imagenet", include_top=False, input_shape=(224, 224, 3)
 )
 
 base_model.trainable = False
-
-# ===============================
-# 4️⃣ Build Custom Model
-# ===============================
 
 model = models.Sequential(
     [
@@ -88,10 +71,6 @@ model = models.Sequential(
     ]
 )
 
-# ===============================
-# 5️⃣ Compile Model
-# ===============================
-
 model.compile(
     optimizer=keras.optimizers.Adam(learning_rate=0.001),
     loss="categorical_crossentropy",
@@ -100,10 +79,6 @@ model.compile(
 
 print("\nModel compiled successfully!")
 print(f"Total parameters: {model.count_params()}")
-
-# ===============================
-# 6️⃣ Train Model with Callbacks
-# ===============================
 
 print(f"\nTraining model for {EPOCHS} epochs...")
 
@@ -119,10 +94,6 @@ history = model.fit(
     verbose=1,
 )
 
-# ===============================
-# 7️⃣ Save Training History
-# ===============================
-
 history_dict = {
     "accuracy": [float(x) for x in history.history["accuracy"]],
     "loss": [float(x) for x in history.history["loss"]],
@@ -133,7 +104,6 @@ history_dict = {
 with open(os.path.join(SCRIPT_DIR, "training_history.json"), "w") as f:
     json.dump(history_dict, f, indent=2)
 
-# Plot training history
 plt.figure(figsize=(12, 4))
 
 plt.subplot(1, 2, 1)
@@ -157,10 +127,6 @@ plt.grid(True)
 plt.tight_layout()
 plt.savefig(os.path.join(SCRIPT_DIR, "training_history.png"), dpi=100)
 print("Training history plot saved!")
-
-# ===============================
-# 8️⃣ Save Model
-# ===============================
 
 model_path = os.path.join(SCRIPT_DIR, "model", "waste_classifier_model.keras")
 model.save(model_path)
