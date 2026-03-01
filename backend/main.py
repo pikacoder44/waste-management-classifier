@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 import io
 import json
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 app = FastAPI()
 
