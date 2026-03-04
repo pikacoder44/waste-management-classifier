@@ -6,9 +6,6 @@ from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-
-import matplotlib.pyplot as plt
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 train_dir = os.path.join(SCRIPT_DIR, "dataset", "train")
 test_dir = os.path.join(SCRIPT_DIR, "dataset", "test")
@@ -86,7 +83,7 @@ early_stopping = keras.callbacks.EarlyStopping(
     monitor="val_loss", patience=5, restore_best_weights=True
 )
 
-history = model.fit(
+model.fit(
     train_data,
     epochs=EPOCHS,
     validation_data=test_data,
@@ -94,42 +91,7 @@ history = model.fit(
     verbose=1,
 )
 
-history_dict = {
-    "accuracy": [float(x) for x in history.history["accuracy"]],
-    "loss": [float(x) for x in history.history["loss"]],
-    "val_accuracy": [float(x) for x in history.history["val_accuracy"]],
-    "val_loss": [float(x) for x in history.history["val_loss"]],
-}
-
-with open(os.path.join(SCRIPT_DIR, "training_history.json"), "w") as f:
-    json.dump(history_dict, f, indent=2)
-
-plt.figure(figsize=(12, 4))
-
-plt.subplot(1, 2, 1)
-plt.plot(history.history["accuracy"], label="Training Accuracy")
-plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-plt.title("Model Accuracy")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.legend()
-plt.grid(True)
-
-plt.subplot(1, 2, 2)
-plt.plot(history.history["loss"], label="Training Loss")
-plt.plot(history.history["val_loss"], label="Validation Loss")
-plt.title("Model Loss")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.legend()
-plt.grid(True)
-
-plt.tight_layout()
-plt.savefig(os.path.join(SCRIPT_DIR, "training_history.png"), dpi=100)
-print("Training history plot saved!")
-
 model_path = os.path.join(SCRIPT_DIR, "model", "waste_classifier_model.keras")
 model.save(model_path)
 
-print(f"\n✅ Model saved successfully to: {model_path}")
-print(f"✅ Run 'python evaluation_of_model.py' to evaluate the model")
+print(f"\nModel saved successfully to: {model_path}")
