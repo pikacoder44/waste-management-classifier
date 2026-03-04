@@ -39,11 +39,8 @@ y_true = test_generator.classes
 
 class_labels = list(test_generator.class_indices.keys())
 
-print("\n" + "=" * 30)
-
 print("📊 FINAL EVALUATION METRICS")
 
-print("=" * 30)
 
 report = classification_report(
     y_true, y_pred, target_names=class_labels, output_dict=True
@@ -60,11 +57,19 @@ results = {
     "class_labels": class_labels,
 }
 
+# Print evaluation results to console
+print(f"\nAccuracy:  {results['accuracy']:.4f}")
+print(f"Precision: {results['precision']:.4f}")
+print(f"Recall:    {results['recall']:.4f}")
+print(f"F1 Score:  {results['f1_score']:.4f}")
+
 frontend_utils_dir = os.path.join(SCRIPT_DIR, "..", "frontend", "utils")
 os.makedirs(frontend_utils_dir, exist_ok=True)
 json.dump(
     results, open(os.path.join(frontend_utils_dir, "evaluation_results.json"), "w")
 )
+
+print("Results saved to frontend/utils/evaluation_results.json")
 
 plt.figure(figsize=(10, 8))
 
