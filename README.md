@@ -30,7 +30,7 @@ The model classifies waste into the following categories:
 | **Custom Layers** | GlobalAveragePooling2D → Dense(256, ReLU) → Dropout(0.5) → Dense(128, ReLU) → Dropout(0.3) → Dense(6, Softmax) |
 | **Optimizer**     | Adam                                                                                                           |
 | **Loss Function** | Categorical Crossentropy                                                                                       |
-| **Epochs**        | 5                                                                                                              |
+| **Epochs**        | 20                                                                                                              |
 | **Batch Size**    | 32                                                                                                             |
 
 ## Tech Stack
