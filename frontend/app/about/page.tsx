@@ -93,7 +93,7 @@ const Page = () => {
                 },
               ].map((item) => (
                 <div key={item.step} className="flex gap-4">
-                  <div className="flex-shrink-0">
+                  <div className="shrink">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-lg font-bold text-emerald-600">
                       {item.icon}
                     </div>
