@@ -28,32 +28,26 @@ disposal_recommendations = {
     "cardboard": {
         "disposal_method": "Recycle Bin",
         "instructions": "Flatten the cardboard box and place in the recycling bin.",
-        "tips": "Remove any plastic, foam, or tape before recycling.",
     },
     "paper": {
         "disposal_method": "Recycle Bin",
         "instructions": "Place clean, dry paper in the recycling bin.",
-        "tips": "Avoid placing wet or contaminated paper in recycling.",
     },
     "metal": {
         "disposal_method": "Recycle Bin",
         "instructions": "Rinse metal items and place in the recycling bin.",
-        "tips": "Aluminum cans, tin cans, and metal containers are recyclable.",
     },
     "glass": {
         "disposal_method": "Recycle Bin (Separate if available)",
         "instructions": "Place glass items in the recycling bin or separate glass collection.",
-        "tips": "Rinse glass containers. Some areas have separate glass recycling.",
     },
     "plastic": {
         "disposal_method": "Recycle Bin",
         "instructions": "Rinse plastic items and check the recycling symbol on the bottom.",
-        "tips": "Check local recycling guidelines for accepted plastic types (usually #1-#7).",
     },
     "trash": {
         "disposal_method": "General Waste / Landfill",
         "instructions": "Place in the regular trash bin for disposal at landfill.",
-        "tips": "If the item is hazardous (batteries, chemicals), use special disposal facilities.",
     },
 }
 
@@ -90,8 +84,7 @@ async def predict(file: UploadFile = File(...)):
             "predicted_class": predicted_class,
             "confidence": round(confidence, 4),
             "disposal_method": recommendations["disposal_method"],
-            "disposal_instructions": recommendations["instructions"],
-            "disposal_tips": recommendations["tips"],
+            "disposal_instructions": recommendations["instructions"]
         }
     except Exception as e:
         return {"error": str(e)}
