@@ -4,11 +4,14 @@ from PIL import Image
 import numpy as np
 import io
 import json
+import os
 from keras.models import load_model
 
 app = FastAPI()
 
-model = load_model("model/waste_classifier_model.keras")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model = load_model(os.path.join(BASE_DIR, "model", "waste_classifier_model.keras"))
+assert model is not None, "Failed to load model"
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-with open("utils/class_indices.json") as f:
+with open(os.path.join(BASE_DIR, "utils", "class_indices.json")) as f:
     class_indices = json.load(f)
 
 class_labels = {v: k for k, v in class_indices.items()}
@@ -63,7 +66,7 @@ async def predict(file: UploadFile = File(...)):
         image_array = image_array / 255.0
         image_array = np.expand_dims(image_array, axis=0)
 
-        prediction = model.predict(image_array, verbose=0)
+        prediction = model.predict(image_array, vegit rbose=0)  # type: ignore
 
         class_index = int(np.argmax(prediction, axis=1)[0])
         confidence = float(np.max(prediction))
