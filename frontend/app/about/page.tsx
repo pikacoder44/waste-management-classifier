@@ -1,93 +1,113 @@
 const Page = () => {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 font-sans">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="text-center space-y-3 mb-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+    <div className="min-h-screen bg-white text-slate-900 font-sans py-16 sm:py-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center space-y-4 mb-16">
+          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
             Learn More
           </p>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-            About the{" "}
-            <span className="bg-linear-to-r from-rose-500 via-amber-500 to-sky-500 bg-clip-text text-transparent">
-              Project
-            </span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+            About the <span className="text-emerald-600">Project</span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
-            An AI-powered waste classification system that helps identify and
-            sort waste materials for better recycling and disposal.
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            An intelligent AI-powered system for waste classification and
+            sustainable disposal guidance
           </p>
         </div>
 
-        <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-rose-100/80 backdrop-blur-xl mb-10">
-          <div className="mb-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Overview
-            </p>
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mt-1">
-              What It Does
-            </h2>
-          </div>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-4">
-            The Waste Classifier System uses a deep learning model trained on
-            thousands of waste images to classify items into one of six
-            categories: cardboard, glass, metal, paper, plastic, and trash.
-          </p>
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-            Upload a photo or use your camera to capture an image, and the model
-            will predict its category along with a confidence score to help with
-            proper waste sorting.
-          </p>
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-rose-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-amber-200/35 blur-3xl" />
-        </div>
-
-        <div className="relative overflow-hidden rounded-3xl border border-sky-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-sky-100/80 backdrop-blur-xl">
-          <div className="mb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Process
-            </p>
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mt-1">
-              How It Works
-            </h2>
-          </div>
-          <div className="space-y-4">
-            {[
-              {
-                step: "1",
-                title: "Upload or Capture",
-                desc: "Choose an image from your device or take a photo using your camera.",
-              },
-              {
-                step: "2",
-                title: "Image Processing",
-                desc: "The image is resized and normalized before being sent to the classification model.",
-              },
-              {
-                step: "3",
-                title: "AI Prediction",
-                desc: "A trained deep learning model analyzes the image and predicts the waste category.",
-              },
-              {
-                step: "4",
-                title: "View Results",
-                desc: "The predicted class and confidence score are displayed so you know how to sort the item.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-50 text-sky-600 text-sm font-bold shadow-inner shadow-sky-100">
-                  {item.step}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {item.title}
-                  </p>
-                  <p className="text-xs text-slate-500">{item.desc}</p>
-                </div>
+        {/* What It Does Card */}
+        <div className="mb-8">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="mb-6">
+              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
+                Overview
+              </p>
+              <h2 className="text-3xl font-bold text-slate-900">
+                What It Does
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <p className="text-slate-700 leading-relaxed">
+                The Smart Waste Classifier uses a deep learning model
+                (MobileNetV2) trained on thousands of waste images to
+                automatically classify items into six categories: cardboard,
+                glass, metal, paper, plastic, and trash.
+              </p>
+              <p className="text-slate-700 leading-relaxed">
+                Upload a photo or use your camera to capture an image, and the
+                AI model will predict its category along with a confidence score
+                to help with proper waste sorting and recycling.
+              </p>
+              <div className="pt-4 border-t border-slate-200 mt-4 space-y-1">
+                <p className="text-sm text-emerald-600 font-semibold">
+                  ✓ Real-time classification
+                </p>
+                <p className="text-sm text-emerald-600 font-semibold">
+                  ✓ High accuracy predictions
+                </p>
+                <p className="text-sm text-emerald-600 font-semibold">
+                  ✓ Eco-friendly disposal guidance
+                </p>
               </div>
-            ))}
+            </div>
           </div>
-          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -left-6 h-40 w-40 rounded-full bg-rose-200/35 blur-3xl" />
+        </div>
+
+        {/* How It Works Card */}
+        <div>
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="mb-8">
+              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
+                Process
+              </p>
+              <h2 className="text-3xl font-bold text-slate-900">
+                How It Works
+              </h2>
+            </div>
+            <div className="space-y-6">
+              {[
+                {
+                  step: "1",
+                  icon: "📸",
+                  title: "Upload or Capture",
+                  desc: "Choose an image from your device or use your camera to capture a photo of the waste item.",
+                },
+                {
+                  step: "2",
+                  icon: "🔄",
+                  title: "Image Processing",
+                  desc: "The image is automatically resized to 224×224 pixels and normalized for model input.",
+                },
+                {
+                  step: "3",
+                  icon: "🤖",
+                  title: "AI Prediction",
+                  desc: "The trained MobileNetV2 model analyzes the image and predicts the waste category.",
+                },
+                {
+                  step: "4",
+                  icon: "♻️",
+                  title: "View Results",
+                  desc: "Get instant results with confidence score and disposal recommendations for proper sorting.",
+                },
+              ].map((item) => (
+                <div key={item.step} className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-lg font-bold text-emerald-600">
+                      {item.icon}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

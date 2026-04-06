@@ -8,10 +8,10 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-
 export const metadata: Metadata = {
-  title: "Waste Management System",
-  description: "A web application for managing waste collection and disposal.",
+  title: "Smart Waste Classifier | AI-Powered Waste Management",
+  description:
+    "Intelligent waste classification system powered by AI. Automatically classify waste items and get eco-friendly disposal recommendations in real-time.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -24,9 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} antialiased`}>
         <Navbar />
         {children}
       </body>

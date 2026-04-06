@@ -10,27 +10,34 @@ const poppins = Poppins({
 
 const Navbar = () => {
   return (
-    <nav className={`bg-gray-800 p-4 ${poppins.className}`}>
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="text-white text-xl font-bold tracking-wide">
-          Waste Classifier System
+    <nav
+      className={`bg-white border-b border-slate-200 shadow-sm ${poppins.className}`}
+    >
+      <div className="container mx-auto flex items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-2">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">♻</span>
+          </div>
+          <span className="text-slate-900 text-xl font-bold tracking-wide">
+            Waste<span className="text-emerald-600">Classifier</span>
+          </span>
         </div>
-        <div>
+        <div className="flex items-center gap-1">
           <Link
             href="/"
-            className="text-gray-300 hover:text-white px-3 transition"
+            className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
           >
             Home
           </Link>
           <Link
             href="/evaluation"
-            className="text-gray-300 hover:text-white px-3 transition"
+            className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
           >
             Evaluation
           </Link>
           <Link
             href="/about"
-            className="text-gray-300 hover:text-white px-3 transition"
+            className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
           >
             About
           </Link>
