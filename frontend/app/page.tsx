@@ -326,14 +326,12 @@ export default function Home() {
                         </div>
 
                         {/* Waste Type Badge */}
-                        <div className="text-center space-y-2">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                            Waste Type
+                        <div className="text-center space-y-3 py-2">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                            Classification
                           </p>
-                          <div
-                            className={`inline-block rounded-full bg-gradient-to-r ${getWasteColor(result)} px-6 py-2`}
-                          >
-                            <span className="text-lg font-bold text-white capitalize">
+                          <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl px-4 py-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                            <span className="text-3xl font-bold text-white capitalize">
                               {result}
                             </span>
                           </div>
