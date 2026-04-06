@@ -84,7 +84,7 @@ async def predict(file: UploadFile = File(...)):
             "predicted_class": predicted_class,
             "confidence": round(confidence, 4),
             "disposal_method": recommendations["disposal_method"],
-            "disposal_instructions": recommendations["instructions"]
+            "disposal_instructions": recommendations["instructions"],
         }
     except Exception as e:
         return {"error": str(e)}

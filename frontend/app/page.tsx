@@ -389,8 +389,6 @@ export default function Home() {
                             {disposalInstructions}
                           </p>
                         </div>
-
-
                       </div>
                     )}
                   </div>
