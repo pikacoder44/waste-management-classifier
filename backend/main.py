@@ -23,6 +23,40 @@ with open("utils/class_indices.json") as f:
 
 class_labels = {v: k for k, v in class_indices.items()}
 
+# Disposal recommendations for each waste category
+disposal_recommendations = {
+    "cardboard": {
+        "disposal_method": "Recycle Bin",
+        "instructions": "Flatten the cardboard box and place in the recycling bin.",
+        "tips": "Remove any plastic, foam, or tape before recycling.",
+    },
+    "paper": {
+        "disposal_method": "Recycle Bin",
+        "instructions": "Place clean, dry paper in the recycling bin.",
+        "tips": "Avoid placing wet or contaminated paper in recycling.",
+    },
+    "metal": {
+        "disposal_method": "Recycle Bin",
+        "instructions": "Rinse metal items and place in the recycling bin.",
+        "tips": "Aluminum cans, tin cans, and metal containers are recyclable.",
+    },
+    "glass": {
+        "disposal_method": "Recycle Bin (Separate if available)",
+        "instructions": "Place glass items in the recycling bin or separate glass collection.",
+        "tips": "Rinse glass containers. Some areas have separate glass recycling.",
+    },
+    "plastic": {
+        "disposal_method": "Recycle Bin",
+        "instructions": "Rinse plastic items and check the recycling symbol on the bottom.",
+        "tips": "Check local recycling guidelines for accepted plastic types (usually #1-#7).",
+    },
+    "trash": {
+        "disposal_method": "General Waste / Landfill",
+        "instructions": "Place in the regular trash bin for disposal at landfill.",
+        "tips": "If the item is hazardous (batteries, chemicals), use special disposal facilities.",
+    },
+}
+
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -42,6 +76,22 @@ async def predict(file: UploadFile = File(...)):
 
         predicted_class = class_labels[class_index]
 
-        return {"predicted_class": predicted_class, "confidence": round(confidence, 4)}
+        # Get disposal recommendations
+        recommendations = disposal_recommendations.get(
+            predicted_class.lower(),
+            {
+                "disposal_method": "Unknown",
+                "instructions": "Please check local waste management guidelines.",
+                "tips": "",
+            },
+        )
+
+        return {
+            "predicted_class": predicted_class,
+            "confidence": round(confidence, 4),
+            "disposal_method": recommendations["disposal_method"],
+            "disposal_instructions": recommendations["instructions"],
+            "disposal_tips": recommendations["tips"],
+        }
     except Exception as e:
         return {"error": str(e)}
