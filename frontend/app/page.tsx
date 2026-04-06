@@ -9,6 +9,11 @@ export default function Home() {
 
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [disposalMethod, setDisposalMethod] = useState<string | null>(null);
+  const [disposalInstructions, setDisposalInstructions] = useState<
+    string | null
+  >(null);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +80,8 @@ export default function Home() {
       setSubmittedFile(null);
       setResult(null);
       setConfidence(null);
+      setDisposalMethod(null);
+      setDisposalInstructions(null);
       closeCameraOverlay();
     }, "image/jpeg");
   };
@@ -112,6 +119,8 @@ export default function Home() {
     setIsLoading(true);
     setResult(null);
     setConfidence(null);
+    setDisposalMethod(null);
+    setDisposalInstructions(null);
     setSubmittedFile(null);
 
     const formData = new FormData();
@@ -133,6 +142,8 @@ export default function Home() {
           console.log("Prediction result:", data);
           setResult(data.predicted_class);
           setConfidence(data.confidence);
+          setDisposalMethod(data.disposal_method);
+          setDisposalInstructions(data.disposal_instructions);
           setSubmittedFile(file);
         }
       } else {
@@ -151,10 +162,10 @@ export default function Home() {
   const hasResult = result && submittedFile;
 
   return (
-    <div className="h-[calc(100vh-4rem)] overflow-hidden bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 flex items-center justify-center px-4 py-10 font-sans">
-      <div className="w-full max-w-3xl">
-        <div className="mb-7 text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-linear-to-br from-rose-50 via-amber-50 to-sky-50 text-slate-900 px-4 py-8 font-sans">
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="mb-8 text-center space-y-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">
             Upload a picture to{" "}
             <span className="bg-linear-to-r from-rose-500 via-amber-500 to-sky-500 bg-clip-text text-transparent">
               get prediction
@@ -166,10 +177,10 @@ export default function Home() {
         </div>
 
         <div
-          className={`grid items-start transition-all duration-500 ${hasResult || isLoading ? "gap-8 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" : "gap-8 md:gap-0 md:grid-cols-[1fr_0fr]"}`}
+          className={`grid transition-all duration-500 gap-6 lg:gap-8 ${hasResult || isLoading ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}
         >
           <form
-            className="w-full md:max-w-104 md:justify-self-center relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
+            className="w-full relative overflow-hidden rounded-3xl border border-amber-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-amber-100/80 backdrop-blur-xl flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
               upload_image();
@@ -268,10 +279,10 @@ export default function Home() {
           </form>
 
           <div
-            className={`min-w-0 overflow-hidden relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-7 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
+            className={`w-full relative transform rounded-3xl border border-rose-100 bg-white/90 p-6 sm:p-8 shadow-xl shadow-rose-100/80 backdrop-blur-xl transition-all duration-500 ease-out ${
               hasResult || isLoading
                 ? "opacity-100 translate-y-0 scale-100"
-                : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
+                : "hidden lg:block opacity-0 -translate-y-2 scale-95"
             }`}
           >
             {isLoading ? (
@@ -336,6 +347,52 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
+
+                    {disposalMethod && (
+                      <div className="mt-5 pt-5 border-t border-slate-200 space-y-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 flex items-center gap-2">
+                            <svg
+                              className="h-4 w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 5v8a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-2-4a2 2 0 00-2-2H8a2 2 0 00-2 2v4h12V1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Disposal Method
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-900">
+                            {disposalMethod}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 flex items-center gap-2">
+                            <svg
+                              className="h-4 w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 5v8a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-2-4a2 2 0 00-2-2H8a2 2 0 00-2 2v4h12V1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Instructions
+                          </p>
+                          <p className="mt-1 text-sm text-slate-700 leading-relaxed">
+                            {disposalInstructions}
+                          </p>
+                        </div>
+
+
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center text-center text-sm text-slate-500">
