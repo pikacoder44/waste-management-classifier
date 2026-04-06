@@ -66,7 +66,7 @@ async def predict(file: UploadFile = File(...)):
         image_array = image_array / 255.0
         image_array = np.expand_dims(image_array, axis=0)
 
-        prediction = model.predict(image_array, vegit rbose=0)  # type: ignore
+        prediction = model.predict(image_array, verbose=0)  # type: ignore
 
         class_index = int(np.argmax(prediction, axis=1)[0])
         confidence = float(np.max(prediction))
