@@ -7,4 +7,3 @@ app = FastAPI()
 @app.get("/")
 def test_db():
     return {"collections": db.list_collection_names()}
-s
