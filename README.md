@@ -17,7 +17,7 @@ The model classifies waste into the following categories:
 ## Dataset
 
 - **Source:** [TrashNet dataset](https://www.kaggle.com/datasets/feyzazkefe/trashnet) from Kaggle
-- **Size:** ``2,527`` classified images across 6 waste categories
+- **Size:** `2,527` classified images across 6 waste categories
 - **Preprocessing:** Images resized to 224x224 pixels, normalized (pixel values scaled to 0–1)
 - **Augmentation:** Rotation (20°), width/height shift (0.2), zoom (0.2), horizontal flip
 
@@ -30,7 +30,7 @@ The model classifies waste into the following categories:
 | **Custom Layers** | GlobalAveragePooling2D → Dense(256, ReLU) → Dropout(0.5) → Dense(128, ReLU) → Dropout(0.3) → Dense(6, Softmax) |
 | **Optimizer**     | Adam                                                                                                           |
 | **Loss Function** | Categorical Crossentropy                                                                                       |
-| **Epochs**        | 20                                                                                                              |
+| **Epochs**        | 20                                                                                                             |
 | **Batch Size**    | 32                                                                                                             |
 
 ## Tech Stack
@@ -42,6 +42,12 @@ The model classifies waste into the following categories:
 ## Project Structure
 
 ### Backend Files
+
+- `api/` → only handles requests
+- `services/` → real logic
+- `ai/` → ML isolated
+- `database/` → all DB logic in one place
+- `models/` → validation
 
 - `main.py` — FastAPI application with `/predict` endpoint for image classification
 - `model_training.py` — Script to train the MobileNetV2 model on the TrashNet dataset with data augmentation
@@ -87,7 +93,6 @@ The model classifies waste into the following categories:
 - Backend: `http://localhost:8000`
 - Frontend: `http://localhost:3000`
 
-
 ## Model Training & Evaluation
 
 ### Training the Model
@@ -124,12 +129,9 @@ This script will:
 - Create a **Confusion Matrix** heatmap visualization
 - Save results to `frontend/utils/evaluation_results.json` for frontend display
 
-
-
 ## API Endpoints
 
 - `POST /predict` — classify an image
-
 
 # Conclusion
 
