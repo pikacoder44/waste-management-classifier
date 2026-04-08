@@ -3,7 +3,7 @@ from typing import Optional
 
 
 class Admin(BaseModel):
-    adminId: Optional[str] = Field(None, alias="_id")
+    adminId: Optional[str] = Field(None, alias="adminId")
     hashed_password: str
     role: str = "admin"  # Default role is 'admin'
 
