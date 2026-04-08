@@ -4,7 +4,7 @@ from typing import Optional
 
 
 class Dataset(BaseModel):
-    datasetId: Optional[str] = Field(None, alias="_id")
+    datasetId: Optional[str] = Field(None, alias="datasetId")
     uploadDate: datetime
     lastUpdated: datetime
 
