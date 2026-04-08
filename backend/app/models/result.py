@@ -4,7 +4,7 @@ from typing import Optional
 
 
 class ClassificationResult(BaseModel):
-    resultId: Optional[str] = Field(None, alias="_id")
+    resultId: Optional[str] = Field(None, alias="resultId")
     imageId: str  # foreign key to Waste model
     categoryID: str
     inferenceTime: datetime
