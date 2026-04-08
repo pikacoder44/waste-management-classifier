@@ -9,7 +9,7 @@ class Dataset(BaseModel):
     lastUpdated: datetime
 
     class Config:
-        allow_population_by_field_name = (
+        populate_by_name = (
             True  # Allow using field names instead of aliases when creating instances
         )
         arbitrary_types_allowed = (

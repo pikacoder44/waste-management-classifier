@@ -8,5 +8,5 @@ class Admin(BaseModel):
     role: str = "admin"  # Default role is 'admin'
 
     class Config:
-        allow_population_by_field_name = True # Allow using field names instead of aliases when creating instances
+        populate_by_name = True # Allow using field names instead of aliases when creating instances
         arbitrary_types_allowed = True # Allow arbitrary types (like ObjectId) without validation errors

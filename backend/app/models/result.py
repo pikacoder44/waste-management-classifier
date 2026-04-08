@@ -11,7 +11,7 @@ class ClassificationResult(BaseModel):
     confidenceScore: float
 
     class Config:
-        allow_population_by_field_name = (
+        populate_by_name = (
             True  # Allow using field names instead of aliases when creating instances
         )
         arbitrary_types_allowed = (
