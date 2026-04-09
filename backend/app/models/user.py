@@ -4,7 +4,7 @@ from typing import Optional
 
 class User(BaseModel):
     userId: Optional[str] = Field(None, alias="userId")  # MongoDB's ObjectId will be stored as a string
-    hashed_password: str
+    password: str
     role: str = "user"  # Default role is 'user', can be 'admin' for administrators
 
     class Config:
