@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 # JWT Configuration
 SECRET_KEY = os.getenv("SECRET_KEY")
