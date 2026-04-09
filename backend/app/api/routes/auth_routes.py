@@ -28,12 +28,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router.post("/auth/register")
 def registerUser(user: User):
-
-    # Check if user already exists
+    # Logic-based checks
     username = user.username.lower()  # Normalize username to lowercase
-    existing_user = user_collection.find_one({"username": username})
+    try:
+        existing_user = user_collection.find_one({"username": username})
+    except Exception as e:
+        print(f"Database error during user lookup: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
+
     # Encode the password to bytes
     password_bytes = user.password.encode("utf-8")
     # Generate salt and hash
@@ -46,7 +51,12 @@ def registerUser(user: User):
         "role": "user",  # Force role to 'user' for all registered users
     }
 
-    result = user_collection.insert_one(user_dict)
+    # Only wrap the unpredictable DB operation
+    try:
+        result = user_collection.insert_one(user_dict)
+    except Exception as e:
+        print(f"Database error during user creation: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
     return {
         "message": "User registered successfully",
@@ -58,13 +68,19 @@ def registerUser(user: User):
 def loginUser(user: User, response: Response):
     # check if request is for admin login
     if user.role == "admin":
-        existing_admin = user_collection.find_one(
-            {"username": user.username, "role": "admin"}
-        )
+        try:
+            existing_admin = user_collection.find_one(
+                {"username": user.username, "role": "admin"}
+            )
+        except Exception as e:
+            print(f"Database error during admin lookup: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+
         if not existing_admin:
             raise HTTPException(status_code=404, detail="Admin not found")
         if bcrypt.checkpw(
-            user.password.encode("utf-8"), existing_admin["password"].encode("utf-8")
+            user.password.encode("utf-8"),
+            existing_admin["password"].encode("utf-8"),
         ):
             # Create JWT token
             access_token = create_access_token(
@@ -83,14 +99,22 @@ def loginUser(user: User, response: Response):
                 samesite="lax",
                 max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             )
-            return {"message": "Admin login successful", "access_token": access_token}
+            return {
+                "message": "Admin login successful",
+                "access_token": access_token,
+            }
         else:
             raise HTTPException(status_code=401, detail="Invalid password")
     else:
         # Normal user login
-        existing_user = user_collection.find_one(
-            {"username": user.username, "role": "user"}
-        )
+        try:
+            existing_user = user_collection.find_one(
+                {"username": user.username, "role": "user"}
+            )
+        except Exception as e:
+            print(f"Database error during user lookup: {e}")
+            raise HTTPException(status_code=500, detail="Internal Server Error")
+
         if not existing_user:
             raise HTTPException(status_code=404, detail="User not found")
         if bcrypt.checkpw(
