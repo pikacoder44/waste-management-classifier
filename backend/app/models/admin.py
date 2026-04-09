@@ -4,7 +4,7 @@ from typing import Optional
 
 class Admin(BaseModel):
     adminId: Optional[str] = Field(None, alias="adminId")
-    hashed_password: str
+    password: str
     role: str = "admin"  # Default role is 'admin'
 
     class Config:
