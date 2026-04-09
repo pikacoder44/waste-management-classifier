@@ -5,7 +5,6 @@ from app.models.user import User
 from passlib.context import CryptContext
 
 
-
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -27,7 +26,7 @@ def registerUser(user: User):
     user_dict = {
         "username": username,
         "password": hashed_password.decode("utf-8"),  # hashed password
-        "role": user.role,
+        "role": "user",  # Force role to 'user' for all registered users
     }
 
     result = user_collection.insert_one(user_dict)
