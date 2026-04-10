@@ -1,8 +1,8 @@
 import bcrypt
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Response
-from jwt import encode
-from typing import Optional
+from jwt import encode, decode
+from typing import Optional, Any
 from app.database.collections import user_collection
 from app.models.user import User
 from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -24,6 +24,16 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def get_user_id_from_token(token: str) -> Optional[str]:
+    try:
+        payload: dict[str, Any] = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("user_id")
+        return user_id if isinstance(user_id, str) else None
+    except Exception as e:
+        print(f"Error decoding JWT token: {e}")
+        return None
 
 
 @router.post("/auth/register")
