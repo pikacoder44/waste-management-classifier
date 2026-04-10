@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Waste(BaseModel):
-    imageId: Optional[str] = Field(None, alias="imageId")
     userId: str  # foreign key to User model
     filePath: str
     uploadDate: str
