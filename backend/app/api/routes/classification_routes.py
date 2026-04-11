@@ -6,7 +6,7 @@ from app.models.waste import Waste
 from app.database.connection import db
 from app.api.routes.auth_routes import get_user_id_from_token
 from datetime import datetime
-from pathlib import Path
+import cloudinary.uploader
 from uuid import uuid4
 import time
 
@@ -49,21 +49,20 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             raise HTTPException(status_code=401, detail="Invalid access token")
         user_id = str(user_id)  # Ensure user_id is a string for database storage
 
-        uploads_dir = Path(__file__).parent.parent / "uploads" / user_id
-        uploads_dir.mkdir(
-            parents=True, exist_ok=True
-        )  # Ensure the uploads directory exists
-        unique_filename = f"{uuid4()}_{file.filename}"
-        file_path = uploads_dir / unique_filename
-        with open(file_path, "wb") as f:
-            f.write(image_bytes)
+        upload_result = cloudinary.uploader.upload(
+            image_bytes,
+            folder=user_id,
+            public_id=str(uuid4()),
+        )
+        image_url = upload_result["secure_url"]
+
         end_time = time.time()
         inference_time = end_time - started_time
 
         # Save classification result to database
         waste_entry = Waste(
             userId=user_id,
-            filePath=f"/uploads/{user_id}/{unique_filename}",
+            filePath=image_url,
             uploadDate=datetime.now().isoformat(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
