@@ -5,6 +5,11 @@ from app.ai.predict import predict_image
 from app.models.waste import Waste
 from app.database.connection import db
 from app.api.routes.auth_routes import get_user_id_from_token
+from datetime import datetime
+from pathlib import Path
+from uuid import uuid4
+import time
+
 
 router = APIRouter()
 
@@ -22,27 +27,47 @@ class_labels = {
 @router.post("/classification/analyze")
 async def analyze_classification_result(file: UploadFile, request: Request):
     try:
+        started_time = time.time()
+        # Validate file is an image
+        if not file.content_type or not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Invalid image file")
+
         # Upload file and preprocess
-        laodedModel = model  # Ensure model is loaded
+        loadedModel = model  # Ensure model is loaded
         image_bytes = await file.read()
         preprocessedImage = preprocess_image(image_bytes)
         predicted_class_label, confidence = predict_image(
-            preprocessedImage, laodedModel, class_labels
+            preprocessedImage, loadedModel, class_labels
         )
+
         # get user ID from JWT token
-        # token
         jwt_token = request.cookies.get("access_token")
         if not jwt_token:
             raise HTTPException(status_code=401, detail="Access token not found")
         user_id = get_user_id_from_token(jwt_token)
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid access token")
+        user_id = str(user_id)  # Ensure user_id is a string for database storage
+
+        uploads_dir = Path(__file__).parent.parent / "uploads" / user_id
+        uploads_dir.mkdir(
+            parents=True, exist_ok=True
+        )  # Ensure the uploads directory exists
+        unique_filename = f"{uuid4()}_{file.filename}"
+        file_path = uploads_dir / unique_filename
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
+        end_time = time.time()
+        inference_time = end_time - started_time
 
         # Save classification result to database
         waste_entry = Waste(
-            userId=user_id,  # Use the user ID from the JWT token
-            filePath=f"/path/to/uploaded/{file.filename}",  # Replace with actual file
-            uploadDate="2024-01-01",  # Replace with actual upload date
+            userId=user_id,
+            filePath=f"/uploads/{user_id}/{unique_filename}",
+            uploadDate=datetime.now().isoformat(),
+            predictedLabel=predicted_class_label,
+            confidence=confidence,
+            inferenceTime=inference_time,
         )
         db.waste.insert_one(waste_entry.dict())
 
