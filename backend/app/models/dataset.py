@@ -8,6 +8,9 @@ class Dataset(BaseModel):
     description: Optional[str] = Field(None, max_length=500)
     uploadDate: datetime
     lastUpdated: datetime
+    filePath: str = Field(..., description="The file path where the dataset is stored")
+    version: Optional[float] = Field(None, max_length=20)
+    
 
     class Config:
         populate_by_name = (
