@@ -4,7 +4,8 @@ from typing import Optional
 
 
 class Dataset(BaseModel):
-    datasetId: Optional[str] = Field(None, alias="datasetId")
+    name: str = Field(..., min_length=1)
+    description: Optional[str] = Field(None, max_length=500)
     uploadDate: datetime
     lastUpdated: datetime
 
