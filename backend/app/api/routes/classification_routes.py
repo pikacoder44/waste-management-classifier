@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, Request
 from app.ai.model_loader import model
 from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
+from app.ai.imageQualityAnalysis import imageQualityAnalysis
 from app.models.waste import Waste
 from app.database.connection import db
 from app.api.routes.auth_routes import get_user_id_from_token
@@ -9,6 +10,8 @@ from datetime import datetime
 import cloudinary.uploader
 from uuid import uuid4
 import time
+
+from app.services.recommendation_service import get_disposal_recommendation
 
 
 router = APIRouter()
@@ -32,10 +35,25 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Invalid image file")
 
+        # Read image bytes
+        image_bytes = await file.read()
+
+        # Check image quality
+        quality_status = imageQualityAnalysis(image_bytes)
+        if quality_status != "OK":
+            return {
+                "status": "error",
+                "message": quality_status,
+                "detail": "Please upload a clear, high-resolution image without blur",
+            }
+
         # Upload file and preprocess
         loadedModel = model  # Ensure model is loaded
-        image_bytes = await file.read()
+
+        # Preprocess image
         preprocessedImage = preprocess_image(image_bytes)
+
+        # Predict image category
         predicted_class_label, confidence = predict_image(
             preprocessedImage, loadedModel, class_labels
         )
@@ -59,6 +77,8 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         end_time = time.time()
         inference_time = end_time - started_time
 
+        disposalRecommendation = get_disposal_recommendation(predicted_class_label)
+
         # Save classification result to database
         waste_entry = Waste(
             userId=user_id,
@@ -67,10 +87,17 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             predictedLabel=predicted_class_label,
             confidence=confidence,
             inferenceTime=inference_time,
+            disposalRecommendation=disposalRecommendation,
         )
         db.waste.insert_one(waste_entry.dict())
 
-        return {"label": predicted_class_label, "confidence": confidence}
+        return {
+            "status": "success",
+            "label": predicted_class_label,
+            "confidence": confidence,
+            "inferenceTime": inference_time,
+            "disposalRecommendation": disposalRecommendation,
+        }
 
     except HTTPException as e:
         raise e  # Re-raise HTTP exceptions to be handled by FastAPI
