@@ -8,15 +8,18 @@ class Waste(BaseModel):
         None, description="The file path where the uploaded image is stored"
     )
     createdAt: str
-    predictedLabel: Optional[str] = Field(
-        None, description="The predicted class label for the waste item"
+    predictedLabel: str = Field(
+        ..., description="The predicted class label for the waste item"
     )
-    confidence: Optional[float] = Field(
-        None, description="The confidence score of the prediction (0 to 1)"
+    confidence: float = Field(
+        ..., description="The confidence score of the prediction (0 to 1)"
     )
-    inferenceTime: Optional[float] = Field(
-        None,
+    inferenceTime: float = Field(
+        ...,
         description="The time taken for the AI model to make the prediction (in seconds)",
+    )
+    disposalRecommendation: Optional[str] = Field(
+        None, description="Recommended disposal method based on the predicted label"
     )
 
     class Config:
