@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class Admin(BaseModel):
-    adminId: str = Field(..., min_length=1)
+    username: str = Field(..., min_length=1)
     password: str = Field(..., min_length=1)
     role: str = "admin"  # Default role is 'admin', can be 'user' for regular users
 
