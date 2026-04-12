@@ -63,7 +63,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         waste_entry = Waste(
             userId=user_id,
             filePath=image_url,
-            uploadDate=datetime.now().isoformat(),
+            createdAt=datetime.now().isoformat(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
             inferenceTime=inference_time,

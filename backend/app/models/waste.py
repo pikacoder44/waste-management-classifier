@@ -7,7 +7,7 @@ class Waste(BaseModel):
     filePath: Optional[str] = Field(
         None, description="The file path where the uploaded image is stored"
     )
-    uploadDate: str
+    createdAt: str
     predictedLabel: Optional[str] = Field(
         None, description="The predicted class label for the waste item"
     )
