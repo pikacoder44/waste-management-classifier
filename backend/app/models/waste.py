@@ -4,8 +4,8 @@ from typing import Optional
 
 class Waste(BaseModel):
     userId: str  # foreign key to User model
-    filePath: Optional[str] = Field(
-        None, description="The file path where the uploaded image is stored"
+    filePath: str = Field(
+        ..., description="The file path where the uploaded image is stored"
     )
     publicId: str = Field(
         ..., description="The public ID of the uploaded image in Cloudinary"
