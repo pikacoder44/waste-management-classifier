@@ -49,6 +49,10 @@ def registerUser(user: User):
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
 
+    if len(user.password) < 8:
+        raise HTTPException(
+            status_code=400, detail="Password must be at least 8 characters long"
+        )
     # Encode the password to bytes
     password_bytes = user.password.encode("utf-8")
     # Generate salt and hash
