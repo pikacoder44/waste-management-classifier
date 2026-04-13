@@ -1,11 +1,14 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
-from app.api.routes.auth_routes import get_user_id_from_token
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request
+from app.services.admin_check_service import checkAdmin
 from app.database.connection import db
+from app.database.collections import dataset_collection
 import os
 from uuid import uuid4
 from datetime import datetime
 
-from backend.app.services.admin_check_service import checkAdmin
+from app.api.routes.auth_routes import get_user_id_from_token
+from app.models import dataset
+
 
 router = APIRouter()
 
@@ -14,30 +17,24 @@ ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 
 BASE_DATASET_PATH = "dataset/custom"
 
-router = APIRouter()
 
+# @router.post("/admin/model/retrain")
+# def retrain_model(request: Request):
+#     if not checkAdmin(request):
+#         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
-@router.post("/admin/model/retrain")
-def retrain_model(token: str):
-    if not checkAdmin(token):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+#     # Logic to retrain the model goes here
+#     # For example, you might call a function like `retrain_model_function()`
 
-    # Logic to retrain the model goes here
-    # For example, you might call a function like `retrain_model_function()`
-
-    return {"message": "Model retraining initiated successfully"}
+#     return {"message": "Model retraining initiated successfully"}
 
 
 @router.post("/admin/dataset/upload")
 async def upload_dataset(
-    token: str, request: Request, file: UploadFile = File(...), label: str = Form(...)
+    request: Request, file: UploadFile = File(...), label: str = Form(...)
 ):
     try:
-        if not checkAdmin(token):
-            raise HTTPException(
-                status_code=403, detail="Forbidden: Admin access required"
-            )
-
+        checkAdmin(request)
         # Validate label
         if label not in ALLOWED_LABELS:
             raise HTTPException(status_code=400, detail="Invalid label")
@@ -53,7 +50,10 @@ async def upload_dataset(
         os.makedirs(label_folder, exist_ok=True)
 
         # Save file locally
-        file_ext = file.filename.split(".")[-1] if file.filename else "unknown"
+        if not file.filename or "." not in file.filename:
+            raise HTTPException(status_code=400, detail="Invalid file name")
+
+        file_ext = file.filename.rsplit(".", 1)[-1].lower()
         filename = f"{uuid4()}.{file_ext}"
 
         filePath = os.path.join(label_folder, filename)
@@ -66,22 +66,25 @@ async def upload_dataset(
             "filePath": filePath,
             "label": label,
             "uploadedBy": "admin",
-            "createdAt": datetime.utcnow(),
+            "createdAt": datetime.utcnow().isoformat(),
         }
-        db.insert_one("datasets", metadata)
+        dataset_collection.insert_one(metadata)
         return {
             "status": "success",
             "message": "Dataset uploaded successfully",
             "label": label,
         }
+    except HTTPException:
+        raise  # Let HTTP exceptions pass through
     except Exception as e:
         print(f"Error uploading dataset: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+"""
 @router.get("/admin/dataset")
-def get_datasets(token: str):
-    if not checkAdmin(token):
+def get_datasets(request: Request):
+    if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     # Logic to get datasets goes here
@@ -91,8 +94,8 @@ def get_datasets(token: str):
 
 
 @router.delete("/admin/dataset/delete")
-def delete_dataset(token: str, dataset_id: str):
-    if not checkAdmin(token):
+def delete_dataset(request: Request, dataset_id: str):
+    if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     # Logic to delete dataset goes here
@@ -102,8 +105,8 @@ def delete_dataset(token: str, dataset_id: str):
 
 
 @router.get("/admin/model/status")
-def get_model_status(token: str):
-    if not checkAdmin(token):
+def get_model_status(request: Request):
+    if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     # Logic to get model status goes here
@@ -113,8 +116,8 @@ def get_model_status(token: str):
 
 
 @router.get("/admin/logs")
-def get_logs(token: str):
-    if not checkAdmin(token):
+def get_logs(request: Request):
+    if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     # Logic to get logs goes here
@@ -124,11 +127,12 @@ def get_logs(token: str):
 
 
 @router.get("/admin/model/evaluation")
-def evaluate_model(token: str):
-    if not checkAdmin(token):
+def evaluate_model(request: Request):
+    if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     # Logic to evaluate the model goes here
     # For example, you might call a function like `evaluate_model_function()`
 
     return {"message": "Model evaluation completed successfully"}
+"""
