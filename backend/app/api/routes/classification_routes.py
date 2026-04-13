@@ -104,3 +104,44 @@ async def analyze_classification_result(file: UploadFile, request: Request):
     except Exception as e:
         print(f"Error during classification analysis: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.get("/classification/history")
+async def get_classification_history(request: Request):
+    try:
+        # get user ID from JWT token
+        jwt_token = request.cookies.get("access_token")
+        if not jwt_token:
+            raise HTTPException(status_code=401, detail="Access token not found")
+        user_id = get_user_id_from_token(jwt_token)
+
+        # if role is admin, return erorr: admin dont have classification history
+        if user_id == "admin":
+            raise HTTPException(
+                status_code=403, detail="Admin users do not have classification history"
+            )
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid access token")
+        user_id = str(user_id)  # Ensure user_id is a string for database query
+
+        # Fetch classification history from database
+        history = list(db.waste.find({"userId": user_id}).sort("createdAt", -1))
+
+        # Convert ObjectId to string and format createdAt
+        for entry in history:
+            entry["_id"] = str(entry["_id"])
+            entry["createdAt"] = entry["createdAt"]
+
+        if len(history) == 0:
+            raise HTTPException(
+                status_code=404, detail="No classification history found"
+            )
+
+        return {"status": "success", "history": history}
+
+    except HTTPException as e:
+        raise e  # Re-raise HTTP exceptions to be handled by FastAPI
+    except Exception as e:
+        print(f"Error fetching classification history: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
