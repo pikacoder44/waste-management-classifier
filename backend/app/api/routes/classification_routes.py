@@ -112,7 +112,7 @@ async def get_classification_history(request: Request):
         # get user ID from JWT token
         jwt_token = request.cookies.get("access_token")
         if not jwt_token:
-            raise HTTPException(status_code=401, detail="Access token not found")
+            raise HTTPException(status_code=401, detail="Access token not found, Login first please")
         user_id = get_user_id_from_token(jwt_token)
 
         # if role is admin, return erorr: admin dont have classification history
