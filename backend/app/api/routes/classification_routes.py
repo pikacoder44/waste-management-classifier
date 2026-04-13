@@ -84,6 +84,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         waste_entry = Waste(
             userId=user_id,
             filePath=image_url,
+            publicId=upload_result["public_id"],
             createdAt=datetime.now().isoformat(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
@@ -177,13 +178,26 @@ async def delete_classification_entry(entry_id: str, request: Request):
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
-        # Delete the specified entry from the database
+        # Fetch the entry BEFORE deletion to get publicId for Cloudinary cleanup
+        entry = db.waste.find_one({"_id": object_id, "userId": user_id})
+        if entry is None:
+            raise HTTPException(
+                status_code=404, detail="Classification entry not found or unauthorized"
+            )
+
+        # Delete the entry from the database
         result = db.waste.delete_one({"_id": object_id, "userId": user_id})
 
         if result.deleted_count == 0:
             raise HTTPException(
-                status_code=404, detail="Classification entry not found or unauthorized"
+                status_code=404, detail="Failed to delete classification entry"
             )
+
+        # Delete image from Cloudinary
+        try:
+            cloudinary.uploader.destroy(entry["publicId"])
+        except Exception as e:
+            print(f"Error deleting image from Cloudinary: {e}")
 
         return {"status": "success", "message": "Classification entry deleted"}
 
