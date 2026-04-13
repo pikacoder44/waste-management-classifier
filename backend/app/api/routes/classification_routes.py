@@ -10,6 +10,7 @@ from datetime import datetime
 import cloudinary.uploader
 from uuid import uuid4
 import time
+from bson import ObjectId
 
 from app.services.recommendation_service import get_disposal_recommendation
 
@@ -112,7 +113,9 @@ async def get_classification_history(request: Request):
         # get user ID from JWT token
         jwt_token = request.cookies.get("access_token")
         if not jwt_token:
-            raise HTTPException(status_code=401, detail="Access token not found, Login first please")
+            raise HTTPException(
+                status_code=401, detail="Access token not found, Login first please"
+            )
         user_id = get_user_id_from_token(jwt_token)
 
         # if role is admin, return erorr: admin dont have classification history
@@ -144,4 +147,48 @@ async def get_classification_history(request: Request):
         raise e  # Re-raise HTTP exceptions to be handled by FastAPI
     except Exception as e:
         print(f"Error fetching classification history: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.delete("/classification/history/{entry_id}")
+async def delete_classification_entry(entry_id: str, request: Request):
+    try:
+        # get user ID from JWT token
+        jwt_token = request.cookies.get("access_token")
+        if not jwt_token:
+            raise HTTPException(
+                status_code=401, detail="Access token not found, Login first please"
+            )
+        user_id = get_user_id_from_token(jwt_token)
+
+        # if role is admin, return erorr: admin dont have classification history
+        if user_id == "admin":
+            raise HTTPException(
+                status_code=403, detail="Admin users do not have classification history"
+            )
+
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid access token")
+        user_id = str(user_id)  # Ensure user_id is a string for database query
+
+        # Convert entry_id string to ObjectId for MongoDB query
+        try:
+            object_id = ObjectId(entry_id)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid entry ID format")
+
+        # Delete the specified entry from the database
+        result = db.waste.delete_one({"_id": object_id, "userId": user_id})
+
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=404, detail="Classification entry not found or unauthorized"
+            )
+
+        return {"status": "success", "message": "Classification entry deleted"}
+
+    except HTTPException as e:
+        raise e  # Re-raise HTTP exceptions to be handled by FastAPI
+    except Exception as e:
+        print(f"Error deleting classification entry: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
