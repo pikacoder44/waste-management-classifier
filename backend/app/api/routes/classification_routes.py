@@ -181,9 +181,7 @@ async def delete_classification_entry(entry_id: str, request: Request):
         # Fetch the entry BEFORE deletion to get publicId for Cloudinary cleanup
         entry = db.waste.find_one({"_id": object_id, "userId": user_id})
         if entry is None:
-            raise HTTPException(
-                status_code=404, detail="Classification entry not found or unauthorized"
-            )
+            raise HTTPException(status_code=404, detail="Entry not found")
 
         # Delete the entry from the database
         result = db.waste.delete_one({"_id": object_id, "userId": user_id})
@@ -195,7 +193,11 @@ async def delete_classification_entry(entry_id: str, request: Request):
 
         # Delete image from Cloudinary
         try:
-            cloudinary.uploader.destroy(entry["publicId"])
+            result = cloudinary.uploader.destroy(entry["publicId"], invalidate=True)
+            if not result.get("result") == "ok":
+                raise HTTPException(
+                    status_code=500, detail="Failed to delete image from Cloudinary"
+                )
         except Exception as e:
             print(f"Error deleting image from Cloudinary: {e}")
 
