@@ -150,3 +150,10 @@ def loginUser(user: User, response: Response):
             return {"message": "User login successful", "access_token": access_token}
         else:
             raise HTTPException(status_code=401, detail="Invalid password")
+
+
+@router.post("/auth/logout")
+def logoutUser(response: Response):
+    # Clear the access token cookie
+    response.delete_cookie(key="access_token")
+    return {"message": "Logout successful"}
