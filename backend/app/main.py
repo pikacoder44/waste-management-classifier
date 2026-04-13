@@ -3,7 +3,7 @@ from app.database.connection import db
 from app.api.routes import user_routes
 from app.api.routes import auth_routes
 from app.api.routes import classification_routes
-
+from app.api.routes import admin_routes
 app = FastAPI()
 
 
@@ -15,3 +15,4 @@ def test_db():
 app.include_router(user_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(classification_routes.router)
+app.include_router(admin_routes.router)
