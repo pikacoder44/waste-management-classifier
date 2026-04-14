@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, Form, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from app.services.admin_check_service import checkAdmin
 from app.models.dataset import Dataset
 from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
@@ -8,9 +8,6 @@ from uuid import uuid4
 from datetime import datetime
 import base64
 from bson import ObjectId
-
-from app.api.routes.auth_routes import get_user_id_from_token
-from app.models import dataset
 
 
 router = APIRouter()
