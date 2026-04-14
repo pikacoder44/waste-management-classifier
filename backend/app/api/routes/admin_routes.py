@@ -1,32 +1,16 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
+from fastapi import APIRouter, File, Form, HTTPException, Request
 from app.services.admin_check_service import checkAdmin
 from app.models.dataset import Dataset
+from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
 from app.database.collections import dataset_collection
 import os
 from uuid import uuid4
 from datetime import datetime
-from typing import List
-from pydantic import BaseModel
 import base64
 from bson import ObjectId
 
 from app.api.routes.auth_routes import get_user_id_from_token
 from app.models import dataset
-
-
-class ImageUpload(BaseModel):
-    filename: str
-    label: str
-    fileData: str  # Base64 encoded image data
-
-
-class BatchUploadRequest(BaseModel):
-    datasetName: str
-    images: List[ImageUpload]
-
-
-class DeleteDatasetRequest(BaseModel):
-    dataset_id: str
 
 
 router = APIRouter()
@@ -234,10 +218,10 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
     # Delete the dataset
     result = dataset_collection.delete_one({"_id": object_id})
-    
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Dataset not found")
-    
+
     return {"message": "Dataset deleted successfully"}
 
 
