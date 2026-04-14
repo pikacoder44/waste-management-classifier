@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List
 from pydantic import BaseModel
 import base64
+from bson import ObjectId
 
 from app.api.routes.auth_routes import get_user_id_from_token
 from app.models import dataset
@@ -22,6 +23,10 @@ class ImageUpload(BaseModel):
 class BatchUploadRequest(BaseModel):
     datasetName: str
     images: List[ImageUpload]
+
+
+class DeleteDatasetRequest(BaseModel):
+    dataset_id: str
 
 
 router = APIRouter()
@@ -216,18 +221,28 @@ def get_datasets(request: Request):
     return {"message": "Datasets retrieved successfully", "datasets": datasets}
 
 
-"""
-
-
 @router.delete("/admin/dataset/delete")
-def delete_dataset(request: Request, dataset_id: str):
+def delete_dataset(request: Request, payload: DeleteDatasetRequest):
     if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
-    # Logic to delete dataset goes here
-    # For example, you might call a function like `delete_dataset_function(dataset_id)`
+    try:
+        # Convert the string dataset_id to ObjectId
+        object_id = ObjectId(payload.dataset_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid dataset ID format")
 
-    return {"message": f"Dataset with id {dataset_id} deleted successfully"}
+    # Delete the dataset
+    result = dataset_collection.delete_one({"_id": object_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    return {"message": "Dataset deleted successfully"}
+
+
+"""
+
 
 
 @router.get("/admin/model/status")
