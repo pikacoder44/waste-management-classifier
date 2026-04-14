@@ -27,6 +27,7 @@ const Page = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDatasets = async () => {
@@ -69,6 +70,55 @@ const Page = () => {
     fetchDatasets();
   }, []);
 
+  const handleDelete = async (datasetId: string, datasetName: string) => {
+    // Confirmation dialog
+    if (
+      !confirm(
+        `Are you sure you want to delete "${datasetName}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(datasetId);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setError("Not authenticated. Please login first.");
+        setDeleting(null);
+        return;
+      }
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/admin/dataset/delete",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ dataset_id: datasetId }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to delete dataset");
+      }
+
+      // Remove from UI
+      setDatasets((prev) => prev.filter((d) => d._id !== datasetId));
+      console.log("Dataset deleted successfully");
+    } catch (error) {
+      console.error("Error deleting dataset:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to delete dataset",
+      );
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 to-gray-800 p-8">
       <div className="max-w-5xl mx-auto">
@@ -109,8 +159,22 @@ const Page = () => {
                     </h2>
                     <p className="text-gray-700">{dataset.description}</p>
                   </div>
-                  <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold">
-                    {dataset.imageCount} Images
+                  <div className="flex gap-2 items-center">
+                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold">
+                      {dataset.imageCount} Images
+                    </div>
+                    <button
+                      onClick={() => handleDelete(dataset._id, dataset.name)}
+                      disabled={deleting === dataset._id}
+                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                      title="Delete this dataset"
+                    >
+                      {deleting === dataset._id ? (
+                        <span>⏳</span>
+                      ) : (
+                        <span>🗑️</span>
+                      )}
+                    </button>
                   </div>
                 </div>
 
