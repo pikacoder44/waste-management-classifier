@@ -104,15 +104,6 @@ def loginUser(user: User, response: Response):
                     "user_id": str(existing_admin["_id"]),
                 }
             )
-            # Set token in httponly cookie
-            response.set_cookie(
-                key="access_token",
-                value=access_token,
-                httponly=True,
-                secure=True,
-                samesite="lax",
-                max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            )
             return {
                 "message": "Admin login successful",
                 "access_token": access_token,
@@ -141,15 +132,6 @@ def loginUser(user: User, response: Response):
                     "role": "user",
                     "user_id": str(existing_user["_id"]),
                 }
-            )
-            # Set token in httponly cookie
-            response.set_cookie(
-                key="access_token",
-                value=access_token,
-                httponly=True,
-                secure=True,
-                samesite="lax",
-                max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             )
             return {"message": "User login successful", "access_token": access_token}
         else:
