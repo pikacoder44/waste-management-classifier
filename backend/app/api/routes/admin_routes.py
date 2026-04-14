@@ -20,6 +20,7 @@ class ImageUpload(BaseModel):
 
 
 class BatchUploadRequest(BaseModel):
+    datasetName: str
     images: List[ImageUpload]
 
 
@@ -46,6 +47,10 @@ BASE_DATASET_PATH = "dataset/custom"
 async def upload_dataset(request: Request, payload: BatchUploadRequest):
     try:
         checkAdmin(request)
+
+        # Validate dataset name
+        if not payload.datasetName or not payload.datasetName.strip():
+            raise HTTPException(status_code=400, detail="Dataset name is required")
 
         if len(payload.images) == 0:
             raise HTTPException(
@@ -133,15 +138,44 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
         # Create single database entry for this batch upload if there are successful uploads
         if uploaded_results:
-            # Create a generic name with timestamp
-            dataset_name = (
-                f"Dataset Update {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}"
+            # Use the dataset name provided by the admin
+            dataset_name = payload.datasetName.strip()
+
+            # Get the latest version for this dataset
+            # Use find with sort to get the most recent version
+            latest_dataset = list(
+                dataset_collection.find({"name": dataset_name})
+                .sort("uploadDate", -1)
+                .limit(1)
             )
+            existing_dataset = latest_dataset[0] if latest_dataset else None
+
+            if existing_dataset and "version" in existing_dataset:
+                try:
+                    # Parse current version and increment by 0.1
+                    current_version = float(existing_dataset["version"])
+                    new_version = current_version + 0.1
+                    new_version = f"{new_version:.1f}"
+                    print(
+                        f"Found existing dataset version {current_version}, updating to {new_version}"
+                    )
+                except Exception as e:
+                    # If parsing fails, start from 1.0
+                    print(f"Error parsing version: {e}, starting from 1.0")
+                    new_version = "1.0"
+            else:
+                # First upload of this dataset
+                print(
+                    f"No existing dataset found with name '{dataset_name}', starting from 1.0"
+                )
+                new_version = "1.0"
+
+            print(f"Using version: {new_version} for dataset: {dataset_name}")
 
             uploadedDataset = Dataset(
                 name=dataset_name,
                 description=f"Batch upload containing {len(uploaded_results)} image(s)",
-                version="1.0",
+                version=new_version,
                 filePath=str(all_file_paths),  # Store all file paths as string
                 label="mixed",  # Multiple labels in one upload
                 imageCount=len(uploaded_results),  # Count of successful uploads
@@ -171,16 +205,18 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-"""
-@router.get("/admin/dataset")
+@router.get("/admin/datasets")
 def get_datasets(request: Request):
     if not checkAdmin(request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    # Logic to retrieve datasets goes here
+    datasets = list(dataset_collection.find())
+    for ds in datasets:
+        ds["_id"] = str(ds["_id"])  # Convert ObjectId to string for JSON serialization
+    return {"message": "Datasets retrieved successfully", "datasets": datasets}
 
-    # Logic to get datasets goes here
-    # For example, you might call a function like `get_datasets_function()`
 
-    return {"message": "Datasets retrieved successfully"}
+"""
 
 
 @router.delete("/admin/dataset/delete")
