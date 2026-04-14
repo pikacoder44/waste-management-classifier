@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import Image from "next/image";
 interface ImageFile {
   file: File;
   label: string;
@@ -27,6 +27,7 @@ interface UploadResponse {
 
 export default function AdminUploadPage() {
   const [images, setImages] = useState<ImageFile[]>([]);
+  const [datasetName, setDatasetName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +67,12 @@ export default function AdminUploadPage() {
   };
 
   const handleUpload = async () => {
+    // Validate dataset name
+    if (!datasetName.trim()) {
+      setError("Please enter a dataset name");
+      return;
+    }
+
     // Validate that all images have labels
     if (images.some((img) => !img.label)) {
       setError("Please select a label for all images");
@@ -118,6 +125,7 @@ export default function AdminUploadPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          datasetName: datasetName.trim(),
           images: imageData,
         }),
       });
@@ -151,6 +159,28 @@ export default function AdminUploadPage() {
           <p className="text-gray-600 mb-8">
             Upload waste images with their corresponding labels
           </p>
+
+          {/* Dataset Name Input */}
+          <div className="mb-8 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <label htmlFor="datasetName" className="block mb-2">
+              <span className="font-semibold text-gray-900">
+                Dataset Name *
+              </span>
+              <span className="text-sm text-gray-600 ml-2">(Required)</span>
+            </label>
+            <input
+              type="text"
+              id="datasetName"
+              value={datasetName}
+              onChange={(e) => setDatasetName(e.target.value)}
+              placeholder="e.g., Plastic Waste Collection - March 2026"
+              disabled={uploading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200"
+            />
+            <p className="text-sm text-gray-600 mt-1">
+              Give this dataset a descriptive name for easy identification
+            </p>
+          </div>
 
           {/* Upload Area */}
           <div className="mb-8">
@@ -222,7 +252,7 @@ export default function AdminUploadPage() {
                 {images.map((img, index) => (
                   <div key={index} className="relative group">
                     <div className="bg-gray-100 rounded-lg overflow-hidden">
-                      <img
+                      <Image
                         src={img.preview}
                         alt={`Preview ${index}`}
                         className="w-full h-48 object-cover"
@@ -275,6 +305,7 @@ export default function AdminUploadPage() {
                 onClick={() => {
                   images.forEach((img) => URL.revokeObjectURL(img.preview));
                   setImages([]);
+                  setDatasetName("");
                 }}
                 disabled={uploading}
                 className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold disabled:cursor-not-allowed hover:bg-gray-400 transition"
