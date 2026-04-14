@@ -5,7 +5,20 @@ from bson import ObjectId
 
 
 def checkAdmin(request: Request):
-    jwt_token = request.cookies.get("access_token")
+    # Try to get token from Authorization header first, then fall back to cookies
+    auth_header = request.headers.get("authorization")
+    jwt_token = None
+
+    if auth_header:
+        # Authorization header format: "Bearer <token>"
+        parts = auth_header.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            jwt_token = parts[1]
+
+    # Fall back to cookie if no Authorization header
+    if not jwt_token:
+        jwt_token = request.cookies.get("access_token")
+
     if not jwt_token:
         raise HTTPException(
             status_code=401, detail="Access token not found, Login first please"
