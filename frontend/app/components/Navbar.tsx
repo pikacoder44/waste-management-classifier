@@ -41,6 +41,12 @@ const Navbar = () => {
           >
             About
           </Link>
+          <Link
+            href={"/auth/login"}
+            className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
+          >
+            Login
+          </Link>
         </div>
       </div>
     </nav>
