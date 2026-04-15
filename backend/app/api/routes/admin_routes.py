@@ -1,19 +1,25 @@
+#type: ignore
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
 from tensorflow import keras
-from tensorflow.keras import layers, models
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras import layers, models
+from keras.applications import MobileNetV2
+from keras.preprocessing.image import ImageDataGenerator
 from app.services.admin_check_service import checkAdmin
+from app.services.model_evaluation_service import (
+    evaluate_model,
+    save_evaluation_to_database,
+    save_confusion_matrix_locally,
+)
 from app.models.dataset import Dataset
 from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
-from app.database.collections import dataset_collection
+from app.database.collections import dataset_collection, model_evaluation_collection
 import os
-import json
 import shutil
 from uuid import uuid4
 from datetime import datetime
 import base64
 from bson import ObjectId
+import time
 
 
 router = APIRouter()
@@ -37,14 +43,17 @@ training_status = {
 
 
 def run_training_logic():
-    """Merge original and custom datasets, split into train/test, and retrain the model."""
+    # Merge original and custom datasets, split into train/test, and retrain the model.
     global training_status
 
     # Configuration
     IMG_SIZE = (224, 224)
     BATCH_SIZE = 32
-    EPOCHS = 20
-    TRAIN_SPLIT = 0.8  # 80% train, 20% test
+    EPOCHS = 10
+    TRAIN_SPLIT = 0.7  # 70% train, 30% test
+
+    # Record training start time
+    training_start_time = time.time()
 
     # Create temporary combined dataset directory
     combined_dataset_path = "dataset/combined_temp"
@@ -225,15 +234,39 @@ def run_training_logic():
             verbose=1,
         )
 
-        # Save model
+        # Calculate training time
+        training_time = time.time() - training_start_time
+
+        # Save model first
         training_status["message"] = "Saving model..."
-        training_status["progress"] = 95
+        training_status["progress"] = 90
 
         model_path = os.path.join("model", "waste_classifier_model.keras")
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
         model.save(model_path)
+        print(f"\n✓ Model saved successfully to: {model_path}")
 
-        print(f"\nModel saved successfully to: {model_path}")
+        # Evaluate model on test data
+        training_status["message"] = "Evaluating model..."
+        training_status["progress"] = 92
+
+        evaluation_doc = evaluate_model(model, test_data)
+        evaluation_doc["trainingTime"] = float(training_time)
+
+        # Save confusion matrix locally
+        training_status["message"] = "Saving confusion matrix..."
+        training_status["progress"] = 96
+        save_confusion_matrix_locally(
+            evaluation_doc["confusionMatrix"],
+            evaluation_doc["classLabels"],
+            evaluation_doc["modelVersion"],
+        )
+
+        # Save evaluation results to database
+        training_status["message"] = "Saving results to database..."
+        training_status["progress"] = 98
+
+        save_evaluation_to_database(evaluation_doc)
 
         training_status["status"] = "completed"
         training_status["message"] = "Training completed successfully!"
@@ -469,6 +502,39 @@ def get_model_status(request: Request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     return training_status
+
+
+@router.get("/admin/model/evaluation/latest")
+def get_latest_evaluation(request: Request):
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+
+    try:
+        # Get the latest evaluation result
+        from app.database.collections import model_evaluation_collection
+
+        latest_evaluation = model_evaluation_collection.find_one(
+            sort=[("evaluationDate", -1)]
+        )
+
+        if not latest_evaluation:
+            raise HTTPException(status_code=404, detail="No evaluation results found")
+
+        # Convert ObjectId to string for JSON serialization
+        latest_evaluation["_id"] = str(latest_evaluation["_id"])
+        if isinstance(latest_evaluation.get("evaluationDate"), str):
+            latest_evaluation["evaluationDate"] = latest_evaluation["evaluationDate"]
+        else:
+            latest_evaluation["evaluationDate"] = latest_evaluation[
+                "evaluationDate"
+            ].isoformat()
+
+        return latest_evaluation
+    except Exception as e:
+        print(f"Error fetching evaluation results: {e}")
+        raise HTTPException(
+            status_code=500, detail="Failed to fetch evaluation results"
+        )
 
 
 # @router.get("/admin/logs")
