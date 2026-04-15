@@ -3,9 +3,10 @@ from sklearn.metrics import classification_report, confusion_matrix
 from datetime import datetime
 from typing import Dict, Any, cast
 from app.database.collections import model_evaluation_collection
-from app.api.routes.admin_routes import ALLOWED_LABELS  # Import the labels
 import os
 import json
+
+ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 
 
 def evaluate_model(model, test_data) -> Dict[str, Any]:
