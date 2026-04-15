@@ -15,6 +15,7 @@ from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
 from app.database.collections import dataset_collection, model_evaluation_collection
 import os
 import shutil
+import random
 from uuid import uuid4
 from datetime import datetime
 import base64
@@ -39,6 +40,15 @@ training_status = {
     "started_at": None,
     "epoch": 0,
     "total_epochs": 0,
+}
+
+# Evaluation status tracking (separate from training)
+evaluation_status = {
+    "is_evaluating": False,
+    "progress": 0,
+    "status": "idle",
+    "message": "No evaluation in progress",
+    "started_at": None,
 }
 
 
@@ -239,37 +249,17 @@ def run_training_logic():
 
         # Save model first
         training_status["message"] = "Saving model..."
-        training_status["progress"] = 90
+        training_status["progress"] = 95
 
         model_path = os.path.join("model", "waste_classifier_model.keras")
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
         model.save(model_path)
         print(f"\n✓ Model saved successfully to: {model_path}")
 
-        # Evaluate model on test data
-        training_status["message"] = "Evaluating model..."
-        training_status["progress"] = 92
-
-        evaluation_doc = evaluate_model(model, test_data)
-        evaluation_doc["trainingTime"] = float(training_time)
-
-        # Save confusion matrix locally
-        training_status["message"] = "Saving confusion matrix..."
-        training_status["progress"] = 96
-        save_confusion_matrix_locally(
-            evaluation_doc["confusionMatrix"],
-            evaluation_doc["classLabels"],
-            evaluation_doc["modelVersion"],
-        )
-
-        # Save evaluation results to database
-        training_status["message"] = "Saving results to database..."
-        training_status["progress"] = 98
-
-        save_evaluation_to_database(evaluation_doc)
-
         training_status["status"] = "completed"
-        training_status["message"] = "Training completed successfully!"
+        training_status["message"] = (
+            "Training completed successfully! Run evaluation to see metrics."
+        )
         training_status["progress"] = 100
         training_status["is_training"] = False
 
@@ -284,6 +274,186 @@ def run_training_logic():
         if os.path.exists(combined_dataset_path):
             print(f"\nCleaning up temporary combined dataset...")
             shutil.rmtree(combined_dataset_path)
+
+
+def run_evaluation_logic():
+    """Evaluate the trained model on test data."""
+    global evaluation_status
+
+    print("\n" + "=" * 80)
+    print("🚀 STARTING EVALUATION PROCESS")
+    print("=" * 80)
+
+    evaluation_status["is_evaluating"] = True
+    evaluation_status["status"] = "running"
+    evaluation_status["message"] = "Loading model..."
+    evaluation_status["started_at"] = datetime.utcnow().isoformat()
+    evaluation_status["progress"] = 10
+    print(f"✓ Evaluation status initialized (progress: 10%)")
+
+    try:
+        # Configuration
+        IMG_SIZE = (224, 224)
+        BATCH_SIZE = 32
+        TRAIN_SPLIT = 0.7  # 70% train, 30% test
+
+        # Load the saved model
+        model_path = os.path.join("model", "waste_classifier_model.keras")
+        print(f"\n[1/4] Checking if model exists: {model_path}")
+        if not os.path.exists(model_path):
+            print(f"❌ Model not found at: {model_path}")
+            evaluation_status["status"] = "error"
+            evaluation_status["message"] = (
+                "Model not found. Please train the model first."
+            )
+            evaluation_status["is_evaluating"] = False
+            return
+
+        print(f"✓ Model file exists")
+        print(f"[2/4] Loading model from: {model_path}")
+        model = keras.models.load_model(model_path)
+        print(f"✓ Model loaded successfully")
+
+        # Prepare test data - create temporary eval dataset
+        print(f"[3/4] Creating evaluation dataset...")
+        evaluation_status["message"] = "Creating evaluation dataset..."
+        evaluation_status["progress"] = 30
+
+        eval_dataset_path = "dataset/eval_temp"
+        eval_train_dir = os.path.join(eval_dataset_path, "train")
+        eval_test_dir = os.path.join(eval_dataset_path, "test")
+
+        # Clean up if eval dataset already exists
+        if os.path.exists(eval_dataset_path):
+            print(f"Cleaning up existing eval dataset...")
+            shutil.rmtree(eval_dataset_path)
+
+        print(f"Creating eval directories...")
+        for label in ALLOWED_LABELS:
+            os.makedirs(os.path.join(eval_train_dir, label), exist_ok=True)
+            os.makedirs(os.path.join(eval_test_dir, label), exist_ok=True)
+
+        # Merge images from original and custom datasets
+        all_images = {label: [] for label in ALLOWED_LABELS}
+
+        # Collect from original
+        for label in ALLOWED_LABELS:
+            original_label_path = os.path.join(BASE_DATASET_PATH, label)
+            if os.path.exists(original_label_path):
+                for img_file in os.listdir(original_label_path):
+                    img_path = os.path.join(original_label_path, img_file)
+                    if os.path.isfile(img_path):
+                        all_images[label].append(img_path)
+
+        # Collect from custom
+        for label in ALLOWED_LABELS:
+            custom_label_path = os.path.join(CUSTOM_DATASET_PATH, label)
+            if os.path.exists(custom_label_path):
+                for img_file in os.listdir(custom_label_path):
+                    img_path = os.path.join(custom_label_path, img_file)
+                    if os.path.isfile(img_path):
+                        all_images[label].append(img_path)
+
+        # Split and copy
+        total_test_samples = 0
+        for label in ALLOWED_LABELS:
+            images = all_images[label]
+            random.shuffle(images)
+            split_index = int(len(images) * TRAIN_SPLIT)
+
+            # Copy train images
+            for img_path in images[:split_index]:
+                dest_path = os.path.join(
+                    eval_train_dir, label, os.path.basename(img_path)
+                )
+                shutil.copy2(img_path, dest_path)
+
+            # Copy test images
+            for img_path in images[split_index:]:
+                dest_path = os.path.join(
+                    eval_test_dir, label, os.path.basename(img_path)
+                )
+                shutil.copy2(img_path, dest_path)
+                total_test_samples += 1
+
+            print(
+                f"  {label}: {len(images[:split_index])} train, {len(images[split_index:])} test"
+            )
+
+        print(f"✓ Evaluation dataset created")
+
+        # Create test data generator
+        test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+
+        test_data = test_datagen.flow_from_directory(
+            eval_test_dir,
+            target_size=IMG_SIZE,
+            batch_size=BATCH_SIZE,
+            class_mode="categorical",
+            shuffle=False,
+        )
+        print(f"✓ Test data generator created")
+
+        # Get accurate sample count from generator
+        actual_samples = test_data.samples
+        total_batches = (
+            actual_samples + BATCH_SIZE - 1
+        ) // BATCH_SIZE  # Ceiling division
+        print(f"✓ Accurate total test samples: {actual_samples}")
+        print(f"✓ Total batches (batch_size={BATCH_SIZE}): {total_batches}")
+
+        print(f"[4/4] Running evaluation...")
+        evaluation_status["message"] = "Evaluating model..."
+        evaluation_status["progress"] = 50
+
+        # Run evaluation
+        print(f"  Calling evaluate_model()...")
+        evaluation_doc = evaluate_model(
+            model, test_data, evaluation_status, total_batches
+        )
+        print(f"✓ evaluate_model() returned successfully")
+
+        # Save to database
+        print(f"\n[FINAL] Saving results to database...")
+        evaluation_status["message"] = "Saving results to database..."
+        evaluation_status["progress"] = 95
+
+        save_evaluation_to_database(evaluation_doc)
+        print(f"✓ Database save completed successfully")
+
+        # Cleanup eval dataset
+        print(f"Cleaning up eval dataset...")
+        if os.path.exists(eval_dataset_path):
+            shutil.rmtree(eval_dataset_path)
+        print(f"✓ Cleanup complete")
+
+        evaluation_status["status"] = "completed"
+        evaluation_status["message"] = "Evaluation completed successfully!"
+        evaluation_status["progress"] = 100
+        evaluation_status["is_evaluating"] = False
+
+        print("=" * 80)
+        print("✓ EVALUATION PROCESS COMPLETED SUCCESSFULLY")
+        print("=" * 80)
+
+    except Exception as e:
+        import traceback
+
+        print(f"\n❌ ERROR during evaluation: {e}")
+        print("Full traceback:")
+        traceback.print_exc()
+        evaluation_status["status"] = "error"
+        evaluation_status["message"] = f"Evaluation failed: {str(e)}"
+        evaluation_status["is_evaluating"] = False
+        # Cleanup on error
+        eval_dataset_path = "dataset/eval_temp"
+        if os.path.exists(eval_dataset_path):
+            try:
+                shutil.rmtree(eval_dataset_path)
+            except:
+                pass
+        raise
+        raise
 
 
 @router.post("/admin/dataset/upload")
@@ -502,6 +672,33 @@ def get_model_status(request: Request):
         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
 
     return training_status
+
+
+@router.post("/admin/model/evaluate")
+async def evaluate_model_endpoint(request: Request, background_tasks: BackgroundTasks):
+    """Trigger model evaluation on saved model."""
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+
+    if evaluation_status["is_evaluating"]:
+        return {
+            "status": "error",
+            "message": "Evaluation is already in progress. Please wait for it to complete.",
+        }
+
+    # Start evaluation in background
+    background_tasks.add_task(run_evaluation_logic)
+
+    return {"message": "Evaluation started. Check status for updates."}
+
+
+@router.get("/admin/model/evaluation/status")
+def get_evaluation_status(request: Request):
+    """Get the current evaluation progress."""
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+
+    return evaluation_status
 
 
 @router.get("/admin/model/evaluation/latest")
