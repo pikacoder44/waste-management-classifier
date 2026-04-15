@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
