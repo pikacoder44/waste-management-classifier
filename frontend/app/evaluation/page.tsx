@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 interface EvaluationData {
@@ -11,11 +11,25 @@ interface EvaluationData {
   f1_score: number;
 }
 
+interface EvaluationStatus {
+  is_evaluating: boolean;
+  progress: number;
+  message: string;
+  status: string;
+}
+
 const Page = () => {
   const [data, setData] = useState<EvaluationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  // Evaluation tracking
+  const [isRunningEval, setIsRunningEval] = useState(false);
+  const [evalProgress, setEvalProgress] = useState(0);
+  const [evalMessage, setEvalMessage] = useState("");
+  const [evalError, setEvalError] = useState<string | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch latest evaluation report
   const fetchLatestEvaluation = async () => {
@@ -92,6 +106,112 @@ const Page = () => {
     }
   };
 
+  // Poll evaluation status
+  const pollEvaluationStatus = async (token: string) => {
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/admin/model/evaluation/status",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch status: ${response.status}`);
+      }
+
+      const status: EvaluationStatus = await response.json();
+
+      setEvalProgress(status.progress);
+      setEvalMessage(status.message);
+
+      // If evaluation is complete, fetch the latest results
+      if (!status.is_evaluating && status.progress === 100) {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+
+        // Stop showing evaluation spinner
+        setIsRunningEval(false);
+
+        // Fetch latest evaluation results
+        setTimeout(() => fetchLatestEvaluation(), 500);
+      }
+    } catch (err) {
+      console.error("Error polling evaluation status:", err);
+    }
+  };
+
+  // Handle Run Evaluation button click
+  const handleRunEvaluation = async () => {
+    setIsRunningEval(true);
+    setEvalError(null);
+    setEvalProgress(0);
+    setEvalMessage("Starting evaluation...");
+
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setEvalError("Not authenticated. Please login first.");
+        setIsRunningEval(false);
+        return;
+      }
+
+      // Trigger evaluation
+      const response = await fetch(
+        "http://127.0.0.1:8000/admin/model/evaluate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        let errorMessage = `Failed to start evaluation: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.detail || errorMessage;
+        } catch {
+          errorMessage += ` ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Start polling for status updates
+      console.log("✓ Evaluation started, polling for progress...");
+
+      // Poll immediately, then every 1 second
+      await pollEvaluationStatus(token);
+
+      pollingIntervalRef.current = setInterval(() => {
+        pollEvaluationStatus(token);
+      }, 1000);
+    } catch (err) {
+      console.error("Error starting evaluation:", err);
+      setEvalError(
+        err instanceof Error ? err.message : "Failed to start evaluation",
+      );
+      setIsRunningEval(false);
+    }
+  };
+
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans py-16 sm:py-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,27 +228,47 @@ const Page = () => {
             classification model
           </p>
 
-          {/* Fetch Button */}
+          {/* Fetch and Run Buttons */}
           <div className="flex flex-col items-center gap-4 mt-8">
-            <button
-              onClick={fetchLatestEvaluation}
-              disabled={loading}
-              className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Fetching...
-                </>
-              ) : (
-                <>
-                  <span>📊</span>
-                  Get Latest Evaluation Report
-                </>
-              )}
-            </button>
+            <div className="flex gap-4 flex-wrap justify-center">
+              <button
+                onClick={fetchLatestEvaluation}
+                disabled={loading || isRunningEval}
+                className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Fetching...
+                  </>
+                ) : (
+                  <>
+                    <span>📊</span>
+                    Get Latest Evaluation Report
+                  </>
+                )}
+              </button>
 
-            {/* Progress Bar */}
+              <button
+                onClick={handleRunEvaluation}
+                disabled={isRunningEval || loading}
+                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+              >
+                {isRunningEval ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Running Evaluation...
+                  </>
+                ) : (
+                  <>
+                    <span>⚙️</span>
+                    Run Evaluation
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Fetch Progress Bar */}
             {loading && (
               <div className="w-full max-w-md">
                 <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -143,7 +283,22 @@ const Page = () => {
               </div>
             )}
 
-            {/* Error Message */}
+            {/* Evaluation Progress Bar */}
+            {isRunningEval && (
+              <div className="w-full max-w-md">
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                    style={{ width: `${evalProgress}%` }}
+                  />
+                </div>
+                <p className="text-sm text-slate-600 mt-2 text-center">
+                  {Math.round(evalProgress)}% - {evalMessage}
+                </p>
+              </div>
+            )}
+
+            {/* Fetch Error Message */}
             {error && (
               <div className="w-full max-w-md bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-sm text-red-700 mb-2">
@@ -151,10 +306,19 @@ const Page = () => {
                 </p>
                 {error.includes("No evaluation results") && (
                   <p className="text-xs text-red-600">
-                    💡 Tip: Go to Admin → Retrain to run model training and
+                    💡 Tip: Click the &quot;Run Evaluation&quot; button to
                     generate evaluation results.
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Evaluation Error Message */}
+            {evalError && (
+              <div className="w-full max-w-md bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-700">
+                  <strong>⚠️ Evaluation Error:</strong> {evalError}
+                </p>
               </div>
             )}
 
