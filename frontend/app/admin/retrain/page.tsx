@@ -102,7 +102,7 @@ export default function RetrainPage() {
   }, [pollingInterval]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -205,7 +205,7 @@ export default function RetrainPage() {
                 </div>
                 <div className="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-500 ease-out"
+                    className="bg-linear-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${trainingStatus?.progress || 0}%` }}
                   />
                 </div>
