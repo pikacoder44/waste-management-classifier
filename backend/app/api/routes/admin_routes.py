@@ -1,9 +1,9 @@
-#type: ignore
+# type: ignore
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks
 from tensorflow import keras
-from keras import layers, models
-from keras.applications import MobileNetV2
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras import layers, models
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from app.services.admin_check_service import checkAdmin
 from app.services.model_evaluation_service import (
     evaluate_model,
@@ -518,7 +518,10 @@ def get_latest_evaluation(request: Request):
         )
 
         if not latest_evaluation:
-            raise HTTPException(status_code=404, detail="No evaluation results found")
+            raise HTTPException(
+                status_code=404,
+                detail="No evaluation results found. Please run model retraining first.",
+            )
 
         # Convert ObjectId to string for JSON serialization
         latest_evaluation["_id"] = str(latest_evaluation["_id"])
@@ -530,6 +533,9 @@ def get_latest_evaluation(request: Request):
             ].isoformat()
 
         return latest_evaluation
+    except HTTPException:
+        # Re-raise HTTP exceptions (404, etc.) without catching them
+        raise
     except Exception as e:
         print(f"Error fetching evaluation results: {e}")
         raise HTTPException(
