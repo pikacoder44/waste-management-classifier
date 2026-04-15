@@ -26,12 +26,13 @@ export default function RetrainPage() {
   // Fetch training status from the API
   const fetchTrainingStatus = async () => {
     try {
+      const token = localStorage.getItem("access_token");
       const response = await fetch("http://127.0.0.1:8000/admin/model/status", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` }),
         },
-        credentials: "include",
       });
 
       if (response.ok) {
@@ -57,14 +58,15 @@ export default function RetrainPage() {
   const handleRetrain = async () => {
     setIsLoading(true);
     try {
+      const token = localStorage.getItem("access_token");
       const response = await fetch(
         "http://127.0.0.1:8000/admin/model/retrain",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` }),
           },
-          credentials: "include",
         },
       );
 
