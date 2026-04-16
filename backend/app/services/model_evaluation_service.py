@@ -30,36 +30,49 @@ def evaluate_model(
     batch_count = 0
     total_samples = 0
 
-    # Loop over test data batches
-    for batch_num, (images, labels) in enumerate(test_data):
-        # Break if we've processed all batches
-        if total_batches and batch_num >= total_batches:
+    try:
+        # Loop over test data batches
+        for batch_num, (images, labels) in enumerate(test_data):
+            # Break if we've processed all batches
+            if total_batches and batch_num >= total_batches:
+                print(
+                    f"  Reached expected {total_batches} batches, stopping prediction loop"
+                )
+                break
+
+            batch_count += 1
+            total_samples += images.shape[0]
+
+            # Calculate progress based on batch number if total_batches provided
+            if total_batches and training_status:
+                progress = int(92 + (batch_num / total_batches) * 5)  # 92% to 97%
+                progress = min(progress, 97)  # Cap at 97% during predictions
+                training_status["progress"] = progress
+
             print(
-                f"  Reached expected {total_batches} batches, stopping prediction loop"
+                f"  Batch {batch_num+1}/{total_batches if total_batches else '?'}: Processing {images.shape[0]} images (total: {total_samples} samples)..."
             )
-            break
 
-        batch_count += 1
-        total_samples += images.shape[0]
+            try:
+                predictions = model.predict(images, verbose=0)
+                if predictions is None or len(predictions) == 0:
+                    raise ValueError(
+                        f"Model returned empty predictions for batch {batch_num+1}"
+                    )
 
-        # Calculate progress based on batch number if total_batches provided
-        if total_batches and training_status:
-            progress = int(92 + (batch_num / total_batches) * 5)  # 92% to 97%
-            progress = min(progress, 97)  # Cap at 97% during predictions
-            training_status["progress"] = progress
+                y_pred.extend([np.argmax(p) for p in predictions])
+                y_true.extend([np.argmax(l) for l in labels])
+                print(f"  Batch {batch_num+1}: ✓ Complete")
+            except Exception as batch_error:
+                print(f"❌ ERROR in batch {batch_num+1}: {batch_error}")
+                raise
 
-        print(
-            f"  Batch {batch_num+1}/{total_batches if total_batches else '?'}: Processing {images.shape[0]} images (total: {total_samples} samples)..."
-        )
+    except Exception as loop_error:
+        print(f"❌ ERROR in prediction loop: {loop_error}")
+        import traceback
 
-        try:
-            predictions = model.predict(images, verbose=0)
-            y_pred.extend([np.argmax(p) for p in predictions])
-            y_true.extend([np.argmax(l) for l in labels])
-            print(f"  Batch {batch_num+1}: ✓ Complete")
-        except Exception as e:
-            print(f"❌ ERROR in batch {batch_num+1}: {e}")
-            raise
+        traceback.print_exc()
+        raise
 
     print(
         f"✓ Prediction loop complete: {batch_count} batches, {total_samples} total samples"
@@ -72,6 +85,17 @@ def evaluate_model(
 
     # Calculate metrics with explicit type annotation
     print(f"📈 Computing classification metrics...")
+
+    if not y_true or not y_pred:
+        raise ValueError(
+            f"No predictions or labels collected. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
+        )
+
+    if len(y_true) != len(y_pred):
+        raise ValueError(
+            f"Mismatch in predictions and labels length. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
+        )
+
     try:
         class_report = cast(
             Dict[str, Any],
@@ -84,6 +108,9 @@ def evaluate_model(
         print(f"✓ Confusion matrix computed")
     except Exception as e:
         print(f"❌ ERROR computing metrics: {e}")
+        import traceback
+
+        traceback.print_exc()
         raise
 
     # Extract weighted averages
