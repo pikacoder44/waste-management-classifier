@@ -233,6 +233,7 @@ def run_evaluation_logic():
         # Configuration
         IMG_SIZE = (224, 224)
         BATCH_SIZE = 32
+        TRAIN_SPLIT = 0.7  # Must match training split to evaluate on same test set
 
         # Load the saved model
         model_path = os.path.join("model", "waste_classifier_model.keras")
@@ -252,18 +253,22 @@ def run_evaluation_logic():
         model = keras.models.load_model(model_path)
         print(f"✓ Model loaded successfully")
 
-        # Ensure evaluation split is current (0.0 train_split = all data as test)
+        # Ensure evaluation split is current using SAME split ratio as training
+        # This ensures we evaluate on the SAME test data (30% holdout) that model never trained on
         print(f"[3/4] Checking evaluation dataset...")
         evaluation_status["message"] = "Checking evaluation dataset..."
         evaluation_status["progress"] = 30
 
-        split_info = ensure_split_dataset("eval", train_split=0.0)
+        split_info = ensure_split_dataset("eval", train_split=TRAIN_SPLIT)
         eval_test_dir = split_info[
             "test_dir"
-        ]  # With 0% train split, all data goes to test_dir
+        ]  # Uses test_dir with 30% holdout data (unseen by model)
         eval_dataset_path = split_info["split_path"]
 
-        print(f"✓ Evaluation dataset ready")
+        print(f"✓ Evaluation dataset ready (using same test split as training)")
+        print(
+            f"  Train split: {TRAIN_SPLIT*100:.0f}% | Test split: {(1-TRAIN_SPLIT)*100:.0f}%"
+        )
 
         # Create test data generator
         test_datagen = ImageDataGenerator(rescale=1.0 / 255)
