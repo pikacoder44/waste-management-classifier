@@ -42,6 +42,16 @@ body {
   }
 }
 
+@keyframes bounceSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 @layer utilities {
   .animate-slideDown {
     animation: slideDown 0.3s ease-out;

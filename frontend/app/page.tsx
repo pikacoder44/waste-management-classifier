@@ -308,63 +308,69 @@ export default function Home() {
             </form>
           </div>
 
-          {/* Results Card - Slides in from right */}
+          {/* Clean & Professional Results Card */}
           {(hasResult || isLoading) && (
-            <div className="w-full lg:w-96 animate-slideInFromRight">
-              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="w-full animate-slideInFromRight">
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center justify-center py-20">
                     <Loader />
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-                        Result
-                      </p>
-                      <h2 className="text-2xl font-bold text-slate-900 mt-1">
-                        Classification
-                      </h2>
-                    </div>
-
-                    {hasResult && (
-                      <div className="space-y-6">
-                        {/* Image Preview */}
-                        <div className="relative w-full overflow-hidden rounded-xl border border-slate-200">
+                  hasResult && (
+                    <div className="grid md:grid-cols-2 gap-0">
+                      {/* Image Section - Left */}
+                      <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 flex items-center justify-center">
+                        <div className="relative w-80 h-80 rounded-2xl overflow-hidden shadow-xl ring-1 ring-slate-200">
                           <Image
                             src={URL.createObjectURL(submittedFile as File)}
-                            alt="Uploaded Image"
-                            width={200}
-                            height={200}
-                            className="h-auto w-full object-cover"
+                            alt="Waste Classification"
+                            width={320}
+                            height={320}
+                            className="w-full h-full object-cover"
                           />
                         </div>
+                      </div>
 
-                        {/* Waste Type Badge */}
-                        <div className="text-center space-y-3 py-2">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                            Classification
+                      {/* Results Section - Right */}
+                      <div className="p-6 flex flex-col justify-center">
+                        {/* Prediction Result */}
+                        <div className="mb-5">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                            Prediction Result
                           </p>
-                          <div className="inline-block bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl px-4 py-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                            <span className="text-3xl font-bold text-white capitalize">
-                              {result}
-                            </span>
-                          </div>
+                          <h2 className="text-4xl font-bold text-slate-900 capitalize">
+                            {result}
+                          </h2>
                         </div>
 
-                        {/* Confidence */}
-                        <div className="space-y-3 pt-4 border-t border-slate-200">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-slate-700">
-                              Confidence
-                            </p>
-                            <p className="text-lg font-bold text-emerald-600">
+                        {/* Confidence Score */}
+                        <div className="mb-5">
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm font-semibold text-slate-700">
+                              Confidence Score
+                            </label>
+                            <span
+                              className={`text-sm font-bold px-3 py-1 rounded-full ${
+                                confidence >= 0.8
+                                  ? "bg-green-100 text-green-700"
+                                  : confidence >= 0.6
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                              }`}
+                            >
                               {(confidence * 100).toFixed(1)}%
-                            </p>
+                            </span>
                           </div>
-                          <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                          <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                              className={`h-full transition-all duration-700 rounded-full ${
+                                confidence >= 0.8
+                                  ? "bg-green-500"
+                                  : confidence >= 0.6
+                                    ? "bg-yellow-500"
+                                    : "bg-red-500"
+                              }`}
                               style={{
                                 width: `${Math.min(
                                   100,
@@ -373,29 +379,54 @@ export default function Home() {
                               }}
                             />
                           </div>
-                          {inferenceTime !== null && (
-                            <p className="text-xs text-slate-500 mt-1">
-                              Inference Time: {inferenceTime.toFixed(1)} ms
-                            </p>
-                          )}
+                          <p className="text-xs text-slate-500 mt-1">
+                            {confidence >= 0.8
+                              ? "High confidence prediction"
+                              : confidence >= 0.6
+                                ? "Medium confidence prediction"
+                                : "Low confidence - please verify"}
+                          </p>
                         </div>
 
-                        {/* Disposal Information */}
+                        {/* Disposal Method */}
                         {disposalMethod && (
-                          <div className="pt-4 border-t border-slate-200">
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                              Disposal Method
+                          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <label className="text-xs font-semibold text-blue-700 uppercase tracking-wider block mb-1">
+                              Recommended Disposal
+                            </label>
+                            <p className="text-sm font-semibold text-blue-900">
+                              {disposalMethod}
                             </p>
-                            <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                              <p className="text-sm font-semibold text-blue-900">
-                                {disposalMethod}
-                              </p>
-                            </div>
                           </div>
                         )}
+
+                        {/* Metadata */}
+                        <div className="pt-4 border-t border-slate-200 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                              Inference Time
+                            </label>
+                            <span className="text-sm font-semibold text-slate-900">
+                              {inferenceTime?.toFixed(0)}ms
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                              Timestamp
+                            </label>
+                            <span className="text-sm font-semibold text-slate-900">
+                              {new Date().toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )
                 )}
               </div>
             </div>
