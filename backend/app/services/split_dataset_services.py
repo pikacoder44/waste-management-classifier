@@ -38,7 +38,7 @@ def get_source_image_count():
 
 
 def create_split_dataset(split_path: str, train_split: float = 0.7):
-    """Create train/test split from original and custom datasets."""
+    
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
 
@@ -88,15 +88,7 @@ def create_split_dataset(split_path: str, train_split: float = 0.7):
 
 
 def ensure_split_dataset(split_type: str, train_split: float = 0.7):
-    """Ensure split dataset exists and is based on latest source data.
-
-    Args:
-        split_type: 'train' or 'eval'
-        train_split: ratio for train/test split (default 0.7)
-
-    Returns:
-        dict: {'train_dir': path, 'test_dir': path, 'split_path': path}
-    """
+    
     if split_type == "train":
         split_path = "dataset/combined_temp"
     elif split_type == "eval":
