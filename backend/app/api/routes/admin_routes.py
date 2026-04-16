@@ -9,17 +9,16 @@ from app.services.model_evaluation_service import (
     evaluate_model,
     save_evaluation_to_database,
 )
+from app.services.split_dataset_services import ensure_split_dataset
 from app.models.dataset import Dataset
 from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
 from app.database.collections import dataset_collection
 import os
 import shutil
-import random
 from uuid import uuid4
 from datetime import datetime
 import base64
 from bson import ObjectId
-import time
 
 
 router = APIRouter()
@@ -61,11 +60,6 @@ def run_training_logic():
     EPOCHS = 10
     TRAIN_SPLIT = 0.7  # 70% train, 30% test
 
-    # Create temporary combined dataset directory
-    combined_dataset_path = "dataset/combined_temp"
-    train_dir = os.path.join(combined_dataset_path, "train")
-    test_dir = os.path.join(combined_dataset_path, "test")
-
     # Initialize training status
     training_status["is_training"] = True
     training_status["status"] = "preparing_data"
@@ -74,70 +68,12 @@ def run_training_logic():
     training_status["progress"] = 5
 
     try:
-        # Clean up if combined dataset already exists
-        if os.path.exists(combined_dataset_path):
-            print(f"Removing existing combined dataset...")
-            shutil.rmtree(combined_dataset_path)
-
-        print(f"Creating combined dataset from original and custom folders...")
-
-        # Create train and test directories for each label
-        for label in ALLOWED_LABELS:
-            os.makedirs(os.path.join(train_dir, label), exist_ok=True)
-            os.makedirs(os.path.join(test_dir, label), exist_ok=True)
-
-        # Merge images from both original and custom datasets
-        all_images = {label: [] for label in ALLOWED_LABELS}
-
-        # Collect images from original dataset
-        for label in ALLOWED_LABELS:
-            original_label_path = os.path.join(BASE_DATASET_PATH, label)
-            if os.path.exists(original_label_path):
-                for img_file in os.listdir(original_label_path):
-                    img_path = os.path.join(original_label_path, img_file)
-                    if os.path.isfile(img_path):
-                        all_images[label].append(img_path)
-
-        # Collect images from custom dataset
-        for label in ALLOWED_LABELS:
-            custom_label_path = os.path.join(CUSTOM_DATASET_PATH, label)
-            if os.path.exists(custom_label_path):
-                for img_file in os.listdir(custom_label_path):
-                    img_path = os.path.join(custom_label_path, img_file)
-                    if os.path.isfile(img_path):
-                        all_images[label].append(img_path)
-
-        # Split images into train and test and copy them
-        total_images = 0
-        for label, img_paths in all_images.items():
-            split_index = int(len(img_paths) * TRAIN_SPLIT)
-
-            # Copy images into train and test images into test directories
-            for i, img_path in enumerate(img_paths[:split_index]):
-                try:
-                    dest_path = os.path.join(
-                        train_dir, label, os.path.basename(img_path)
-                    )
-                    shutil.copy2(img_path, dest_path)
-                except Exception as e:
-                    print(f"Error copying training image {img_path}: {e}")
-            for i, img_path in enumerate(img_paths[split_index:]):
-                try:
-                    dest_path = os.path.join(
-                        test_dir, label, os.path.basename(img_path)
-                    )
-                    shutil.copy2(img_path, dest_path)
-                except Exception as e:
-                    print(f"Error copying test image {img_path}: {e}")
-
-            total_images += len(img_paths)
-            print(
-                f"  {label}: {len(img_paths)} images (train: {split_index}, test: {len(img_paths) - split_index})"
-            )
-
-        print(f"\nTotal images collected: {total_images}")
-        print(f"Train directory: {train_dir}")
-        print(f"Test directory: {test_dir}")
+        # Ensure split dataset is current
+        print(f"Checking if train split exists and is current...")
+        split_info = ensure_split_dataset("train", TRAIN_SPLIT)
+        train_dir = split_info["train_dir"]
+        test_dir = split_info["test_dir"]
+        combined_dataset_path = split_info["split_path"]
 
         training_status["message"] = "Loading data into memory..."
         training_status["progress"] = 25
@@ -276,7 +212,7 @@ def run_training_logic():
 
 
 def run_evaluation_logic():
-    """Evaluate the trained model on test data."""
+
     global evaluation_status
 
     print("\n" + "=" * 80)
@@ -294,7 +230,6 @@ def run_evaluation_logic():
         # Configuration
         IMG_SIZE = (224, 224)
         BATCH_SIZE = 32
-        TRAIN_SPLIT = 0.7  # 70% train, 30% test
 
         # Load the saved model
         model_path = os.path.join("model", "waste_classifier_model.keras")
@@ -313,73 +248,18 @@ def run_evaluation_logic():
         model = keras.models.load_model(model_path)
         print(f"✓ Model loaded successfully")
 
-        # Prepare test data - create temporary eval dataset
-        print(f"[3/4] Creating evaluation dataset...")
-        evaluation_status["message"] = "Creating evaluation dataset..."
+        # Ensure evaluation split is current (0.0 train_split = all data as test)
+        print(f"[3/4] Checking evaluation dataset...")
+        evaluation_status["message"] = "Checking evaluation dataset..."
         evaluation_status["progress"] = 30
 
-        eval_dataset_path = "dataset/eval_temp"
-        eval_train_dir = os.path.join(eval_dataset_path, "train")
-        eval_test_dir = os.path.join(eval_dataset_path, "test")
+        split_info = ensure_split_dataset("eval", train_split=0.0)
+        eval_test_dir = split_info[
+            "train_dir"
+        ]  # With 0% train split, all goes to 'train' dir
+        eval_dataset_path = split_info["split_path"]
 
-        # Clean up if eval dataset already exists
-        if os.path.exists(eval_dataset_path):
-            print(f"Cleaning up existing eval dataset...")
-            shutil.rmtree(eval_dataset_path)
-
-        print(f"Creating eval directories...")
-        for label in ALLOWED_LABELS:
-            os.makedirs(os.path.join(eval_train_dir, label), exist_ok=True)
-            os.makedirs(os.path.join(eval_test_dir, label), exist_ok=True)
-
-        # Merge images from original and custom datasets
-        all_images = {label: [] for label in ALLOWED_LABELS}
-
-        # Collect from original
-        for label in ALLOWED_LABELS:
-            original_label_path = os.path.join(BASE_DATASET_PATH, label)
-            if os.path.exists(original_label_path):
-                for img_file in os.listdir(original_label_path):
-                    img_path = os.path.join(original_label_path, img_file)
-                    if os.path.isfile(img_path):
-                        all_images[label].append(img_path)
-
-        # Collect from custom
-        for label in ALLOWED_LABELS:
-            custom_label_path = os.path.join(CUSTOM_DATASET_PATH, label)
-            if os.path.exists(custom_label_path):
-                for img_file in os.listdir(custom_label_path):
-                    img_path = os.path.join(custom_label_path, img_file)
-                    if os.path.isfile(img_path):
-                        all_images[label].append(img_path)
-
-        # Split and copy
-        total_test_samples = 0
-        for label in ALLOWED_LABELS:
-            images = all_images[label]
-            random.shuffle(images)
-            split_index = int(len(images) * TRAIN_SPLIT)
-
-            # Copy train images
-            for img_path in images[:split_index]:
-                dest_path = os.path.join(
-                    eval_train_dir, label, os.path.basename(img_path)
-                )
-                shutil.copy2(img_path, dest_path)
-
-            # Copy test images
-            for img_path in images[split_index:]:
-                dest_path = os.path.join(
-                    eval_test_dir, label, os.path.basename(img_path)
-                )
-                shutil.copy2(img_path, dest_path)
-                total_test_samples += 1
-
-            print(
-                f"  {label}: {len(images[:split_index])} train, {len(images[split_index:])} test"
-            )
-
-        print(f"✓ Evaluation dataset created")
+        print(f"✓ Evaluation dataset ready")
 
         # Create test data generator
         test_datagen = ImageDataGenerator(rescale=1.0 / 255)
@@ -398,7 +278,7 @@ def run_evaluation_logic():
         total_batches = (
             actual_samples + BATCH_SIZE - 1
         ) // BATCH_SIZE  # Ceiling division
-        print(f"✓ Accurate total test samples: {actual_samples}")
+        print(f"✓ Total evaluation samples: {actual_samples}")
         print(f"✓ Total batches (batch_size={BATCH_SIZE}): {total_batches}")
 
         print(f"[4/4] Running evaluation...")
