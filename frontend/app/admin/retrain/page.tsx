@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface TrainingStatus {
   is_training: boolean;
@@ -22,6 +22,8 @@ export default function RetrainPage() {
     null,
   );
   const [showCompletion, setShowCompletion] = useState(false);
+  const errorCountRef = useRef(0);
+  const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
 
   // Fetch training status from the API
   const fetchTrainingStatus = async () => {
@@ -31,13 +33,16 @@ export default function RetrainPage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...(token && { "Authorization": `Bearer ${token}` }),
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
 
       if (response.ok) {
         const data: TrainingStatus = await response.json();
         setTrainingStatus(data);
+
+        // Reset error count on successful fetch
+        errorCountRef.current = 0;
 
         // Show completion animation when training is done
         if (data.status === "completed" && data.progress === 100) {
@@ -48,9 +53,27 @@ export default function RetrainPage() {
             setPollingInterval(null);
           }
         }
+      } else {
+        throw new Error(`Status fetch failed: ${response.status}`);
       }
     } catch (error) {
       console.error("Error fetching training status:", error);
+      errorCountRef.current += 1;
+
+      // Stop polling after too many errors
+      if (errorCountRef.current >= MAX_ERRORS) {
+        console.error(
+          `Stopping training polling after ${MAX_ERRORS} consecutive errors`,
+        );
+        alert(
+          "Training monitoring stopped due to connection errors. Check your connection and try again.",
+        );
+
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+      }
     }
   };
 
@@ -65,7 +88,7 @@ export default function RetrainPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` }),
+            ...(token && { Authorization: `Bearer ${token}` }),
           },
         },
       );
@@ -77,10 +100,10 @@ export default function RetrainPage() {
           fetchTrainingStatus();
         }, 500);
 
-        // Start polling for status updates every 2 seconds
+        // Start polling for status updates every 3 seconds (reduced from 2 seconds)
         const interval = setInterval(() => {
           fetchTrainingStatus();
-        }, 2000);
+        }, 3000);
         setPollingInterval(interval);
       } else {
         const error = await response.json();
