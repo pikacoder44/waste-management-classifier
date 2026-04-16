@@ -8,6 +8,7 @@ ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 BASE_DATASET_PATH = "dataset/original"
 CUSTOM_DATASET_PATH = "dataset/custom"
 
+
 def get_source_image_count():
     """Get total count of images from original and custom datasets."""
     total = 0
@@ -38,7 +39,7 @@ def get_source_image_count():
 
 
 def create_split_dataset(split_path: str, train_split: float = 0.7):
-    
+
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
 
@@ -88,7 +89,7 @@ def create_split_dataset(split_path: str, train_split: float = 0.7):
 
 
 def ensure_split_dataset(split_type: str, train_split: float = 0.7):
-    
+
     if split_type == "train":
         split_path = "dataset/combined_temp"
     elif split_type == "eval":
