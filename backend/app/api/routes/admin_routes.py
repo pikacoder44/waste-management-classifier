@@ -61,9 +61,6 @@ def run_training_logic():
     EPOCHS = 10
     TRAIN_SPLIT = 0.7  # 70% train, 30% test
 
-    # Record training start time
-    training_start_time = time.time()
-
     # Create temporary combined dataset directory
     combined_dataset_path = "dataset/combined_temp"
     train_dir = os.path.join(combined_dataset_path, "train")
@@ -115,7 +112,7 @@ def run_training_logic():
         for label, img_paths in all_images.items():
             split_index = int(len(img_paths) * TRAIN_SPLIT)
 
-            # Copy training images
+            # Copy images into train and test images into test directories
             for i, img_path in enumerate(img_paths[:split_index]):
                 try:
                     dest_path = os.path.join(
@@ -124,8 +121,6 @@ def run_training_logic():
                     shutil.copy2(img_path, dest_path)
                 except Exception as e:
                     print(f"Error copying training image {img_path}: {e}")
-
-            # Copy test images
             for i, img_path in enumerate(img_paths[split_index:]):
                 try:
                     dest_path = os.path.join(
@@ -147,7 +142,7 @@ def run_training_logic():
         training_status["message"] = "Loading data into memory..."
         training_status["progress"] = 25
 
-        # Create data generators
+        # Data Augmentation - this makes the model more robust and can help with small datasets to prevent overfitting
         train_datagen = ImageDataGenerator(
             rescale=1.0 / 255,
             rotation_range=20,
@@ -189,7 +184,7 @@ def run_training_logic():
         )
 
         base_model.trainable = False
-
+        # Add custom layers on top of the base model
         model = models.Sequential(
             [
                 base_model,
@@ -224,6 +219,14 @@ def run_training_logic():
         )
 
         # Custom callback to track progress
+        """
+        Updates:
+            # epoch number
+            # progress %
+            # loss
+        This is how frontend gets live updates
+        """
+
         class StatusCallback(keras.callbacks.Callback):
             def on_epoch_end(self, epoch, logs=None):
                 training_status["epoch"] = epoch + 1
@@ -242,9 +245,6 @@ def run_training_logic():
             callbacks=[early_stopping, StatusCallback()],
             verbose=1,
         )
-
-        # Calculate training time
-        training_time = time.time() - training_start_time
 
         # Save model first
         training_status["message"] = "Saving model..."
