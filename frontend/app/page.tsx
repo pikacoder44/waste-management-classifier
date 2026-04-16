@@ -138,7 +138,6 @@ export default function Home() {
           },
         },
       );
-      console.log("Token:", token);
       if (response.status == 401) {
         showError("Unauthorized. Please Login first.");
         setIsLoading(false);
