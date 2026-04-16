@@ -5,15 +5,14 @@ import Loader from "./components/Loader";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const [submittedFile, setSubmittedFile] = useState<File | null>(null);
-
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [disposalMethod, setDisposalMethod] = useState<string | null>(null);
   const [disposalInstructions, setDisposalInstructions] = useState<
     string | null
   >(null);
-
+  const [inferenceTime, setInferenceTime] = useState<number | null>(null);
+  const [submittedFile, setSubmittedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -152,10 +151,26 @@ export default function Home() {
           );
         } else {
           console.log("Prediction result:", data);
-          setResult(data.predicted_class);
+          setResult(data.label);
           setConfidence(data.confidence);
-          setDisposalMethod(data.disposal_method);
-          setDisposalInstructions(data.disposal_instructions);
+          setInferenceTime(data.inferenceTime);
+
+          // Handle disposal recommendation
+          if (data.disposalRecommendation) {
+            if (typeof data.disposalRecommendation === "object") {
+              setDisposalMethod(
+                data.disposalRecommendation.method ||
+                  data.disposalRecommendation.disposal_method,
+              );
+              setDisposalInstructions(
+                data.disposalRecommendation.instructions ||
+                  data.disposalRecommendation.disposal_instructions,
+              );
+            } else {
+              setDisposalMethod(data.disposalRecommendation);
+            }
+          }
+
           setSubmittedFile(file);
         }
       } else {
@@ -358,25 +373,22 @@ export default function Home() {
                               }}
                             />
                           </div>
+                          {inferenceTime !== null && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              Inference Time: {inferenceTime.toFixed(1)} ms
+                            </p>
+                          )}
                         </div>
 
                         {/* Disposal Information */}
                         {disposalMethod && (
-                          <div className="space-y-4 pt-4 border-t border-slate-200">
-                            <div>
-                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Disposal Method
-                              </p>
-                              <p className="text-base font-semibold text-slate-900">
+                          <div className="pt-4 border-t border-slate-200">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                              Disposal Method
+                            </p>
+                            <div className="inline-block bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                              <p className="text-sm font-semibold text-blue-900">
                                 {disposalMethod}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                How to Dispose
-                              </p>
-                              <p className="text-sm text-slate-700 leading-relaxed">
-                                {disposalInstructions}
                               </p>
                             </div>
                           </div>
