@@ -226,6 +226,9 @@ def run_evaluation_logic():
     evaluation_status["progress"] = 10
     print(f"✓ Evaluation status initialized (progress: 10%)")
 
+    # Initialize cleanup path before try
+    eval_dataset_path = None
+
     try:
         # Configuration
         IMG_SIZE = (224, 224)
@@ -241,6 +244,7 @@ def run_evaluation_logic():
                 "Model not found. Please train the model first."
             )
             evaluation_status["is_evaluating"] = False
+            evaluation_status["progress"] = 0
             return
 
         print(f"✓ Model file exists")
@@ -255,8 +259,8 @@ def run_evaluation_logic():
 
         split_info = ensure_split_dataset("eval", train_split=0.0)
         eval_test_dir = split_info[
-            "train_dir"
-        ]  # With 0% train split, all goes to 'train' dir
+            "test_dir"
+        ]  # With 0% train split, all data goes to test_dir
         eval_dataset_path = split_info["split_path"]
 
         print(f"✓ Evaluation dataset ready")
@@ -280,6 +284,10 @@ def run_evaluation_logic():
         ) // BATCH_SIZE  # Ceiling division
         print(f"✓ Total evaluation samples: {actual_samples}")
         print(f"✓ Total batches (batch_size={BATCH_SIZE}): {total_batches}")
+
+        # Reset generator to ensure clean state before evaluation
+        test_data.reset()
+        print(f"✓ Test data generator reset for evaluation")
 
         print(f"[4/4] Running evaluation...")
         evaluation_status["message"] = "Evaluating model..."
@@ -324,14 +332,17 @@ def run_evaluation_logic():
         evaluation_status["status"] = "error"
         evaluation_status["message"] = f"Evaluation failed: {str(e)}"
         evaluation_status["is_evaluating"] = False
-        # Cleanup on error
-        eval_dataset_path = "dataset/eval_temp"
-        if os.path.exists(eval_dataset_path):
-            try:
-                shutil.rmtree(eval_dataset_path)
-            except:
-                pass
         raise
+
+    finally:
+        # Guarantee cleanup happens regardless of success/error
+        if eval_dataset_path and os.path.exists(eval_dataset_path):
+            try:
+                print(f"Cleaning up eval dataset in finally block...")
+                shutil.rmtree(eval_dataset_path)
+                print("✓ Cleanup complete (finally block)")
+            except Exception as cleanup_error:
+                print(f"❌ Cleanup failed: {cleanup_error}")
 
 
 @router.post("/admin/dataset/upload")
