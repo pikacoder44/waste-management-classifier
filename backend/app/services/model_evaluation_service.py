@@ -23,13 +23,14 @@ def evaluate_model(
         training_status["progress"] = 92
 
     # Get predictions
-    y_true = []
-    y_pred = []
+    y_true = []  # actual labels
+    y_pred = []  # predicted labels
 
     print("📊 Starting prediction loop...")
     batch_count = 0
     total_samples = 0
 
+    # Loop over test data batches
     for batch_num, (images, labels) in enumerate(test_data):
         # Break if we've processed all batches
         if total_batches and batch_num >= total_batches:
@@ -85,7 +86,7 @@ def evaluate_model(
         print(f"❌ ERROR computing metrics: {e}")
         raise
 
-    # Extract weighted averages (safely handle dict access)
+    # Extract weighted averages
     print(f"📋 Extracting metrics...")
     weighted_metrics = class_report.get("weighted avg", {})
     weighted_precision = weighted_metrics.get("precision", 0.0)
@@ -117,7 +118,7 @@ def evaluate_model(
         print(f"❌ ERROR saving confusion matrix: {e}")
         raise
 
-    # Return evaluation document
+    # Return evaluation document - This is what gets stored in DB
     print(f"📦 Creating evaluation document...")
     evaluation_doc: Dict[str, Any] = {
         "modelVersion": model_version,
@@ -135,17 +136,7 @@ def evaluate_model(
 def save_confusion_matrix_locally(
     conf_matrix: list, class_labels: list, model_version: str
 ) -> str:
-    """
-    Save confusion matrix to a local JSON file.
 
-    Args:
-        conf_matrix: 2D confusion matrix array
-        class_labels: List of class labels
-        model_version: Model version timestamp
-
-    Returns:
-        Path to the saved confusion matrix file
-    """
     try:
         # Create directory if it doesn't exist
         output_dir = "evaluation_results"
@@ -176,15 +167,6 @@ def save_confusion_matrix_locally(
 
 
 def save_evaluation_to_database(evaluation_doc: Dict[str, Any]) -> str:
-    """
-    Save evaluation results to MongoDB.
-
-    Args:
-        evaluation_doc: Dictionary containing evaluation metrics
-
-    Returns:
-        The ID of the inserted document
-    """
     try:
         # Ensure evaluation_doc is not None
         print(f"🗄️  Saving evaluation to database...")
