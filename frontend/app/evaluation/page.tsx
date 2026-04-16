@@ -30,6 +30,8 @@ const Page = () => {
   const [evalMessage, setEvalMessage] = useState("");
   const [evalError, setEvalError] = useState<string | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const errorCountRef = useRef(0);
+  const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
 
   // Fetch latest evaluation report
   const fetchLatestEvaluation = async () => {
@@ -126,6 +128,9 @@ const Page = () => {
 
       const status: EvaluationStatus = await response.json();
 
+      // Reset error count on successful fetch
+      errorCountRef.current = 0;
+
       setEvalProgress(status.progress);
       setEvalMessage(status.message);
 
@@ -144,6 +149,23 @@ const Page = () => {
       }
     } catch (err) {
       console.error("Error polling evaluation status:", err);
+      errorCountRef.current += 1;
+
+      // Stop polling after too many errors
+      if (errorCountRef.current >= MAX_ERRORS) {
+        console.error(
+          `Stopping evaluation polling after ${MAX_ERRORS} consecutive errors`,
+        );
+        setEvalError(
+          err instanceof Error ? err.message : "Polling failed too many times",
+        );
+        setIsRunningEval(false);
+
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+      }
     }
   };
 
@@ -188,12 +210,12 @@ const Page = () => {
       // Start polling for status updates
       console.log("✓ Evaluation started, polling for progress...");
 
-      // Poll immediately, then every 1 second
+      // Poll immediately, then every 3 seconds (reduced from 1 second)
       await pollEvaluationStatus(token);
 
       pollingIntervalRef.current = setInterval(() => {
         pollEvaluationStatus(token);
-      }, 1000);
+      }, 3000);
     } catch (err) {
       console.error("Error starting evaluation:", err);
       setEvalError(
