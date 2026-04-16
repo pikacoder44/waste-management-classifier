@@ -8,11 +8,10 @@ from app.services.admin_check_service import checkAdmin
 from app.services.model_evaluation_service import (
     evaluate_model,
     save_evaluation_to_database,
-    save_confusion_matrix_locally,
 )
 from app.models.dataset import Dataset
 from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
-from app.database.collections import dataset_collection, model_evaluation_collection
+from app.database.collections import dataset_collection
 import os
 import shutil
 import random
@@ -453,7 +452,6 @@ def run_evaluation_logic():
             except:
                 pass
         raise
-        raise
 
 
 @router.post("/admin/dataset/upload")
@@ -738,25 +736,3 @@ def get_latest_evaluation(request: Request):
         raise HTTPException(
             status_code=500, detail="Failed to fetch evaluation results"
         )
-
-
-# @router.get("/admin/logs")
-# def get_logs(request: Request):
-#     if not checkAdmin(request):
-#         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-
-#     # Logic to get logs goes here
-#     # For example, you might call a function like `get_logs_function()`
-
-#     return {"message": "Logs retrieved successfully"}
-
-
-# @router.get("/admin/model/evaluation")
-# def evaluate_model(request: Request):
-#     if not checkAdmin(request):
-#         raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-
-#     # Logic to evaluate the model goes here
-#     # For example, you might call a function like `evaluate_model_function()`
-
-#     return {"message": "Model evaluation completed successfully"}
