@@ -127,10 +127,23 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
-        method: "POST",
-        body: formData,
-      });
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        "http://localhost:8000/classification/analyze",
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log("Token:", token);
+      if (response.status == 401) {
+        showError("Unauthorized. Please Login first.");
+        setIsLoading(false);
+        return;
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -160,7 +173,6 @@ export default function Home() {
   };
 
   const hasResult = result && submittedFile;
-
 
   return (
     <div className="min-h-screen bg-white text-slate-900 pt-8 pb-16">
