@@ -1,25 +1,57 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.database.connection import db
 from app.api.routes import user_routes
 from app.api.routes import auth_routes
 from app.api.routes import classification_routes
 from app.api.routes import admin_routes
 
-app = FastAPI()
+app = FastAPI(
+    title="Waste Classifier API",
+    description="Secure waste classification system with JWT HTTP-only cookies",
+    version="1.0.0",
+)
 
-# Configure CORS
+# Trust only specific hosts to prevent HTTP Host header attacks
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.localhost",
+        "localhost:8000",
+        "127.0.0.1:8000",
+    ],
+)
+
+# Configure CORS - IMPORTANT for HTTP-only cookies
+# Cookies are only sent if credentials: 'include' is used in fetch AND CORS allows it
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    # Allow all localhost origins for development
+    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|localhost\.localhost)(:[0-9]+)?$",
+    # CRITICAL: Allow credentials for cookies to be sent/received
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # Restrict HTTP methods to what's needed
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    # Whitelist specific headers instead of "*"
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-CSRF-Token",  # For CSRF protection
+        "X-Requested-With",
+    ],
+    # Expose any custom response headers the frontend needs
+    expose_headers=["Content-Length", "X-CSRF-Token"],
+    # Cache preflight requests for 1 hour
+    max_age=3600,
 )
 
 
 @app.get("/")
 def test_db():
+    """Test database connection."""
     return {"collections": db.list_collection_names()}
 
 
