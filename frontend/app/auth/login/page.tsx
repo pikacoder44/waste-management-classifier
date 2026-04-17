@@ -18,9 +18,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/auth/login", {
+      const response = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, password, role }),
       });
 
@@ -37,13 +38,6 @@ const Login = () => {
 
       const data = JSON.parse(text);
       console.log("Success:", data);
-
-      // Store token in localStorage
-      if (data.access_token) {
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("user_role", role);
-        console.log("Token stored in localStorage");
-      }
 
       setSuccess(data.message || "Login successful! Redirecting...");
 

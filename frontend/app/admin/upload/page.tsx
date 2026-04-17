@@ -106,24 +106,13 @@ export default function AdminUploadPage() {
 
       const imageData = await Promise.all(imageDataPromises);
 
-      // Get token from localStorage
-      const token = localStorage.getItem("access_token");
-      console.log("Token from localStorage:", token ? "Found" : "Not found");
-      console.log("Full token:", token);
-
-      if (!token) {
-        setError("Not authenticated. Please login first.");
-        setUploading(false);
-        return;
-      }
-
       // Send to backend
-      const res = await fetch("http://127.0.0.1:8000/admin/dataset/upload", {
+      const res = await fetch("http://localhost:8000/admin/dataset/upload", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           datasetName: datasetName.trim(),
           images: imageData,

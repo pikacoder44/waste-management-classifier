@@ -8,15 +8,10 @@ export default function Home() {
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [disposalMethod, setDisposalMethod] = useState<string | null>(null);
-  const [disposalInstructions, setDisposalInstructions] = useState<
-    string | null
-  >(null);
   const [inferenceTime, setInferenceTime] = useState<number | null>(null);
   const [submittedFile, setSubmittedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
-
   const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -80,7 +75,6 @@ export default function Home() {
       setResult(null);
       setConfidence(null);
       setDisposalMethod(null);
-      setDisposalInstructions(null);
       closeCameraOverlay();
     }, "image/jpeg");
   };
@@ -119,22 +113,18 @@ export default function Home() {
     setResult(null);
     setConfidence(null);
     setDisposalMethod(null);
-    setDisposalInstructions(null);
     setSubmittedFile(null);
 
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const token = localStorage.getItem("access_token");
       const response = await fetch(
         "http://localhost:8000/classification/analyze",
         {
           method: "POST",
           body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         },
       );
       if (response.status == 401) {
@@ -161,10 +151,6 @@ export default function Home() {
               setDisposalMethod(
                 data.disposalRecommendation.method ||
                   data.disposalRecommendation.disposal_method,
-              );
-              setDisposalInstructions(
-                data.disposalRecommendation.instructions ||
-                  data.disposalRecommendation.disposal_instructions,
               );
             } else {
               setDisposalMethod(data.disposalRecommendation);
@@ -320,7 +306,7 @@ export default function Home() {
                   hasResult && (
                     <div className="grid md:grid-cols-2 gap-0">
                       {/* Image Section - Left */}
-                      <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-4 flex items-center justify-center">
+                      <div className="bg-linear-to-br from-slate-50 to-slate-100 p-4 flex items-center justify-center">
                         <div className="relative w-80 h-80 rounded-2xl overflow-hidden shadow-xl ring-1 ring-slate-200">
                           <Image
                             src={URL.createObjectURL(submittedFile as File)}

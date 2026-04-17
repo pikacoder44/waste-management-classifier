@@ -48,22 +48,14 @@ const Page = () => {
     }, 300);
 
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        setError("Not authenticated. Please login first.");
-        setLoading(false);
-        clearInterval(progressInterval);
-        return;
-      }
-
       const response = await fetch(
-        "http://127.0.0.1:8000/admin/model/evaluation/latest",
+        "http://localhost:8000/admin/model/evaluation/latest",
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         },
       );
 
@@ -109,16 +101,16 @@ const Page = () => {
   };
 
   // Poll evaluation status
-  const pollEvaluationStatus = async (token: string) => {
+  const pollEvaluationStatus = async () => {
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/admin/model/evaluation/status",
+        "http://localhost:8000/admin/model/evaluation/status",
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         },
       );
 
@@ -177,22 +169,15 @@ const Page = () => {
     setEvalMessage("Starting evaluation...");
 
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        setEvalError("Not authenticated. Please login first.");
-        setIsRunningEval(false);
-        return;
-      }
-
       // Trigger evaluation
       const response = await fetch(
-        "http://127.0.0.1:8000/admin/model/evaluate",
+        "http://localhost:8000/admin/model/evaluate",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         },
       );
 
@@ -211,10 +196,10 @@ const Page = () => {
       console.log("✓ Evaluation started, polling for progress...");
 
       // Poll immediately, then every 3 seconds (reduced from 1 second)
-      await pollEvaluationStatus(token);
+      await pollEvaluationStatus();
 
       pollingIntervalRef.current = setInterval(() => {
-        pollEvaluationStatus(token);
+        pollEvaluationStatus();
       }, 3000);
     } catch (err) {
       console.error("Error starting evaluation:", err);

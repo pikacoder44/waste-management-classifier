@@ -32,19 +32,12 @@ const Page = () => {
   useEffect(() => {
     const fetchDatasets = async () => {
       try {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-          setError("Not authenticated. Please login first.");
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch("http://127.0.0.1:8000/admin/datasets", {
+        const response = await fetch("http://localhost:8000/admin/datasets", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
         });
 
         console.log("Response status:", response.status);
@@ -82,21 +75,14 @@ const Page = () => {
 
     setDeleting(datasetId);
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        setError("Not authenticated. Please login first.");
-        setDeleting(null);
-        return;
-      }
-
       const response = await fetch(
-        "http://127.0.0.1:8000/admin/dataset/delete",
+        "http://localhost:8000/admin/dataset/delete",
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
+          credentials: "include",
           body: JSON.stringify({ dataset_id: datasetId }),
         },
       );
