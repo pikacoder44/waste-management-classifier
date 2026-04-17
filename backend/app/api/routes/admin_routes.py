@@ -632,3 +632,33 @@ def get_latest_evaluation(request: Request):
         raise HTTPException(
             status_code=500, detail="Failed to fetch evaluation results"
         )
+
+
+@router.get("/admin/classification/history")
+def get_classification_history(request: Request):
+    try:
+        # checkAdmin handles both Authorization header and cookies
+        admin_check = checkAdmin(request)
+
+        if not admin_check:
+            raise HTTPException(
+                status_code=403, detail="Only admin users can access this resource"
+            )
+
+        from app.database.collections import waste_collection
+
+        # Get all classification history
+        classification_history = list(waste_collection.find().sort("createdAt", -1))
+
+        # Convert ObjectId to string for JSON serialization
+        for entry in classification_history:
+            entry["_id"] = str(entry["_id"])
+            if "userId" in entry:
+                entry["userId"] = str(entry["userId"])
+
+        return {"status": "success", "history": classification_history}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching classification history: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
