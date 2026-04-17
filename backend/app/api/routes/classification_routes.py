@@ -60,10 +60,20 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         )
 
         # get user ID from JWT token
+        # Try Authorization header first, then fall back to cookies
         auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
+        jwt_token = None
+
+        if auth_header and auth_header.startswith("Bearer "):
+            jwt_token = auth_header.split(" ")[1]
+
+        # Fall back to cookie if no Authorization header
+        if not jwt_token:
+            jwt_token = request.cookies.get("access_token")
+
+        if not jwt_token:
             raise HTTPException(status_code=401, detail="Access token not found")
-        jwt_token = auth_header.split(" ")[1]
+
         user_id = get_user_id_from_token(jwt_token)
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid access token")
@@ -113,12 +123,22 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 async def get_classification_history(request: Request):
     try:
         # get user ID from JWT token
+        # Try Authorization header first, then fall back to cookies
         auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
+        jwt_token = None
+
+        if auth_header and auth_header.startswith("Bearer "):
+            jwt_token = auth_header.split(" ")[1]
+
+        # Fall back to cookie if no Authorization header
+        if not jwt_token:
+            jwt_token = request.cookies.get("access_token")
+
+        if not jwt_token:
             raise HTTPException(
                 status_code=401, detail="Access token not found, Login first please"
             )
-        jwt_token = auth_header.split(" ")[1]
+
         user_id = get_user_id_from_token(jwt_token)
 
         # if role is admin, return erorr: admin dont have classification history
