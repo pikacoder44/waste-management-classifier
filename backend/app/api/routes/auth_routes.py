@@ -1,6 +1,7 @@
 import bcrypt
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Response
+from fastapi.responses import JSONResponse
 from jwt import encode, decode
 from typing import Optional, Any
 from app.database.collections import user_collection
@@ -104,10 +105,17 @@ def loginUser(user: User, response: Response):
                     "user_id": str(existing_admin["_id"]),
                 }
             )
-            return {
-                "message": "Admin login successful",
-                "access_token": access_token,
-            }
+            # Set token as HTTP-only cookie on response
+            response_obj = JSONResponse({"message": "Admin login successful"})
+            response_obj.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=False,  # Set to True in production with HTTPS
+                samesite="lax",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            )
+            return response_obj
         else:
             raise HTTPException(status_code=401, detail="Invalid password")
     else:
@@ -133,7 +141,17 @@ def loginUser(user: User, response: Response):
                     "user_id": str(existing_user["_id"]),
                 }
             )
-            return {"message": "User login successful", "access_token": access_token}
+            # Set token as HTTP-only cookie on response
+            response_obj = JSONResponse({"message": "User login successful"})
+            response_obj.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=False,  # Set to True in production with HTTPS
+                samesite="lax",
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            )
+            return response_obj
         else:
             raise HTTPException(status_code=401, detail="Invalid password")
 
@@ -141,5 +159,6 @@ def loginUser(user: User, response: Response):
 @router.post("/auth/logout")
 def logoutUser(response: Response):
     # Clear the access token cookie
-    response.delete_cookie(key="access_token")
-    return {"message": "Logout successful"}
+    response_obj = JSONResponse({"message": "Logout successful"})
+    response_obj.delete_cookie(key="access_token")
+    return response_obj
