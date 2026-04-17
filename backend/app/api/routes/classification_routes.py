@@ -4,7 +4,7 @@ from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
 from app.ai.imageQualityAnalysis import imageQualityAnalysis
 from app.models.waste import Waste
-from app.database.connection import db
+from app.database.collections import waste_collection
 from app.api.routes.auth_routes import get_user_id_from_token
 from datetime import datetime
 import cloudinary.uploader
@@ -102,7 +102,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             inferenceTime=inference_time,
             disposalRecommendation=disposalRecommendation,
         )
-        db.waste.insert_one(waste_entry.dict())
+        waste_collection.insert_one(waste_entry.dict())
 
         return {
             "status": "success",
@@ -152,7 +152,7 @@ async def get_classification_history(request: Request):
         user_id = str(user_id)  # Ensure user_id is a string for database query
 
         # Fetch classification history from database
-        history = list(db.waste.find({"userId": user_id}).sort("createdAt", -1))
+        history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
 
         # Convert ObjectId to string and format createdAt
         for entry in history:
@@ -202,12 +202,12 @@ async def delete_classification_entry(entry_id: str, request: Request):
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
         # Fetch the entry BEFORE deletion to get publicId for Cloudinary cleanup
-        entry = db.waste.find_one({"_id": object_id, "userId": user_id})
+        entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
         if entry is None:
             raise HTTPException(status_code=404, detail="Entry not found")
 
         # Delete the entry from the database
-        result = db.waste.delete_one({"_id": object_id, "userId": user_id})
+        result = waste_collection.delete_one({"_id": object_id, "userId": user_id})
 
         if result.deleted_count == 0:
             raise HTTPException(
