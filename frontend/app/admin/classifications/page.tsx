@@ -18,6 +18,28 @@ const Page = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadImage = async (filePath: string, wasteType: string) => {
+    try {
+      setDownloadingId(wasteType);
+      const response = await fetch(filePath);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${wasteType}-${new Date().getTime()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Download failed:", err);
+      alert("Failed to download image");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   useEffect(() => {
     // Fetch classification history from the backend
@@ -97,30 +119,60 @@ const Page = () => {
             <p className="text-gray-500 text-lg">No classifications found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {classificationHistory.map((entry) => (
               <div
                 key={entry._id}
                 className="bg-white rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full"
               >
                 {/* Image */}
-                <div className="relative w-full bg-linear-to-br from-gray-200 to-gray-300 overflow-hidden aspect-square">
+                <div className="relative w-full bg-linear-to-br from-gray-200 to-gray-300 overflow-hidden aspect-square group">
                   <Image
                     src={entry.filePath}
                     alt={entry.predictedLabel}
                     fill
-                    className="object-cover hover:scale-110 transition-transform duration-300"
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
                     unoptimized
                   />
+                  {/* Download Button Overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end justify-end p-3 opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() =>
+                        handleDownloadImage(
+                          entry.filePath,
+                          entry.predictedLabel,
+                        )
+                      }
+                      disabled={downloadingId === entry.predictedLabel}
+                      className="bg-white hover:bg-emerald-500 disabled:bg-gray-300 text-gray-700 hover:text-white disabled:text-gray-500 p-3 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-2xl hover:scale-110 disabled:scale-100 disabled:shadow-none hover:-translate-y-1 flex items-center justify-center backdrop-blur-sm hover:backdrop-blur-md"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={`transition-transform duration-500 ${downloadingId === entry.predictedLabel ? "animate-bounce" : ""}`}
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-5 grow flex flex-col">
                   {/* Waste Type Badge */}
-                  <div className="mb-4">
-                    <span className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-100 to-teal-100 text-emerald-900 px-4 py-2 rounded-full text-sm font-bold border border-emerald-200">
-                      <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
-                      {entry.predictedLabel}
+                  <div className="mb-4 flex justify-center">
+                    <span className="text-emerald-600 text-2xl font-bold tracking-tight">
+                      {entry.predictedLabel.charAt(0).toUpperCase() +
+                        entry.predictedLabel.slice(1)}
                     </span>
                   </div>
 
