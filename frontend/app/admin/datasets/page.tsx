@@ -9,7 +9,6 @@ interface Dataset {
   version: string;
   imageCount: number;
   filePath: string[];
-  label: string;
   uploadDate: string;
   lastUpdated: string;
 }
@@ -179,14 +178,6 @@ const Page = () => {
                     </span>
                     <p className="text-lg font-bold text-gray-900">
                       {formatDate(dataset.lastUpdated)}
-                    </p>
-                  </div>
-                  <div className="bg-white bg-opacity-70 p-4 rounded-lg hover:bg-opacity-100 transition">
-                    <span className="text-sm font-semibold text-orange-600">
-                      Label
-                    </span>
-                    <p className="text-lg font-bold text-gray-900 capitalize">
-                      {dataset.label}
                     </p>
                   </div>
                   <div className="bg-white bg-opacity-70 p-4 rounded-lg hover:bg-opacity-100 transition">
