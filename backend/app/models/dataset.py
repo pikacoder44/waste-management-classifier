@@ -9,9 +9,6 @@ class Dataset(BaseModel):
     version: str = Field(default="1.0", description="Dataset version (e.g., 1.0, 2.0)")
     imageCount: int = Field(..., ge=0, description="Number of images in the dataset")
     filePath: str = Field(..., description="The file path where the dataset is stored")
-    label: Optional[str] = Field(
-        None, description="Waste category for the dataset"
-    )
     uploadDate: datetime = Field(default_factory=datetime.utcnow)
     lastUpdated: datetime = Field(default_factory=datetime.utcnow)
 
