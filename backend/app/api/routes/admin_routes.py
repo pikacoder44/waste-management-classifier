@@ -450,41 +450,23 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
             # Get the latest version for this dataset
             # Use find with sort to get the most recent version
-            latest_dataset = list(
+            existing_dataset = list(
                 dataset_collection.find({"name": dataset_name})
                 .sort("uploadDate", -1)
                 .limit(1)
             )
-            existing_dataset = latest_dataset[0] if latest_dataset else None
-
-            if existing_dataset and "version" in existing_dataset:
-                try:
-                    # Parse current version and increment by 0.1
-                    current_version = float(existing_dataset["version"])
-                    new_version = current_version + 0.1
-                    new_version = f"{new_version:.1f}"
-                    print(
-                        f"Found existing dataset version {current_version}, updating to {new_version}"
-                    )
-                except Exception as e:
-                    # If parsing fails, start from 1.0
-                    print(f"Error parsing version: {e}, starting from 1.0")
-                    new_version = "1.0"
-            else:
-                # First upload of this dataset
-                print(
-                    f"No existing dataset found with name '{dataset_name}', starting from 1.0"
+            if existing_dataset:
+                # Raise error if dataset with same name already exists to prevent confusion
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"A dataset with the name '{dataset_name}' already exists. Please choose a different name.",
                 )
-                new_version = "1.0"
-
-            print(f"Using version: {new_version} for dataset: {dataset_name}")
 
             uploadedDataset = Dataset(
                 name=dataset_name,
                 description=f"Batch upload containing {len(uploaded_results)} image(s)",
-                version=new_version,
+                version="1.0",
                 filePath=str(all_file_paths),  # Store all file paths as string
-                label="mixed",  # Multiple labels in one upload
                 imageCount=len(uploaded_results),  # Count of successful uploads
                 uploadDate=datetime.utcnow(),
                 lastUpdated=datetime.utcnow(),
