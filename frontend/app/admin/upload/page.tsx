@@ -28,6 +28,7 @@ interface UploadResponse {
 export default function AdminUploadPage() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [datasetName, setDatasetName] = useState("");
+  const [datasetDescription, setDatasetDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -143,7 +144,7 @@ export default function AdminUploadPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">
-            Upload Training Images
+            Upload New Dataset
           </h1>
           <p className="text-gray-600 mb-8">
             Upload waste images with their corresponding labels
@@ -169,6 +170,16 @@ export default function AdminUploadPage() {
             <p className="text-sm text-gray-600 mt-1">
               Give this dataset a descriptive name for easy identification
             </p>
+            <label htmlFor="datasetDescription">Dataset Description</label>
+            <input
+              type="text"
+              id="datasetDescription"
+              value={datasetDescription}
+              onChange={(e) => setDatasetDescription(e.target.value)}
+              placeholder="Describe your dataset..."
+              disabled={uploading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200"
+            />
           </div>
 
           {/* Upload Area */}
