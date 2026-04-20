@@ -116,6 +116,7 @@ export default function AdminUploadPage() {
         credentials: "include",
         body: JSON.stringify({
           datasetName: datasetName.trim(),
+          datasetDescription: datasetDescription.trim() || null,
           images: imageData,
         }),
       });
@@ -129,6 +130,8 @@ export default function AdminUploadPage() {
       } else {
         setResponse(data);
         setImages([]);
+        setDatasetName("");
+        setDatasetDescription("");
       }
     } catch (err) {
       setError(
@@ -308,6 +311,7 @@ export default function AdminUploadPage() {
                   images.forEach((img) => URL.revokeObjectURL(img.preview));
                   setImages([]);
                   setDatasetName("");
+                  setDatasetDescription("");
                 }}
                 disabled={uploading}
                 className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg font-semibold disabled:cursor-not-allowed hover:bg-gray-400 transition"
