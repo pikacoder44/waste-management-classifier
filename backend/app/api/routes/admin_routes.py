@@ -454,6 +454,11 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
         if uploaded_results:
             # Use the dataset name provided by the admin
             dataset_name = payload.datasetName.strip()
+            dataset_description = (
+                payload.datasetDescription.strip()
+                if payload.datasetDescription is not None
+                else None
+            )
 
             # Get the latest version for this dataset
             # Use find with sort to get the most recent version
@@ -471,7 +476,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
             uploadedDataset = Dataset(
                 name=dataset_name,
-                description=f"Batch upload containing {len(uploaded_results)} image(s)",
+                description=dataset_description,
                 version="1.0",
                 filePath=str(all_file_paths),  # Store all file paths as string
                 imageCount=len(uploaded_results),  # Count of successful uploads
@@ -518,25 +523,61 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         if payload.new_name:
             update_fields["name"] = payload.new_name.strip()
             # .strip(): This removes extra spaces from the beginning and end of the text.
-        if payload.description is not None:
-            update_fields["description"] = payload.description.strip()
         if payload.version is not None:
             update_fields["version"] = payload.version
+        if payload.datasetDescription is not None:
+            update_fields["description"] = payload.datasetDescription.strip()
+        # Handle image deletion
+        existing_file_paths = []
+        if requestedDataset.get("filePath"):
+            try:
+                # Try to parse as Python list string representation first (from str())
+                existing_file_paths = ast.literal_eval(requestedDataset["filePath"])
+            except (ValueError, SyntaxError):
+                try:
+                    # Fall back to JSON parsing
+                    existing_file_paths = json.loads(requestedDataset["filePath"])
+                except (ValueError, json.JSONDecodeError):
+                    # If both fail, treat as empty
+                    existing_file_paths = []
+
+        if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
+            # Normalize the paths to delete for consistent comparison
+            normalized_paths_to_delete = [
+                os.path.normpath(path) for path in payload.images_to_delete
+            ]
+
+            # Delete specified images from disk
+            for file_path in normalized_paths_to_delete:
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"✓ Deleted image file: {file_path}")
+                except Exception as e:
+                    print(f"Error deleting file {file_path}: {e}")
+
+            # Remove deleted images from the database
+            existing_file_paths = [
+                item
+                for item in existing_file_paths
+                if not (
+                    (
+                        isinstance(item, dict)
+                        and os.path.normpath(item.get("filePath", ""))
+                        in normalized_paths_to_delete
+                    )
+                    or (
+                        isinstance(item, str)
+                        and os.path.normpath(item) in normalized_paths_to_delete
+                    )
+                )
+            ]
+            print(
+                f"✓ Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
+            )
+
         # Handling Image Uploads
         if payload.images is not None and len(payload.images) > 0:
-            # Process new images and add to existing dataset
-            existing_file_paths = []
-            if requestedDataset.get("filePath"):
-                try:
-                    # Try to parse as Python list string representation first (from str())
-                    existing_file_paths = ast.literal_eval(requestedDataset["filePath"])
-                except (ValueError, SyntaxError):
-                    try:
-                        # Fall back to JSON parsing
-                        existing_file_paths = json.loads(requestedDataset["filePath"])
-                    except (ValueError, json.JSONDecodeError):
-                        # If both fail, treat as empty
-                        existing_file_paths = []
             new_file_paths = []
             # Processing new images
             for image_data in payload.images:
@@ -586,6 +627,11 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             update_fields["lastUpdated"] = datetime.utcnow()
             # It merges the old file paths with the new ones.
             # It updates the total count of images and sets the "last updated" timestamp to right now.
+        elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
+            # Handle deletion without new uploads
+            update_fields["filePath"] = str(existing_file_paths)
+            update_fields["imageCount"] = len(existing_file_paths)
+            update_fields["lastUpdated"] = datetime.utcnow()
             # ----------------------------------
             # Execution
         if update_fields:
@@ -650,6 +696,30 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Dataset not found")
+
+    # Delete associated files from the filesystem
+    # First, we need to find the dataset to get the file paths
+    dataset = dataset_collection.find_one({"_id": object_id})
+    if dataset and dataset.get("filePath"):
+        try:
+            # Try to parse file paths as Python list string representation first (from str())
+            file_paths = ast.literal_eval(dataset["filePath"])
+        except (ValueError, SyntaxError):
+            try:
+                # Fall back to JSON parsing
+                file_paths = json.loads(dataset["filePath"])
+            except (ValueError, json.JSONDecodeError):
+                file_paths = []
+
+        for file_info in file_paths:
+            file_path = file_info.get("filePath")
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            else:
+                print(f"File not found or already deleted: {file_path}")
+    else:
+        print(f"No file paths found for dataset ID: {payload.dataset_id}")
 
     return {"message": "Dataset deleted successfully"}
 
