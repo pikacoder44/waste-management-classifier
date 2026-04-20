@@ -36,6 +36,12 @@ const Navbar = () => {
             Evaluation
           </Link>
           <Link
+            href="/admin/datasets"
+            className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
+          >
+            Datasets
+          </Link>
+          <Link
             href="/about"
             className="text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-all font-medium"
           >
