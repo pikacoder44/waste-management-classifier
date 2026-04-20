@@ -22,7 +22,10 @@ import shutil
 from uuid import uuid4
 from datetime import datetime
 import base64
+import ast
+import json
 from bson import ObjectId
+from fastapi.responses import FileResponse
 
 
 router = APIRouter()
@@ -517,15 +520,23 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             # .strip(): This removes extra spaces from the beginning and end of the text.
         if payload.description is not None:
             update_fields["description"] = payload.description.strip()
+        if payload.version is not None:
+            update_fields["version"] = payload.version
         # Handling Image Uploads
         if payload.images is not None and len(payload.images) > 0:
             # Process new images and add to existing dataset
-            existing_file_paths = (
-                json.loads(requestedDataset["filePath"])
-                # json.loads(...): Since the file paths are stored as a string in the database, this converts them back into a Python List.
-                if requestedDataset.get("filePath")
-                else []
-            )
+            existing_file_paths = []
+            if requestedDataset.get("filePath"):
+                try:
+                    # Try to parse as Python list string representation first (from str())
+                    existing_file_paths = ast.literal_eval(requestedDataset["filePath"])
+                except (ValueError, SyntaxError):
+                    try:
+                        # Fall back to JSON parsing
+                        existing_file_paths = json.loads(requestedDataset["filePath"])
+                    except (ValueError, json.JSONDecodeError):
+                        # If both fail, treat as empty
+                        existing_file_paths = []
             new_file_paths = []
             # Processing new images
             for image_data in payload.images:
@@ -599,6 +610,28 @@ def get_datasets(request: Request):
     for ds in datasets:
         ds["_id"] = str(ds["_id"])  # Convert ObjectId to string for JSON serialization
     return {"message": "Datasets retrieved successfully", "datasets": datasets}
+
+
+@router.get("/admin/dataset/{dataset_id}")
+def get_dataset_details(request: Request, dataset_id: str):
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+
+    try:
+        object_id = ObjectId(dataset_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid dataset ID format")
+
+    dataset = dataset_collection.find_one({"_id": object_id})
+
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    dataset["_id"] = str(
+        dataset["_id"]
+    )  # Convert ObjectId to string for JSON serialization
+
+    return {"message": "Dataset details retrieved successfully", "dataset": dataset}
 
 
 @router.delete("/admin/dataset/delete")
