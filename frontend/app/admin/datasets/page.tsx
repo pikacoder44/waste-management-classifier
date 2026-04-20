@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Dataset {
   _id: string;
@@ -103,7 +104,7 @@ const Page = () => {
       setDeleting(null);
     }
   };
-
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-900 to-gray-800 p-8">
       <div className="max-w-5xl mx-auto">
@@ -148,6 +149,16 @@ const Page = () => {
                     <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold">
                       {dataset.imageCount} Images
                     </div>
+
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/datasets/update/${dataset._id}`)
+                      }
+                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                    >
+                      Update
+                    </button>
+
                     <button
                       onClick={() => handleDelete(dataset._id, dataset.name)}
                       disabled={deleting === dataset._id}
