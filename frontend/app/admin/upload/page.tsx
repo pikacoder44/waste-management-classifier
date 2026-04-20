@@ -254,6 +254,8 @@ export default function AdminUploadPage() {
                     <div className="bg-gray-100 rounded-lg overflow-hidden">
                       <Image
                         src={img.preview}
+                        width={400}
+                        height={300}
                         alt={`Preview ${index}`}
                         className="w-full h-48 object-cover"
                       />
