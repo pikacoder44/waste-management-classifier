@@ -691,16 +691,13 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid dataset ID format")
 
-    # Delete the dataset
-    result = dataset_collection.delete_one({"_id": object_id})
-
-    if result.deleted_count == 0:
+    # IMPORTANT: Retrieve dataset FIRST before deleting from database!
+    dataset = dataset_collection.find_one({"_id": object_id})
+    if not dataset:
         raise HTTPException(status_code=404, detail="Dataset not found")
 
     # Delete associated files from the filesystem
-    # First, we need to find the dataset to get the file paths
-    dataset = dataset_collection.find_one({"_id": object_id})
-    if dataset and dataset.get("filePath"):
+    if dataset.get("filePath"):
         try:
             # Try to parse file paths as Python list string representation first (from str())
             file_paths = ast.literal_eval(dataset["filePath"])
@@ -711,15 +708,33 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
             except (ValueError, json.JSONDecodeError):
                 file_paths = []
 
+        deleted_count = 0
         for file_info in file_paths:
-            file_path = file_info.get("filePath")
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
-                print(f"Deleted file: {file_path}")
-            else:
-                print(f"File not found or already deleted: {file_path}")
+            try:
+                # Handle both dict and string formats
+                if isinstance(file_info, dict):
+                    file_path = file_info.get("filePath")
+                else:
+                    file_path = file_info
+
+                if file_path:
+                    # Normalize path for cross-platform compatibility
+                    normalized_path = os.path.normpath(file_path)
+                    if os.path.exists(normalized_path):
+                        os.remove(normalized_path)
+                        deleted_count += 1
+                        print(f"✓ Deleted file: {normalized_path}")
+                    else:
+                        print(f"⚠ File not found: {normalized_path}")
+            except Exception as file_error:
+                print(f"✗ Error deleting file {file_path}: {file_error}")
+
+        print(f"✓ Successfully deleted {deleted_count} image files")
     else:
-        print(f"No file paths found for dataset ID: {payload.dataset_id}")
+        print(f"No file paths found in dataset")
+
+    # Now delete the dataset from the database
+    result = dataset_collection.delete_one({"_id": object_id})
 
     return {"message": "Dataset deleted successfully"}
 
