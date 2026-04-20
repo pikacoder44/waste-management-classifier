@@ -42,6 +42,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const [uploading, setUploading] = useState(false);
   const [originalName, setOriginalName] = useState("");
   const [originalDescription, setOriginalDescription] = useState("");
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Utility function for API calls
@@ -98,7 +99,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         setDatasetDescription(dataset.description);
         setDatasetVersion(dataset.version);
         setOriginalName(dataset.name);
-        setOriginalDescription(dataset.description);
+        setOriginalDescription(dataset.datasetDescription || "");
         setFilePaths(parseFilePaths(dataset.filePath || ""));
 
         const formattedDate = new Date(dataset.uploadDate).toLocaleDateString(
@@ -139,18 +140,25 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
+  const handleDeleteExistingImage = (filePath: string) => {
+    console.log(`Marking image for deletion: ${filePath}`);
+    setImagesToDelete([...imagesToDelete, filePath]);
+    setFilePaths(filePaths.filter((item) => item.filePath !== filePath));
+  };
+
   // Check if any changes have been made
   const hasChanges =
     datasetName !== originalName ||
     datasetDescription !== originalDescription ||
-    selectedFiles.length > 0;
+    selectedFiles.length > 0 ||
+    imagesToDelete.length > 0;
 
   const handleUpdateDatasetInfo = async () => {
     try {
       await apiCall("/admin/dataset/update", "PUT", {
         dataset_id: datasetId,
         new_name: datasetName,
-        description: datasetDescription,
+        datasetDescription: datasetDescription,
       });
       alert("Dataset information updated successfully!");
     } catch (err) {
@@ -197,8 +205,17 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
       const updatePayload: Record<string, Record<string, unknown>> = {
         dataset_id: datasetId,
         new_name: datasetName,
-        description: datasetDescription,
+        datasetDescription: datasetDescription,
       };
+
+      // Add images to delete if any
+      if (imagesToDelete.length > 0) {
+        console.log(
+          `Sending ${imagesToDelete.length} images to delete:`,
+          imagesToDelete,
+        );
+        updatePayload.images_to_delete = imagesToDelete;
+      }
 
       // Only increment version and add images if images exist
       if (imageData.length > 0) {
@@ -209,10 +226,12 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         updatePayload.images = imageData;
       }
 
+      console.log("Sending update payload:", updatePayload);
       await apiCall("/admin/dataset/update", "PUT", updatePayload);
 
       alert("Dataset updated successfully!");
       setSelectedFiles([]);
+      setImagesToDelete([]);
       router.push("/admin/datasets");
     } catch (err) {
       alert(err instanceof Error ? err.message : "Update failed");
@@ -277,7 +296,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                   return (
                     <div
                       key={`existing-${index}`}
-                      className="bg-white rounded-lg shadow-md p-4 w-56"
+                      className="bg-white rounded-lg shadow-md p-4 w-56 relative"
                     >
                       <img
                         src={imageUrl}
@@ -288,9 +307,15 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23999'%3EImage not found%3C/text%3E%3C/svg%3E";
                         }}
                       />
-                      <p className="text-xs text-gray-600 truncate">
+                      <p className="text-xs text-gray-600 truncate mb-2">
                         {originalFilename}
                       </p>
+                      <button
+                        onClick={() => handleDeleteExistingImage(filePath)}
+                        className="w-full px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition"
+                      >
+                        Delete
+                      </button>
                     </div>
                   );
                 })}
