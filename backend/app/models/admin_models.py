@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class ImageUpload(BaseModel):
@@ -15,6 +15,13 @@ class BatchUploadRequest(BaseModel):
 
     datasetName: str
     images: List[ImageUpload]
+
+
+class UpdateDatasetRequest(BaseModel):
+    dataset_id: str
+    new_name: Optional[str] = None  # Optional if user only wants to add images
+    description: Optional[str] = None  # Allow updating description
+    images: Optional[List[ImageUpload]] = None  # Optional if user only wants to rename
 
 
 class DeleteDatasetRequest(BaseModel):
