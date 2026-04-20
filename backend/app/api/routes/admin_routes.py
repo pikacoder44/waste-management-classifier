@@ -11,7 +11,11 @@ from app.services.model_evaluation_service import (
 )
 from app.services.split_dataset_services import ensure_split_dataset
 from app.models.dataset import Dataset
-from app.models.admin_models import BatchUploadRequest, DeleteDatasetRequest
+from app.models.admin_models import (
+    BatchUploadRequest,
+    DeleteDatasetRequest,
+    UpdateDatasetRequest,
+)
 from app.database.collections import dataset_collection
 import os
 import shutil
@@ -491,6 +495,98 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
         raise  # Let HTTP exceptions pass through
     except Exception as e:
         print(f"Error uploading dataset: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.put("/admin/dataset/update")
+async def update_dataset(request: Request, payload: UpdateDatasetRequest):
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    try:
+        objectId = ObjectId(payload.dataset_id)
+        requestedDataset = dataset_collection.find_one({"_id": objectId})
+        # If the ID doesn't exist, it returns a 404 Not Found error.
+        if not requestedDataset:
+            raise HTTPException(status_code=404, detail="Dataset not found")
+        # -- Preparing the fields to update --
+        update_fields = (
+            {}
+        )  # An empty dictionary to hold only the changes we want to make.
+        if payload.new_name:
+            update_fields["name"] = payload.new_name.strip()
+            # .strip(): This removes extra spaces from the beginning and end of the text.
+        if payload.description is not None:
+            update_fields["description"] = payload.description.strip()
+        # Handling Image Uploads
+        if payload.images is not None and len(payload.images) > 0:
+            # Process new images and add to existing dataset
+            existing_file_paths = (
+                json.loads(requestedDataset["filePath"])
+                # json.loads(...): Since the file paths are stored as a string in the database, this converts them back into a Python List.
+                if requestedDataset.get("filePath")
+                else []
+            )
+            new_file_paths = []
+            # Processing new images
+            for image_data in payload.images:
+                # Extracting label, filename, and file content from the request
+                label = image_data.label
+                filename = image_data.filename
+                file_content = image_data.fileData
+                # Validation
+                if label not in ALLOWED_LABELS:
+                    continue  # Skip invalid labels
+                if not filename or "." not in filename:
+                    continue  # Skip invalid filenames
+
+                # Extension Check
+                file_ext = filename.rsplit(".", 1)[-1].lower()
+                valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
+                if file_ext not in valid_extensions:
+                    continue  # Skip invalid file extensions
+
+                try:
+                    # Decoding base64 file data to bytes
+                    file_bytes = base64.b64decode(file_content)
+                    # base64.b64decode: Images are often sent as "Base64" strings (text). This converts them back into actual binary image data.
+                except Exception:
+                    continue  # Skip invalid base64 data
+
+                label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
+                os.makedirs(label_folder, exist_ok=True)
+
+                new_filename = f"{uuid4()}.{file_ext}"
+                filePath = os.path.join(label_folder, new_filename)
+
+                with open(filePath, "wb") as f:
+                    f.write(file_bytes)
+
+                new_file_paths.append(
+                    {
+                        "filePath": filePath,
+                        "label": label,
+                        "originalFilename": filename,
+                    }
+                )
+            # Finalizing the Database Update
+            all_file_paths = existing_file_paths + new_file_paths
+            update_fields["filePath"] = str(all_file_paths)
+            update_fields["imageCount"] = len(all_file_paths)
+            update_fields["lastUpdated"] = datetime.utcnow()
+            # It merges the old file paths with the new ones.
+            # It updates the total count of images and sets the "last updated" timestamp to right now.
+            # ----------------------------------
+            # Execution
+        if update_fields:
+            dataset_collection.update_one({"_id": objectId}, {"$set": update_fields})
+            # $set: This is a MongoDB command that tells the database: "Only change the fields I provided; leave everything else alone."
+            return {"message": "Dataset updated successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating dataset: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
