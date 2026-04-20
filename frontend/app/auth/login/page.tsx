@@ -31,7 +31,16 @@ const Login = () => {
 
       if (!response.ok) {
         const errorData = JSON.parse(text);
-        setError(errorData.detail || "Login failed");
+        let errorMessage = "Login failed";
+
+        if (typeof errorData.detail === "string") {
+          errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          // Handle validation errors
+          errorMessage = errorData.detail.map((err) => err.msg).join(", ");
+        }
+
+        setError(errorMessage);
         setLoading(false);
         return;
       }
@@ -51,7 +60,9 @@ const Login = () => {
       }, 1500);
     } catch (error) {
       console.error("Error logging in:", error);
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const errorMsg =
+        error instanceof Error ? error.message : "An error occurred";
+      setError(errorMsg);
       setLoading(false);
     }
   };
