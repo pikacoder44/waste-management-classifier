@@ -21,6 +21,7 @@ class UpdateDatasetRequest(BaseModel):
     dataset_id: str
     new_name: Optional[str] = None  # Optional if user only wants to add images
     description: Optional[str] = None  # Allow updating description
+    version: Optional[str] = None  # Optional version update
     images: Optional[List[ImageUpload]] = None  # Optional if user only wants to rename
 
 
