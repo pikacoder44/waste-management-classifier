@@ -170,7 +170,10 @@ const Page = () => {
                 <div className="p-5 grow flex flex-col">
                   {/* Waste Type Badge */}
                   <div className="mb-4 flex justify-center">
-                    <span className="text-emerald-600 text-2xl font-bold tracking-tight">
+                    <span className="text-lg font-semibold text-gray-700 capitalize flex flex-col justify-center text-center tracking-wide">
+                      Predicted Label: 
+                    </span>
+                    <span className="text-emerald-600 ml-2 text-2xl font-bold tracking-tight">
                       {entry.predictedLabel.charAt(0).toUpperCase() +
                         entry.predictedLabel.slice(1)}
                     </span>
