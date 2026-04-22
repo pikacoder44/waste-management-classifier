@@ -357,6 +357,8 @@ def run_evaluation_logic():
                 print(f"❌ Cleanup failed: {cleanup_error}")
 
 
+# ------------------------------- Dataset Routes -------------------------------
+
 @router.post("/admin/dataset/upload")
 async def upload_dataset(request: Request, payload: BatchUploadRequest):
     try:
@@ -738,6 +740,7 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
     return {"message": "Dataset deleted successfully"}
 
+# ------------------------------- Model Training Routes -------------------------------
 
 @router.post("/admin/model/retrain")
 async def retrain_model(request: Request, background_tasks: BackgroundTasks):
@@ -763,6 +766,8 @@ def get_model_status(request: Request):
 
     return training_status
 
+
+# ------------------------------- Model Evaluation Routes -------------------------------
 
 @router.post("/admin/model/evaluate")
 async def evaluate_model_endpoint(request: Request, background_tasks: BackgroundTasks):
@@ -829,6 +834,8 @@ def get_latest_evaluation(request: Request):
             status_code=500, detail="Failed to fetch evaluation results"
         )
 
+
+# ------------------------------- Classification History Route -------------------------------
 
 @router.get("/admin/classification/history")
 def get_classification_history(request: Request):
