@@ -587,6 +587,139 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+@router.put("/admin/dataset/update")
+async def update_dataset(request: Request, payload: UpdateDatasetRequest):
+    if not checkAdmin(request):
+        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    try:
+        objectId = ObjectId(payload.dataset_id)
+        requestedDataset = dataset_collection.find_one({"_id": objectId})
+        # If the ID doesn't exist, it returns a 404 Not Found error.
+        if not requestedDataset:
+            raise HTTPException(status_code=404, detail="Dataset not found")
+
+        # -- Preparing the fields to update --
+        update_fields = {}
+
+        if payload.new_name:
+            update_fields["name"] = payload.new_name.strip()
+        if payload.version is not None:
+            update_fields["version"] = payload.version
+        if payload.datasetDescription is not None:
+            update_fields["description"] = payload.datasetDescription.strip()
+
+        # Handle image deletion and uploads
+        existing_file_paths = []
+        if requestedDataset.get("filePath"):
+            existing_file_paths = parse_file_paths_json(requestedDataset["filePath"])
+
+        # Delete specified images from disk and database
+        if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
+            # Paths to delete are already in normalized format (with /)
+            paths_to_delete_normalized = set(payload.images_to_delete)
+
+            # Delete specified images from disk
+            for file_path in paths_to_delete_normalized:
+                try:
+                    os_specific_path = normalize_path_for_filesystem(file_path)
+                    if os.path.exists(os_specific_path):
+                        os.remove(os_specific_path)
+                        print(f"✓ Deleted image file: {os_specific_path}")
+                except Exception as e:
+                    print(f"Error deleting file {file_path}: {e}")
+
+            # Remove deleted images from the database
+            existing_file_paths = [
+                item
+                for item in existing_file_paths
+                if not (
+                    (
+                        isinstance(item, dict)
+                        and item.get("filePath") in paths_to_delete_normalized
+                    )
+                    or (isinstance(item, str) and item in paths_to_delete_normalized)
+                )
+            ]
+            print(
+                f"✓ Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
+            )
+
+        # Handle Image Uploads using the shared validation helper
+        new_file_paths = []
+        upload_errors = []
+
+        if payload.images is not None and len(payload.images) > 0:
+            for image_data in payload.images:
+                validated = validate_and_process_image(image_data, upload_errors)
+                if validated is None:
+                    continue
+
+                file_bytes = validated["file_bytes"]
+                file_ext = validated["file_ext"]
+                label = validated["label"]
+                filename = validated["filename"]
+
+                try:
+                    # Create label folder if it doesn't exist
+                    label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
+                    os.makedirs(label_folder, exist_ok=True)
+
+                    # Save file locally
+                    new_filename = f"{uuid4()}.{file_ext}"
+                    filePath = os.path.join(label_folder, new_filename)
+
+                    with open(filePath, "wb") as f:
+                        f.write(file_bytes)
+
+                    # Normalize path for storage
+                    normalized_file_path = normalize_path_for_storage(filePath)
+
+                    new_file_paths.append(
+                        {
+                            "filePath": normalized_file_path,
+                            "label": label,
+                            "originalFilename": filename,
+                        }
+                    )
+                except Exception as e:
+                    upload_errors.append({"file": filename, "error": str(e)})
+
+            # Merge old and new file paths
+            all_file_paths = existing_file_paths + new_file_paths
+            update_fields["filePath"] = json.dumps(all_file_paths)
+            update_fields["imageCount"] = len(all_file_paths)
+            update_fields["lastUpdated"] = datetime.utcnow()
+
+        elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
+            # Handle deletion without new uploads
+            update_fields["filePath"] = json.dumps(existing_file_paths)
+            update_fields["imageCount"] = len(existing_file_paths)
+            update_fields["lastUpdated"] = datetime.utcnow()
+
+        # Execute database update
+        if update_fields:
+            dataset_collection.update_one({"_id": objectId}, {"$set": update_fields})
+
+            response = {
+                "message": "Dataset updated successfully",
+                "status": "completed",
+            }
+            if upload_errors:
+                response["errors"] = upload_errors
+            return response
+        else:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error updating dataset: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 @router.get("/admin/datasets")
 def get_datasets(request: Request):
     if not checkAdmin(request):
