@@ -20,9 +20,9 @@ router = APIRouter()
 
 class_labels = {
     0: "cardboard",
-    1: "paper",
+    1: "glass",
     2: "metal",
-    3: "glass",
+    3: "paper",
     4: "plastic",
     5: "trash",
 }

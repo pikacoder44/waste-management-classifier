@@ -19,10 +19,11 @@ from app.models.admin_models import (
 from app.database.collections import dataset_collection
 import os
 import shutil
+from PIL import Image
+import io
 from uuid import uuid4
 from datetime import datetime
 import base64
-import ast
 import json
 from bson import ObjectId
 from fastapi.responses import FileResponse
@@ -35,6 +36,113 @@ ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 
 BASE_DATASET_PATH = "dataset/original"
 CUSTOM_DATASET_PATH = "dataset/custom"
+
+
+# ------------------------------- Validation Helpers -------------------------------
+
+
+def validate_and_process_image(image_data, errors: list):
+    """
+    Validate image and return (file_bytes, file_ext, is_valid).
+    If invalid, error is appended to errors list and None is returned.
+    """
+    try:
+        label = image_data.label
+        filename = image_data.filename
+        file_content = image_data.fileData
+
+        # Validate filename
+        if not filename or "." not in filename:
+            errors.append({"file": filename, "error": "Invalid file name"})
+            return None
+
+        # Validate file extension
+        file_ext = filename.rsplit(".", 1)[-1].lower()
+        valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
+        if file_ext not in valid_extensions:
+            errors.append(
+                {
+                    "file": filename,
+                    "error": f"Invalid file extension. Allowed: {', '.join(valid_extensions)}",
+                }
+            )
+            return None
+
+        # Validate label
+        if label not in ALLOWED_LABELS:
+            errors.append(
+                {
+                    "file": filename,
+                    "error": f"Invalid label: {label}. Allowed labels are: {', '.join(ALLOWED_LABELS)}",
+                }
+            )
+            return None
+
+        # Decode base64 file data
+        try:
+            file_bytes = base64.b64decode(file_content)
+        except Exception:
+            errors.append(
+                {"file": filename, "error": "Invalid base64 encoded file data"}
+            )
+            return None
+
+        # Image file size validation (max 5MB)
+        if len(file_bytes) > 5 * 1024 * 1024:
+            errors.append(
+                {
+                    "file": filename,
+                    "error": "File size exceeds 5MB limit",
+                }
+            )
+            return None
+
+        # Image data validation using PIL
+        try:
+            image = Image.open(io.BytesIO(file_bytes))
+            image.verify()
+        except Exception:
+            errors.append({"file": filename, "error": "Invalid image data"})
+            return None
+
+        return {
+            "file_bytes": file_bytes,
+            "file_ext": file_ext,
+            "label": label,
+            "filename": filename,
+        }
+
+    except Exception as e:
+        errors.append({"file": image_data.filename, "error": str(e)})
+        return None
+
+
+def parse_file_paths_json(file_path_str: str) -> list:
+    """
+    Parse file paths from JSON string. Returns empty list on failure.
+    """
+    try:
+        return json.loads(file_path_str)
+    except (ValueError, json.JSONDecodeError):
+        print(f"⚠ Failed to parse filePath JSON")
+        return []
+
+
+def normalize_path_for_storage(file_path: str) -> str:
+    """
+    Normalize file path to use forward slashes (/) for consistent cross-platform storage.
+    E.g., "dataset\\custom\\metal\\uuid.jpg" -> "dataset/custom/metal/uuid.jpg"
+    """
+    return file_path.replace("\\", "/")
+
+
+def normalize_path_for_filesystem(file_path: str) -> str:
+    """
+    Convert normalized path back to OS-specific format for filesystem operations.
+    E.g., "dataset/custom/metal/uuid.jpg" -> "dataset\\custom\\metal\\uuid.jpg" (on Windows)
+    """
+    return file_path.replace("/", os.sep)
+
 
 # Training status tracking
 training_status = {
@@ -359,6 +467,7 @@ def run_evaluation_logic():
 
 # ------------------------------- Dataset Routes -------------------------------
 
+
 @router.post("/admin/dataset/upload")
 async def upload_dataset(request: Request, payload: BatchUploadRequest):
     try:
@@ -379,47 +488,16 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
         # Process each image with its corresponding label
         for image_data in payload.images:
+            validated = validate_and_process_image(image_data, errors)
+            if validated is None:
+                continue
+
+            file_bytes = validated["file_bytes"]
+            file_ext = validated["file_ext"]
+            label = validated["label"]
+            filename = validated["filename"]
+
             try:
-                label = image_data.label
-                filename = image_data.filename
-                file_content = image_data.fileData
-
-                # Validate label
-                if label not in ALLOWED_LABELS:
-                    errors.append(
-                        {
-                            "file": filename,
-                            "error": f"Invalid label: {label}. Allowed labels are: {', '.join(ALLOWED_LABELS)}",
-                        }
-                    )
-                    continue
-
-                # Validate filename
-                if not filename or "." not in filename:
-                    errors.append({"file": filename, "error": "Invalid file name"})
-                    continue
-
-                # Validate file extension
-                file_ext = filename.rsplit(".", 1)[-1].lower()
-                valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
-                if file_ext not in valid_extensions:
-                    errors.append(
-                        {
-                            "file": filename,
-                            "error": f"Invalid file extension. Allowed: {', '.join(valid_extensions)}",
-                        }
-                    )
-                    continue
-
-                try:
-                    # Decode base64 file data
-                    file_bytes = base64.b64decode(file_content)
-                except Exception as e:
-                    errors.append(
-                        {"file": filename, "error": "Invalid base64 encoded file data"}
-                    )
-                    continue
-
                 # Create label folder if it doesn't exist
                 label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
                 os.makedirs(label_folder, exist_ok=True)
@@ -432,9 +510,10 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                     f.write(file_bytes)
 
                 # Collect file path and upload result
+                normalized_file_path = normalize_path_for_storage(filePath)
                 all_file_paths.append(
                     {
-                        "filePath": filePath,
+                        "filePath": normalized_file_path,
                         "label": label,
                         "originalFilename": filename,
                     }
@@ -450,7 +529,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 )
 
             except Exception as e:
-                errors.append({"file": image_data.filename, "error": str(e)})
+                errors.append({"file": filename, "error": str(e)})
 
         # Create single database entry for this batch upload if there are successful uploads
         if uploaded_results:
@@ -480,7 +559,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 name=dataset_name,
                 description=dataset_description,
                 version="1.0",
-                filePath=str(all_file_paths),  # Store all file paths as string
+                filePath=json.dumps(all_file_paths),  # Store as proper JSON
                 imageCount=len(uploaded_results),  # Count of successful uploads
                 uploadDate=datetime.utcnow(),
                 lastUpdated=datetime.utcnow(),
@@ -518,43 +597,34 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         # If the ID doesn't exist, it returns a 404 Not Found error.
         if not requestedDataset:
             raise HTTPException(status_code=404, detail="Dataset not found")
+
         # -- Preparing the fields to update --
-        update_fields = (
-            {}
-        )  # An empty dictionary to hold only the changes we want to make.
+        update_fields = {}
+
         if payload.new_name:
             update_fields["name"] = payload.new_name.strip()
-            # .strip(): This removes extra spaces from the beginning and end of the text.
         if payload.version is not None:
             update_fields["version"] = payload.version
         if payload.datasetDescription is not None:
             update_fields["description"] = payload.datasetDescription.strip()
-        # Handle image deletion
+
+        # Handle image deletion and uploads
         existing_file_paths = []
         if requestedDataset.get("filePath"):
-            try:
-                # Try to parse as Python list string representation first (from str())
-                existing_file_paths = ast.literal_eval(requestedDataset["filePath"])
-            except (ValueError, SyntaxError):
-                try:
-                    # Fall back to JSON parsing
-                    existing_file_paths = json.loads(requestedDataset["filePath"])
-                except (ValueError, json.JSONDecodeError):
-                    # If both fail, treat as empty
-                    existing_file_paths = []
+            existing_file_paths = parse_file_paths_json(requestedDataset["filePath"])
 
+        # Delete specified images from disk and database
         if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
-            # Normalize the paths to delete for consistent comparison
-            normalized_paths_to_delete = [
-                os.path.normpath(path) for path in payload.images_to_delete
-            ]
+            # Paths to delete are already in normalized format (with /)
+            paths_to_delete_normalized = set(payload.images_to_delete)
 
             # Delete specified images from disk
-            for file_path in normalized_paths_to_delete:
+            for file_path in paths_to_delete_normalized:
                 try:
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                        print(f"✓ Deleted image file: {file_path}")
+                    os_specific_path = normalize_path_for_filesystem(file_path)
+                    if os.path.exists(os_specific_path):
+                        os.remove(os_specific_path)
+                        print(f"✓ Deleted image file: {os_specific_path}")
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
 
@@ -565,87 +635,88 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                 if not (
                     (
                         isinstance(item, dict)
-                        and os.path.normpath(item.get("filePath", ""))
-                        in normalized_paths_to_delete
+                        and item.get("filePath") in paths_to_delete_normalized
                     )
-                    or (
-                        isinstance(item, str)
-                        and os.path.normpath(item) in normalized_paths_to_delete
-                    )
+                    or (isinstance(item, str) and item in paths_to_delete_normalized)
                 )
             ]
             print(
                 f"✓ Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
             )
 
-        # Handling Image Uploads
-        if payload.images is not None and len(payload.images) > 0:
-            new_file_paths = []
-            # Processing new images
-            for image_data in payload.images:
-                # Extracting label, filename, and file content from the request
-                label = image_data.label
-                filename = image_data.filename
-                file_content = image_data.fileData
-                # Validation
-                if label not in ALLOWED_LABELS:
-                    continue  # Skip invalid labels
-                if not filename or "." not in filename:
-                    continue  # Skip invalid filenames
+        # Handle Image Uploads using the shared validation helper
+        new_file_paths = []
+        upload_errors = []
 
-                # Extension Check
-                file_ext = filename.rsplit(".", 1)[-1].lower()
-                valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
-                if file_ext not in valid_extensions:
-                    continue  # Skip invalid file extensions
+        if payload.images is not None and len(payload.images) > 0:
+            for image_data in payload.images:
+                validated = validate_and_process_image(image_data, upload_errors)
+                if validated is None:
+                    continue
+
+                file_bytes = validated["file_bytes"]
+                file_ext = validated["file_ext"]
+                label = validated["label"]
+                filename = validated["filename"]
 
                 try:
-                    # Decoding base64 file data to bytes
-                    file_bytes = base64.b64decode(file_content)
-                    # base64.b64decode: Images are often sent as "Base64" strings (text). This converts them back into actual binary image data.
-                except Exception:
-                    continue  # Skip invalid base64 data
+                    # Create label folder if it doesn't exist
+                    label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
+                    os.makedirs(label_folder, exist_ok=True)
 
-                label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
-                os.makedirs(label_folder, exist_ok=True)
+                    # Save file locally
+                    new_filename = f"{uuid4()}.{file_ext}"
+                    filePath = os.path.join(label_folder, new_filename)
 
-                new_filename = f"{uuid4()}.{file_ext}"
-                filePath = os.path.join(label_folder, new_filename)
+                    with open(filePath, "wb") as f:
+                        f.write(file_bytes)
 
-                with open(filePath, "wb") as f:
-                    f.write(file_bytes)
+                    # Normalize path for storage
+                    normalized_file_path = normalize_path_for_storage(filePath)
 
-                new_file_paths.append(
-                    {
-                        "filePath": filePath,
-                        "label": label,
-                        "originalFilename": filename,
-                    }
-                )
-            # Finalizing the Database Update
+                    new_file_paths.append(
+                        {
+                            "filePath": normalized_file_path,
+                            "label": label,
+                            "originalFilename": filename,
+                        }
+                    )
+                except Exception as e:
+                    upload_errors.append({"file": filename, "error": str(e)})
+
+            # Merge old and new file paths
             all_file_paths = existing_file_paths + new_file_paths
-            update_fields["filePath"] = str(all_file_paths)
+            update_fields["filePath"] = json.dumps(all_file_paths)
             update_fields["imageCount"] = len(all_file_paths)
             update_fields["lastUpdated"] = datetime.utcnow()
-            # It merges the old file paths with the new ones.
-            # It updates the total count of images and sets the "last updated" timestamp to right now.
+
         elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
             # Handle deletion without new uploads
-            update_fields["filePath"] = str(existing_file_paths)
+            update_fields["filePath"] = json.dumps(existing_file_paths)
             update_fields["imageCount"] = len(existing_file_paths)
             update_fields["lastUpdated"] = datetime.utcnow()
-            # ----------------------------------
-            # Execution
+
+        # Execute database update
         if update_fields:
             dataset_collection.update_one({"_id": objectId}, {"$set": update_fields})
-            # $set: This is a MongoDB command that tells the database: "Only change the fields I provided; leave everything else alone."
-            return {"message": "Dataset updated successfully"}
+
+            response = {
+                "message": "Dataset updated successfully",
+                "status": "completed",
+            }
+            if upload_errors:
+                response["errors"] = upload_errors
+            return response
         else:
             raise HTTPException(status_code=400, detail="No valid fields to update")
+
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error updating dataset: {e}")
+        import traceback
+
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
@@ -700,15 +771,7 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
     # Delete associated files from the filesystem
     if dataset.get("filePath"):
-        try:
-            # Try to parse file paths as Python list string representation first (from str())
-            file_paths = ast.literal_eval(dataset["filePath"])
-        except (ValueError, SyntaxError):
-            try:
-                # Fall back to JSON parsing
-                file_paths = json.loads(dataset["filePath"])
-            except (ValueError, json.JSONDecodeError):
-                file_paths = []
+        file_paths = parse_file_paths_json(dataset["filePath"])
 
         deleted_count = 0
         for file_info in file_paths:
@@ -720,14 +783,14 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
                     file_path = file_info
 
                 if file_path:
-                    # Normalize path for cross-platform compatibility
-                    normalized_path = os.path.normpath(file_path)
-                    if os.path.exists(normalized_path):
-                        os.remove(normalized_path)
+                    # Convert stored path (with /) back to OS-specific format
+                    os_specific_path = normalize_path_for_filesystem(file_path)
+                    if os.path.exists(os_specific_path):
+                        os.remove(os_specific_path)
                         deleted_count += 1
-                        print(f"✓ Deleted file: {normalized_path}")
+                        print(f"✓ Deleted file: {os_specific_path}")
                     else:
-                        print(f"⚠ File not found: {normalized_path}")
+                        print(f"⚠ File not found: {os_specific_path}")
             except Exception as file_error:
                 print(f"✗ Error deleting file {file_path}: {file_error}")
 
@@ -740,7 +803,9 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
     return {"message": "Dataset deleted successfully"}
 
+
 # ------------------------------- Model Training Routes -------------------------------
+
 
 @router.post("/admin/model/retrain")
 async def retrain_model(request: Request, background_tasks: BackgroundTasks):
@@ -768,6 +833,7 @@ def get_model_status(request: Request):
 
 
 # ------------------------------- Model Evaluation Routes -------------------------------
+
 
 @router.post("/admin/model/evaluate")
 async def evaluate_model_endpoint(request: Request, background_tasks: BackgroundTasks):
@@ -836,6 +902,7 @@ def get_latest_evaluation(request: Request):
 
 
 # ------------------------------- Classification History Route -------------------------------
+
 
 @router.get("/admin/classification/history")
 def get_classification_history(request: Request):
