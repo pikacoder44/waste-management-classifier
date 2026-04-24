@@ -53,7 +53,7 @@ const Login = () => {
       // Redirect based on role
       setTimeout(() => {
         if (role === "admin") {
-          router.push("/admin/upload");
+          router.push("/admin/dashboard");
         } else {
           router.push("/");
         }
