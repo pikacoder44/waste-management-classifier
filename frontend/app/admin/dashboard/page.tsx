@@ -42,7 +42,7 @@ const Page = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-12">
@@ -65,7 +65,7 @@ const Page = () => {
                 <div className="group h-full bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer">
                   {/* Top color bar */}
                   <div
-                    className={`h-2 bg-gradient-to-r ${feature.color}`}
+                    className={`h-2 bg-linear-to-r ${feature.color}`}
                   ></div>
 
                   {/* Card Content */}
@@ -89,7 +89,7 @@ const Page = () => {
 
                     {/* Button */}
                     <button
-                      className={`w-full bg-gradient-to-r ${feature.color} text-white font-semibold py-2 px-4 rounded-lg group-hover:opacity-90 transition-opacity duration-200`}
+                      className={`w-full bg-linear-to-r ${feature.color} text-white font-semibold py-2 px-4 rounded-lg group-hover:opacity-90 transition-opacity duration-200`}
                     >
                       Access →
                     </button>
@@ -101,7 +101,7 @@ const Page = () => {
         </div>
 
         {/* Quick Actions Section */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-md p-8 border border-gray-100">
+        <div className="bg-linear-to-br from-white to-gray-50 rounded-lg shadow-md p-8 border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             System Health
           </h2>
@@ -198,7 +198,7 @@ const Page = () => {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
               >
                 <div className="flex items-center gap-4 flex-1">
                   <div className="text-2xl">♻️</div>
