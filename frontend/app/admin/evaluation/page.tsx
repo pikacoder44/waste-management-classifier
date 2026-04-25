@@ -330,9 +330,16 @@ const Page = () => {
 
             {/* Success Message */}
             {data && !loading && (
-              <div className="w-full max-w-md bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+              <div className="w-full max-w-lg bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                 <p className="text-sm text-emerald-700">
-                  ✓ Report loaded: {formatDate(data.evaluationDate)}
+                  ✓ Report loaded, This evaluation was conducted on{" "}
+                  <span className="inline font-bold text-slate-900">
+                    {new Date(data.evaluationDate).toLocaleString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                 </p>
               </div>
             )}
