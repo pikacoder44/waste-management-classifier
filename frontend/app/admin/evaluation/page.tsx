@@ -90,15 +90,6 @@ const Page = () => {
     }
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
-
   // Poll evaluation status
   const pollEvaluationStatus = async () => {
     try {
@@ -219,101 +210,108 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans py-16 sm:py-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-16 sm:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center space-y-4 mb-8">
-          <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
-            Performance Analysis
-          </p>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-            Model <span className="text-emerald-600">Evaluation</span>
+        <div className="text-center space-y-4 mb-12">
+          <div className="inline-block">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+              📊 Performance Analysis
+            </p>
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-linear-to-r from-slate-900 via-emerald-600 to-slate-900">
+            Model Evaluation
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Comprehensive evaluation metrics and confusion matrix for the waste
-            classification model
+          <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Comprehensive evaluation metrics and performance analysis for your
+            waste classification model
           </p>
 
           {/* Fetch and Run Buttons */}
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <div className="flex gap-4 flex-wrap justify-center">
+          <div className="flex flex-col items-center gap-4 mt-10">
+            <div className="flex gap-3 flex-wrap justify-center">
               <button
                 onClick={fetchLatestEvaluation}
                 disabled={loading || isRunningEval}
-                className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                className="group relative px-6 py-2.5 bg-linear-to-r from-emerald-600 to-emerald-700 text-white font-semibold rounded-lg hover:shadow-lg disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 flex items-center gap-2 text-sm"
               >
+                <span className="text-lg">📊</span>
                 {loading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Fetching...
+                    Fetching Report...
                   </>
                 ) : (
-                  <>
-                    <span>📊</span>
-                    Get Latest Evaluation Report
-                  </>
+                  <>Get Latest Report</>
                 )}
+                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
               </button>
 
               <button
                 onClick={handleRunEvaluation}
                 disabled={isRunningEval || loading}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                className="group relative px-6 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:shadow-lg disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 flex items-center gap-2 text-sm"
               >
+                <span className="text-lg">⚙️</span>
                 {isRunningEval ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Running Evaluation...
+                    Running...
                   </>
                 ) : (
-                  <>
-                    <span>⚙️</span>
-                    Run Evaluation
-                  </>
+                  <>Run Evaluation</>
                 )}
+                <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
               </button>
             </div>
 
             {/* Fetch Progress Bar */}
             {loading && (
-              <div className="w-full max-w-md">
-                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md">
+                <p className="text-xs font-semibold text-slate-700 mb-3">
+                  Loading Evaluation Report
+                </p>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                    className="h-full bg-linear-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-300 shadow-lg"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-sm text-slate-600 mt-2 text-center">
-                  {Math.round(progress)}% Loading...
+                <p className="text-xs text-slate-600 mt-2 text-center font-medium">
+                  {Math.round(progress)}% Complete
                 </p>
               </div>
             )}
 
             {/* Evaluation Progress Bar */}
             {isRunningEval && (
-              <div className="w-full max-w-md">
-                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md">
+                <p className="text-xs font-semibold text-slate-700 mb-3">
+                  Evaluation in Progress
+                </p>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                    className="h-full bg-linear-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 shadow-lg"
                     style={{ width: `${evalProgress}%` }}
                   />
                 </div>
-                <p className="text-sm text-slate-600 mt-2 text-center">
-                  {Math.round(evalProgress)}% - {evalMessage}
+                <p className="text-xs text-slate-600 mt-2 text-center font-medium">
+                  {Math.round(evalProgress)}% — {evalMessage}
                 </p>
               </div>
             )}
 
             {/* Fetch Error Message */}
             {error && (
-              <div className="w-full max-w-md bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-700 mb-2">
-                  <strong>⚠️ Error:</strong> {error}
+              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md">
+                <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-2">
+                  <span className="text-base">⚠️</span> Error
                 </p>
+                <p className="text-xs text-red-700 mb-2">{error}</p>
                 {error.includes("No evaluation results") && (
-                  <p className="text-xs text-red-600">
-                    💡 Tip: Click the &quot;Run Evaluation&quot; button to
-                    generate evaluation results.
+                  <p className="text-xs text-red-600 bg-red-100 rounded-lg p-2 border-l-4 border-red-400">
+                    💡 <strong>Tip:</strong> Click the &quot;Run
+                    Evaluation&quot; button to generate evaluation results.
                   </p>
                 )}
               </div>
@@ -321,24 +319,31 @@ const Page = () => {
 
             {/* Evaluation Error Message */}
             {evalError && (
-              <div className="w-full max-w-md bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-700">
-                  <strong>⚠️ Evaluation Error:</strong> {evalError}
+              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md">
+                <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-2">
+                  <span className="text-base">⚠️</span> Evaluation Error
                 </p>
+                <p className="text-xs text-red-700">{evalError}</p>
               </div>
             )}
 
             {/* Success Message */}
             {data && !loading && (
-              <div className="w-full max-w-lg bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-                <p className="text-sm text-emerald-700">
-                  ✓ Report loaded, This evaluation was conducted on{" "}
-                  <span className="inline font-bold text-slate-900">
-                    {new Date(data.evaluationDate).toLocaleString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
+              <div className="w-full max-w-md bg-linear-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg p-4 shadow-md">
+                <p className="text-xs text-emerald-700 flex items-center gap-2">
+                  <span className="text-base">✅</span>
+                  <span>
+                    Report loaded successfully on{" "}
+                    <span className="font-bold text-slate-900">
+                      {new Date(data.evaluationDate).toLocaleString("en-US", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </span>
                   </span>
                 </p>
               </div>
@@ -348,137 +353,198 @@ const Page = () => {
 
         {/* Metrics Grid */}
         {data && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {[
-              {
-                label: "Accuracy",
-                value: (data.accuracy * 100).toFixed(1),
-                icon: "✓",
-                color: "bg-emerald-50 text-emerald-600",
-                barColor: "bg-emerald-600",
-                desc: "Overall correct predictions",
-              },
-              {
-                label: "Precision",
-                value: (data.precision * 100).toFixed(1),
-                icon: "⚡",
-                color: "bg-blue-50 text-blue-600",
-                barColor: "bg-blue-600",
-                desc: "Positive prediction accuracy",
-              },
-              {
-                label: "Recall",
-                value: (data.recall * 100).toFixed(1),
-                icon: "🎯",
-                color: "bg-purple-50 text-purple-600",
-                barColor: "bg-purple-600",
-                desc: "True positive detection rate",
-              },
-              {
-                label: "F1 Score",
-                value: (data.f1_score * 100).toFixed(1),
-                icon: "⭐",
-                color: "bg-orange-50 text-orange-600",
-                barColor: "bg-orange-600",
-                desc: "Harmonic mean of metrics",
-              },
-            ].map((metric, idx) => (
-              <div
-                key={idx}
-                className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <div className="flex items-start gap-3 mb-4">
+          <div className="space-y-8 mt-10">
+            <div className="relative">
+              <div className="absolute inset-0 bg-linear-to-r from-emerald-200 to-blue-200 rounded-xl blur-lg opacity-20" />
+              <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {[
+                  {
+                    label: "Accuracy",
+                    value: (data.accuracy * 100).toFixed(1),
+                    icon: "✓",
+                    color: "from-emerald-600 to-emerald-700",
+                    bgColor: "bg-linear-to-br from-emerald-50 to-emerald-100",
+                    borderColor: "border-emerald-200",
+                    desc: "Overall correct predictions",
+                  },
+                  {
+                    label: "Precision",
+                    value: (data.precision * 100).toFixed(1),
+                    icon: "⚡",
+                    color: "from-blue-600 to-blue-700",
+                    bgColor: "bg-linear-to-br from-blue-50 to-blue-100",
+                    borderColor: "border-blue-200",
+                    desc: "Positive prediction accuracy",
+                  },
+                  {
+                    label: "Recall",
+                    value: (data.recall * 100).toFixed(1),
+                    icon: "🎯",
+                    color: "from-purple-600 to-purple-700",
+                    bgColor: "bg-linear-to-br from-purple-50 to-purple-100",
+                    borderColor: "border-purple-200",
+                    desc: "True positive detection rate",
+                  },
+                  {
+                    label: "F1 Score",
+                    value: (data.f1_score * 100).toFixed(1),
+                    icon: "⭐",
+                    color: "from-orange-600 to-orange-700",
+                    bgColor: "bg-linear-to-br from-orange-50 to-orange-100",
+                    borderColor: "border-orange-200",
+                    desc: "Harmonic mean of metrics",
+                  },
+                ].map((metric, idx) => (
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg ${metric.color} text-lg`}
+                    key={idx}
+                    className={`bg-white border-2 ${metric.borderColor} rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1`}
                   >
-                    {metric.icon}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-600">
-                      {metric.label}
+                    <div className="flex items-start gap-3 mb-4">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br ${metric.bgColor} text-lg font-bold`}
+                      >
+                        {metric.icon}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          {metric.label}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-slate-700">
+                        {metric.value}%
+                      </p>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full bg-linear-to-r ${metric.color} transition-all duration-700 shadow-lg`}
+                        style={{
+                          width: `${Math.min(100, parseFloat(metric.value))}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-slate-600 mt-3 font-medium">
+                      {metric.desc}
                     </p>
                   </div>
-                </div>
-                <p className="text-4xl font-bold text-slate-900 mb-3">
-                  {metric.value}%
-                </p>
-                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${metric.barColor} transition-all duration-500`}
-                    style={{
-                      width: `${Math.min(100, parseFloat(metric.value))}%`,
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-slate-600 mt-3">{metric.desc}</p>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Confusion Matrix Section */}
-      {data && (
-        <div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
-            <div className="mb-8">
-              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
-                Classification Detail
-              </p>
-              <h2 className="text-3xl font-bold text-slate-900 mb-2">
-                Confusion Matrix
-              </h2>
-              <p className="text-slate-600">
-                Rows represent actual classes, columns represent predicted
-                classes. Diagonal values indicate correct predictions.
-              </p>
-            </div>
+        {/* Confusion Matrix Section */}
+        {data && (
+          <div className="mt-12">
+            <div className="bg-white border-2 border-slate-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="mb-8">
+                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">
+                  Confusion Matrix
+                </h2>
+                <p className="text-sm text-slate-600 max-w-3xl">
+                  Rows represent actual classes, columns represent predicted
+                  classes. Diagonal values indicate correct predictions.
+                </p>
+              </div>
 
-            <div className="flex justify-center mb-8">
-              <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                <Image
-                  src="/Confusion_Matrix.PNG"
-                  alt="Confusion Matrix"
-                  width={550}
-                  height={550}
-                  className="w-full h-auto"
-                />
+              <div className="flex justify-center mb-8">
+                <div className="rounded-xl overflow-hidden border-2 border-slate-300 bg-linear-to-br from-slate-50 to-slate-100 p-3 shadow-md">
+                  <Image
+                    src="/Confusion_Matrix.PNG"
+                    alt="Confusion Matrix"
+                    width={550}
+                    height={550}
+                    className="w-full h-auto max-w-2xl"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-linear-to-rrounded-xl p-4">
+                <p className="text-sm text-slate-700 text-center leading-relaxed">
+                  The confusion matrix visualizes the model&apos;s
+                  classification performance across all waste categories.
+                  <span className="font-semibold text-slate-900">
+                    {" "}
+                    Darker values along the diagonal indicate strong
+                    classification accuracy
+                  </span>
+                  for each waste type, while off-diagonal values show
+                  misclassifications between categories.
+                </p>
               </div>
             </div>
-
-            <p className="text-sm text-slate-600 text-center leading-relaxed">
-              The confusion matrix visualizes the model&nbsp;s classification
-              performance across all waste categories. Darker values along the
-              diagonal indicate strong classification accuracy for each waste
-              type.
-            </p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Key Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-          <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <span className="text-xl">📊</span> Model Performance
-          </h3>
-          <ul className="space-y-2 text-sm text-slate-700">
-            <li>✓ High accuracy across all waste categories</li>
-            <li>✓ Balanced precision and recall metrics</li>
-            <li>✓ Minimal misclassification between similar categories</li>
-            <li>✓ Robust model suitable for real-world deployment</li>
-          </ul>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300">
-          <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-            <span className="text-xl">🎯</span> Training Details
-          </h3>
-          <ul className="space-y-2 text-sm text-slate-700">
-            <li>• Model: MobileNetV2 (Transfer Learning)</li>
-            <li>• Input Size: 224×224 RGB Images</li>
-            <li>• Epochs: 20 with data augmentation</li>
-            <li>• Dataset: TrashNet (2,527 images)</li>
-          </ul>
+        {/* Key Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+          <div className="bg-linear-to-br from-slate-50 to-blue-50 border-2 border-blue-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform">
+            <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <span className="text-lg">📊</span>
+              <span>Model Performance</span>
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="text-lg">✓</span>
+                <span className="text-sm">
+                  <strong>High accuracy</strong> across all waste categories
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="text-lg">✓</span>
+                <span className="text-sm">
+                  <strong>Balanced metrics</strong> between precision and recall
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="text-lg">✓</span>
+                <span className="text-sm">
+                  <strong>Minimal misclassification</strong> between similar
+                  categories
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="text-lg">✓</span>
+                <span className="text-sm">
+                  <strong>Robust model</strong> suitable for real-world
+                  deployment
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div className="bg-linear-to-br from-slate-50 to-emerald-50 border-2 border-emerald-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform">
+            <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <span className="text-lg">🎯</span>
+              <span>Training Details</span>
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="font-bold text-emerald-600">•</span>
+                <span className="text-sm">
+                  <strong>Model:</strong> MobileNetV2 (Transfer Learning)
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="font-bold text-emerald-600">•</span>
+                <span className="text-sm">
+                  <strong>Input Size:</strong> 224×224 RGB Images
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="font-bold text-emerald-600">•</span>
+                <span className="text-sm">
+                  <strong>Epochs:</strong> 20 with data augmentation
+                </span>
+              </li>
+              <li className="flex items-start gap-2 text-slate-700">
+                <span className="font-bold text-emerald-600">•</span>
+                <span className="text-sm">
+                  <strong>Dataset:</strong> TrashNet (2,527 images)
+                </span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
