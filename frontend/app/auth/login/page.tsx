@@ -18,12 +18,19 @@ const Login = () => {
     setSuccess("");
     setLoading(true);
 
+    const cleanedUsername = username.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
     try {
       const response = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ username, password, role }),
+        body: JSON.stringify({
+          username: cleanedUsername,
+          password: trimmedPassword,
+          role,
+        }),
       });
 
       const text = await response.text();
@@ -46,7 +53,7 @@ const Login = () => {
         return;
       }
 
-      if(response.ok){
+      if (response.ok) {
         setRole(role);
       }
 
@@ -74,7 +81,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <p>Don&apos;t have an account? <a href="/auth/register" className="text-blue-500 hover:underline">Register here</a></p>
+      <p>
+        Don&apos;t have an account?{" "}
+        <a href="/auth/register" className="text-blue-500 hover:underline">
+          Register here
+        </a>
+      </p>
       <h1 className="text-3xl text-black mb-8">Login Account</h1>
 
       <form
