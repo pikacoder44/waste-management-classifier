@@ -74,7 +74,8 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-3xl text-black mb-8">Login Page</h1>
+      <p>Don&apos;t have an account? <a href="/auth/register" className="text-blue-500 hover:underline">Register here</a></p>
+      <h1 className="text-3xl text-black mb-8">Login Account</h1>
 
       <form
         onSubmit={loginUser}
