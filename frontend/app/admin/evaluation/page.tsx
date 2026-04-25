@@ -214,11 +214,6 @@ const Page = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center space-y-4 mb-12">
-          <div className="inline-block">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-              📊 Performance Analysis
-            </p>
-          </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-linear-to-r from-slate-900 via-emerald-600 to-slate-900">
             Model Evaluation
           </h1>
@@ -477,75 +472,44 @@ const Page = () => {
           </div>
         )}
 
-        {/* Key Insights */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-          <div className="bg-linear-to-br from-slate-50 to-blue-50 border-2 border-blue-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform">
-            <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-lg">📊</span>
-              <span>Model Performance</span>
+        {/* Recommendations & Next Steps */}
+        {data && (
+          <div className="mt-12 bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 shadow-lg">
+            <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+              <span className="text-3xl">🚀</span>
+              <span>Recommendations & Next Steps</span>
             </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="text-lg">✓</span>
-                <span className="text-sm">
-                  <strong>High accuracy</strong> across all waste categories
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="text-lg">✓</span>
-                <span className="text-sm">
-                  <strong>Balanced metrics</strong> between precision and recall
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="text-lg">✓</span>
-                <span className="text-sm">
-                  <strong>Minimal misclassification</strong> between similar
-                  categories
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="text-lg">✓</span>
-                <span className="text-sm">
-                  <strong>Robust model</strong> suitable for real-world
-                  deployment
-                </span>
-              </li>
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl p-5 border-l-4 border-emerald-500 shadow-md hover:shadow-lg transition-all">
+                <h4 className="text-sm font-bold text-emerald-600 uppercase mb-3">
+                  ✓ Ready to Deploy
+                </h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  Model performance metrics are excellent. Consider deploying to
+                  production for real-world inference and monitoring.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl p-5 border-l-4 border-blue-500 shadow-md hover:shadow-lg transition-all">
+                <h4 className="text-sm font-bold text-blue-600 uppercase mb-3">
+                  📊 Monitor Performance
+                </h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  Track model predictions in production. Re-evaluate
+                  periodically with new data to ensure continued accuracy.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl p-5 border-l-4 border-orange-500 shadow-md hover:shadow-lg transition-all">
+                <h4 className="text-sm font-bold text-orange-600 uppercase mb-3">
+                  🔄 Continuous Improvement
+                </h4>
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  Collect misclassified samples and retrain periodically to
+                  improve accuracy on edge cases.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="bg-linear-to-br from-slate-50 to-emerald-50 border-2 border-emerald-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 transform">
-            <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-              <span className="text-lg">🎯</span>
-              <span>Training Details</span>
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="font-bold text-emerald-600">•</span>
-                <span className="text-sm">
-                  <strong>Model:</strong> MobileNetV2 (Transfer Learning)
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="font-bold text-emerald-600">•</span>
-                <span className="text-sm">
-                  <strong>Input Size:</strong> 224×224 RGB Images
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="font-bold text-emerald-600">•</span>
-                <span className="text-sm">
-                  <strong>Epochs:</strong> 20 with data augmentation
-                </span>
-              </li>
-              <li className="flex items-start gap-2 text-slate-700">
-                <span className="font-bold text-emerald-600">•</span>
-                <span className="text-sm">
-                  <strong>Dataset:</strong> TrashNet (2,527 images)
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
