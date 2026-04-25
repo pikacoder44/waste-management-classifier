@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useAuth } from "../context/AuthContext";
 
 interface EvaluationData {
   modelVersion: string;
@@ -23,7 +24,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-
+  const { role } = useAuth();
   // Evaluation tracking
   const [isRunningEval, setIsRunningEval] = useState(false);
   const [evalProgress, setEvalProgress] = useState(0);
@@ -255,24 +256,26 @@ const Page = () => {
                   </>
                 )}
               </button>
-
-              <button
-                onClick={handleRunEvaluation}
-                disabled={isRunningEval || loading}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-              >
-                {isRunningEval ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Running Evaluation...
-                  </>
-                ) : (
-                  <>
-                    <span>⚙️</span>
-                    Run Evaluation
-                  </>
-                )}
-              </button>
+              {/* Only Admin can access this button  */}
+              {role === "admin" && (
+                <button
+                  onClick={handleRunEvaluation}
+                  disabled={isRunningEval || loading}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+                >
+                  {isRunningEval ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Running Evaluation...
+                    </>
+                  ) : (
+                    <>
+                      <span>⚙️</span>
+                      Run Evaluation
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
             {/* Fetch Progress Bar */}
