@@ -47,13 +47,6 @@ const Navbar = () => {
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
-              <Link
-                href="/evaluation"
-                className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-              >
-                Evaluation
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-              </Link>
 
               {/* Admin Section */}
               {role === "admin" && (
@@ -65,6 +58,13 @@ const Navbar = () => {
                     className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                   >
                     Dashboard
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                  </Link>
+                  <Link
+                    href="/admin/evaluation"
+                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                  >
+                    Evaluation
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                   <Link
@@ -84,7 +84,6 @@ const Navbar = () => {
                 </>
               )}
 
-              <div className="h-6 w-px bg-slate-300"></div>
               <Link
                 href="/about"
                 className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
