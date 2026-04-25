@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 const Login = () => {
   const router = useRouter();
-  const { role, setRole } = useAuth();
+  const { setRole } = useAuth();
+  const [role, setRoleState] = useState("user");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,10 @@ const Login = () => {
         setError(errorMessage);
         setLoading(false);
         return;
+      }
+
+      if(response.ok){
+        setRole(role);
       }
 
       const data = JSON.parse(text);
@@ -119,7 +124,7 @@ const Login = () => {
         <select
           id="role"
           value={role}
-          onChange={(e) => setRole(e.target.value)}
+          onChange={(e) => setRoleState(e.target.value)}
           disabled={loading}
           className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700 disabled:bg-gray-200"
         >
