@@ -48,7 +48,7 @@ def registerUser(user: User):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
     if existing_user:
-        raise HTTPException(status_code=400, detail="User already exists")
+        raise HTTPException(status_code=409, detail="User already exists")
 
     if len(user.password) < 8:
         raise HTTPException(
