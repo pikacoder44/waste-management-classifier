@@ -2,15 +2,14 @@ from fastapi import APIRouter, HTTPException, UploadFile, Request
 from app.ai.model_loader import model
 from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
-from app.ai.imageQualityAnalysis import imageQualityAnalysis
 from app.models.waste import Waste
 from app.database.collections import waste_collection
 from app.api.routes.auth_routes import get_user_id_from_token
 from datetime import datetime
-import cloudinary.uploader
-from uuid import uuid4
 import time
+import os
 from bson import ObjectId
+from pathlib import Path
 
 from app.services.recommendation_service import get_disposal_recommendation
 
@@ -39,35 +38,13 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Read image bytes
         image_bytes = await file.read()
 
-        # Check image quality
-        quality_status = imageQualityAnalysis(image_bytes)
-        if quality_status != "OK":
-            return {
-                "status": "error",
-                "message": quality_status,
-                "detail": "Please upload a clear, high-resolution image without blur",
-            }
-
-        # Upload file and preprocess
-        loadedModel = model  # Ensure model is loaded
-
-        # Preprocess image
-        preprocessedImage = preprocess_image(image_bytes)
-
-        # Predict image category
-        predicted_class_label, confidence = predict_image(
-            preprocessedImage, loadedModel, class_labels
-        )
-
-        # get user ID from JWT token
-        # Try Authorization header first, then fall back to cookies
+        # Get user ID from JWT token
         auth_header = request.headers.get("Authorization")
         jwt_token = None
 
         if auth_header and auth_header.startswith("Bearer "):
             jwt_token = auth_header.split(" ")[1]
 
-        # Fall back to cookie if no Authorization header
         if not jwt_token:
             jwt_token = request.cookies.get("access_token")
 
@@ -77,14 +54,27 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         user_id = get_user_id_from_token(jwt_token)
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)  # Ensure user_id is a string for database storage
+        user_id = str(user_id)
 
-        upload_result = cloudinary.uploader.upload(
-            image_bytes,
-            folder=user_id,
-            public_id=str(uuid4()),
+        # Create user upload directory if it doesn't exist to backend folder
+        user_upload_dir = Path(f"backend/uploads/{user_id}")
+        user_upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save image locally with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        image_filename = f"{timestamp}.png"
+        image_path = user_upload_dir / image_filename
+
+        with open(image_path, "wb") as f:
+            f.write(image_bytes)
+
+        # Preprocess image
+        preprocessedImage = preprocess_image(image_bytes)
+
+        # Predict image category
+        predicted_class_label, confidence = predict_image(
+            preprocessedImage, model, class_labels
         )
-        image_url = upload_result["secure_url"]
 
         end_time = time.time()
         inference_time = end_time - started_time
@@ -94,8 +84,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Save classification result to database
         waste_entry = Waste(
             userId=user_id,
-            filePath=image_url,
-            publicId=upload_result["public_id"],
+            filePath=str(image_path),
             createdAt=datetime.now().isoformat(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
@@ -113,7 +102,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         }
 
     except HTTPException as e:
-        raise e  # Re-raise HTTP exceptions to be handled by FastAPI
+        raise e
     except Exception as e:
         print(f"Error during classification analysis: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -122,15 +111,13 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 @router.get("/classification/history")
 async def get_classification_history(request: Request):
     try:
-        # get user ID from JWT token
-        # Try Authorization header first, then fall back to cookies
+        # Get user ID from JWT token
         auth_header = request.headers.get("Authorization")
         jwt_token = None
 
         if auth_header and auth_header.startswith("Bearer "):
             jwt_token = auth_header.split(" ")[1]
 
-        # Fall back to cookie if no Authorization header
         if not jwt_token:
             jwt_token = request.cookies.get("access_token")
 
@@ -141,23 +128,16 @@ async def get_classification_history(request: Request):
 
         user_id = get_user_id_from_token(jwt_token)
 
-        # if role is admin, return erorr: admin dont have classification history
-        if user_id == "admin":
-            raise HTTPException(
-                status_code=403, detail="Admin users do not have classification history"
-            )
-
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)  # Ensure user_id is a string for database query
+        user_id = str(user_id)
 
         # Fetch classification history from database
         history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
 
-        # Convert ObjectId to string and format createdAt
+        # Convert ObjectId to string
         for entry in history:
             entry["_id"] = str(entry["_id"])
-            entry["createdAt"] = entry["createdAt"]
 
         if len(history) == 0:
             raise HTTPException(
@@ -167,7 +147,7 @@ async def get_classification_history(request: Request):
         return {"status": "success", "history": history}
 
     except HTTPException as e:
-        raise e  # Re-raise HTTP exceptions to be handled by FastAPI
+        raise e
     except Exception as e:
         print(f"Error fetching classification history: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -176,7 +156,7 @@ async def get_classification_history(request: Request):
 @router.delete("/classification/history/{entry_id}")
 async def delete_classification_entry(entry_id: str, request: Request):
     try:
-        # get user ID from JWT token
+        # Get user ID from JWT token
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer "):
             raise HTTPException(
@@ -185,15 +165,9 @@ async def delete_classification_entry(entry_id: str, request: Request):
         jwt_token = auth_header.split(" ")[1]
         user_id = get_user_id_from_token(jwt_token)
 
-        # if role is admin, return erorr: admin dont have classification history
-        if user_id == "admin":
-            raise HTTPException(
-                status_code=403, detail="Admin users do not have classification history"
-            )
-
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)  # Ensure user_id is a string for database query
+        user_id = str(user_id)
 
         # Convert entry_id string to ObjectId for MongoDB query
         try:
@@ -201,7 +175,7 @@ async def delete_classification_entry(entry_id: str, request: Request):
         except Exception:
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
-        # Fetch the entry BEFORE deletion to get publicId for Cloudinary cleanup
+        # Fetch the entry BEFORE deletion to get filePath for cleanup
         entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
         if entry is None:
             raise HTTPException(status_code=404, detail="Entry not found")
@@ -214,20 +188,17 @@ async def delete_classification_entry(entry_id: str, request: Request):
                 status_code=404, detail="Failed to delete classification entry"
             )
 
-        # Delete image from Cloudinary
+        # Delete image file from local storage
         try:
-            result = cloudinary.uploader.destroy(entry["publicId"], invalidate=True)
-            if not result.get("result") == "ok":
-                raise HTTPException(
-                    status_code=500, detail="Failed to delete image from Cloudinary"
-                )
+            if os.path.exists(entry["filePath"]):
+                os.remove(entry["filePath"])
         except Exception as e:
-            print(f"Error deleting image from Cloudinary: {e}")
+            print(f"Error deleting image file: {e}")
 
         return {"status": "success", "message": "Classification entry deleted"}
 
     except HTTPException as e:
-        raise e  # Re-raise HTTP exceptions to be handled by FastAPI
+        raise e
     except Exception as e:
         print(f"Error deleting classification entry: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
