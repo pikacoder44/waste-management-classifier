@@ -30,7 +30,6 @@ class_labels = {
 @router.post("/classification/analyze")
 async def analyze_classification_result(file: UploadFile, request: Request):
     try:
-        started_time = time.time()
         # Validate file is an image
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Invalid image file")
@@ -56,13 +55,13 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Preprocess image
         preprocessedImage = preprocess_image(image_bytes)
 
+        # Measure only model inference time
+        inference_start = time.time()
         # Predict image category
         predicted_class_label, confidence = predict_image(
             preprocessedImage, model, class_labels
         )
-
-        end_time = time.time()
-        inference_time = end_time - started_time
+        inference_time = time.time() - inference_start
 
         disposalRecommendation = get_disposal_recommendation(predicted_class_label)
 
@@ -106,11 +105,6 @@ async def get_classification_history(request: Request):
         for entry in history:
             entry["_id"] = str(entry["_id"])
 
-        if len(history) == 0:
-            raise HTTPException(
-                status_code=404, detail="No classification history found"
-            )
-
         return {"status": "success", "history": history}
 
     except HTTPException as e:
@@ -129,7 +123,8 @@ async def delete_classification_entry(entry_id: str, request: Request):
         # Convert entry_id string to ObjectId for MongoDB query
         try:
             object_id = ObjectId(entry_id)
-        except Exception:
+        except Exception as e:
+            print(f"Invalid ObjectId format: {entry_id} - {e}")
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
         # Fetch the entry BEFORE deletion to get filePath for cleanup
@@ -149,8 +144,10 @@ async def delete_classification_entry(entry_id: str, request: Request):
         try:
             if os.path.exists(entry["filePath"]):
                 os.remove(entry["filePath"])
+            else:
+                print(f"Image file not found: {entry['filePath']}")
         except Exception as e:
-            print(f"Error deleting image file: {e}")
+            print(f"Error deleting image file at {entry['filePath']}: {e}")
 
         return {"status": "success", "message": "Classification entry deleted"}
 
