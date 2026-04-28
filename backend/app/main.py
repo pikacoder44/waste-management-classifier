@@ -66,3 +66,9 @@ app.include_router(admin_routes.router)
 dataset_path = os.path.join(os.getcwd(), "dataset")
 if os.path.exists(dataset_path):
     app.mount("/dataset", StaticFiles(directory=dataset_path), name="dataset")
+
+# Mount uploads folder for serving user-uploaded images
+uploads_path = os.path.join(os.getcwd(), "uploads")
+if not os.path.exists(uploads_path):
+    os.makedirs(uploads_path)
+app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
