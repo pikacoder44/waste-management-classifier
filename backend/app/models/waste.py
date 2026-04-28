@@ -5,12 +5,8 @@ from typing import Optional
 class Waste(BaseModel):
     userId: str  # foreign key to User model
     filePath: str = Field(
-        ..., description="The file path where the uploaded image is stored"
+        ..., description="Local file path where the uploaded image is stored"
     )
-    publicId: str = Field(
-        ..., description="The public ID of the uploaded image in Cloudinary"
-    )
-
     createdAt: str
     predictedLabel: str = Field(
         ..., description="The predicted class label for the waste item"
