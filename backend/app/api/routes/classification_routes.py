@@ -56,8 +56,8 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             raise HTTPException(status_code=401, detail="Invalid access token")
         user_id = str(user_id)
 
-        # Create user upload directory if it doesn't exist to backend folder
-        user_upload_dir = Path(f"backend/uploads/{user_id}")
+        # Create user upload directory if it doesn't exist
+        user_upload_dir = Path(f"uploads/{user_id}")
         user_upload_dir.mkdir(parents=True, exist_ok=True)
 
         # Save image locally with timestamp
