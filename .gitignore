@@ -63,7 +63,7 @@ Thumbs.db
 
 # Custom 
 backend/dataset/
-
+/backend/uploads/
 # evaluation & confusion matrix results (backend)
 /backend/evaluation_results/
 evaluation_results/
