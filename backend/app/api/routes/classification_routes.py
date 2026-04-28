@@ -4,7 +4,7 @@ from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
 from app.models.waste import Waste
 from app.database.collections import waste_collection
-from app.api.routes.auth_routes import get_user_id_from_token
+from app.utils.auth_utils import verify_user_from_request
 from datetime import datetime
 import time
 import os
@@ -39,22 +39,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         image_bytes = await file.read()
 
         # Get user ID from JWT token
-        auth_header = request.headers.get("Authorization")
-        jwt_token = None
-
-        if auth_header and auth_header.startswith("Bearer "):
-            jwt_token = auth_header.split(" ")[1]
-
-        if not jwt_token:
-            jwt_token = request.cookies.get("access_token")
-
-        if not jwt_token:
-            raise HTTPException(status_code=401, detail="Access token not found")
-
-        user_id = get_user_id_from_token(jwt_token)
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)
+        user_id = verify_user_from_request(request)
 
         # Create user upload directory if it doesn't exist
         user_upload_dir = Path(f"uploads/{user_id}")
@@ -112,25 +97,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 async def get_classification_history(request: Request):
     try:
         # Get user ID from JWT token
-        auth_header = request.headers.get("Authorization")
-        jwt_token = None
-
-        if auth_header and auth_header.startswith("Bearer "):
-            jwt_token = auth_header.split(" ")[1]
-
-        if not jwt_token:
-            jwt_token = request.cookies.get("access_token")
-
-        if not jwt_token:
-            raise HTTPException(
-                status_code=401, detail="Access token not found, Login first please"
-            )
-
-        user_id = get_user_id_from_token(jwt_token)
-
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)
+        user_id = verify_user_from_request(request)
 
         # Fetch classification history from database
         history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
@@ -156,18 +123,8 @@ async def get_classification_history(request: Request):
 @router.delete("/classification/history/{entry_id}")
 async def delete_classification_entry(entry_id: str, request: Request):
     try:
-        # Get user ID from JWT token
-        auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer "):
-            raise HTTPException(
-                status_code=401, detail="Access token not found, Login first please"
-            )
-        jwt_token = auth_header.split(" ")[1]
-        user_id = get_user_id_from_token(jwt_token)
 
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid access token")
-        user_id = str(user_id)
+        user_id = verify_user_from_request(request)
 
         # Convert entry_id string to ObjectId for MongoDB query
         try:
