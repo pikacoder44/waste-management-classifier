@@ -288,39 +288,6 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {/* Stats */}
-        {history.length > 0 && (
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-              <p className="text-4xl font-bold text-emerald-600 mb-2">
-                {history.length}
-              </p>
-              <p className="text-slate-600">Total Classifications</p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-              <p className="text-4xl font-bold text-emerald-600 mb-2">
-                {(
-                  history.reduce((sum, item) => sum + item.confidence, 0) /
-                  history.length
-                ).toFixed(1)}
-                %
-              </p>
-              <p className="text-slate-600">Average Confidence</p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-              <p className="text-4xl font-bold text-emerald-600 mb-2">
-                {(
-                  history.reduce((sum, item) => sum + item.inferenceTime, 0) /
-                  history.length
-                ).toFixed(3)}
-                s
-              </p>
-              <p className="text-slate-600">Average Inference Time</p>
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );
