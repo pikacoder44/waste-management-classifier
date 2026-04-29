@@ -84,8 +84,7 @@ code/
 │   │   │   └── routes/
 │   │   │       ├── admin_routes.py        # Admin endpoints (dataset, model, training)
 │   │   │       ├── auth_routes.py         # Authentication (register, login, logout)
-│   │   │       ├── classification_routes.py # Classification & history
-│   │   │       └── user_routes.py         # User profiles
+│   │   │       └── classification_routes.py # Classification & history
 │   │   ├── ai/
 │   │   │   ├── imageQualityAnalysis.py    # Image quality checks
 │   │   │   ├── model_loader.py            # Model loading
@@ -166,10 +165,6 @@ code/
 - `POST /classification/analyze` - Classify waste image (requires auth)
 - `GET /classification/history` - Get user's classification history (requires auth)
 - `DELETE /classification/history/{entry_id}` - Delete classification entry (requires auth)
-
-### User (`/profile/`)
-
-- `GET /profile/{username}` - Get user profile info
 
 ### Admin (`/admin/`) - Requires admin authentication
 
