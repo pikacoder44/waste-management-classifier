@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type RoleType = "admin" | "user";
+type RoleType = "admin" | "user" | null;
 type AuthContextType = {
   role: RoleType;
   setRole: (role: RoleType) => void;
@@ -15,15 +15,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<RoleType>(() => {
     if (typeof window !== "undefined") {
       const savedRole = localStorage.getItem("userRole") as RoleType | null;
-      return savedRole || "user";
+      return savedRole || null; // Return null if no saved role
     }
-    return "user";
+    return null;
   });
 
   // Save role to localStorage whenever it changes
   const handleSetRole = (newRole: RoleType) => {
     setRole(newRole);
-    localStorage.setItem("userRole", newRole);
+    if (newRole) {
+      localStorage.setItem("userRole", newRole);
+    } else {
+      localStorage.removeItem("userRole"); // Remove if setting to null
+    }
   };
 
   return (
