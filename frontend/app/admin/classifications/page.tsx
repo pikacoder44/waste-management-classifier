@@ -4,12 +4,13 @@ import Image from "next/image";
 
 interface ClassificationEntry {
   _id: string;
-  userId?: string;
-  predictedLabel: string;
-  confidence: number;
+  userId: string;
   filePath: string;
   createdAt: string;
-  disposalRecommendation?: string;
+  predictedLabel: string;
+  confidence: number;
+  inferenceTime: number;
+  disposalRecommendation: string;
 }
 
 const Page = () => {
@@ -20,16 +21,33 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Format date safely after hydration
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   const handleDownloadImage = async (filePath: string, wasteType: string) => {
     try {
       setDownloadingId(wasteType);
       const response = await fetch(filePath);
+      if (!response.ok) {
+        throw new Error("Failed to fetch image");
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${wasteType}-${new Date().getTime()}.jpg`;
+      link.download = `${wasteType}-${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -47,8 +65,9 @@ const Page = () => {
     try {
       setDeletingId(entryId);
 
+      // Use /admin/classification/history endpoint which doesn't check user ownership
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history/${entryId}`,
+        `http://localhost:8000/admin/classification/history/${entryId}`,
         {
           method: "DELETE",
           headers: {
@@ -59,19 +78,41 @@ const Page = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to delete entry");
+        let errorMessage = "Failed to delete entry";
+
+        if (response.status === 404) {
+          errorMessage = "Entry not found";
+        } else if (response.status === 400) {
+          errorMessage = "Invalid entry ID format";
+        } else if (response.status === 403) {
+          errorMessage = "Not authorized to delete this entry";
+        } else if (response.status === 503) {
+          errorMessage = "Database unavailable - please try again";
+        } else if (response.status === 500) {
+          const data = await response.json().catch(() => ({}));
+          errorMessage = data.detail || "Server error occurred";
+        }
+
+        throw new Error(errorMessage);
       }
 
-      setClassificationHistory(classificationHistory.filter((entry) => entry._id !== entryId));
+      setClassificationHistory(
+        classificationHistory.filter((item) => item._id !== entryId),
+      );
+      alert("Entry deleted successfully");
     } catch (err) {
       console.error("Error deleting entry:", err);
-      alert("Failed to delete entry");
+      const message =
+        err instanceof Error ? err.message : "Failed to delete entry";
+      alert(message);
     } finally {
       setDeletingId(null);
     }
   };
 
   useEffect(() => {
+    setHydrated(true);
+
     // Fetch classification history from the backend
     const fetchClassificationHistory = async () => {
       try {
@@ -83,7 +124,11 @@ const Page = () => {
         );
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch history: ${response.statusText}`);
+          const errorMessage =
+            response.status === 503
+              ? "Database connection unavailable"
+              : `Failed to fetch history: ${response.statusText}`;
+          throw new Error(errorMessage);
         }
 
         const data: { status: string; history: ClassificationEntry[] } =
@@ -120,9 +165,20 @@ const Page = () => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
           <p className="text-red-800 font-semibold">Error</p>
           <p className="text-red-700 text-sm mt-2">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
+  }
+
+  // Only render hydrated content to avoid hydration mismatch
+  if (!hydrated) {
+    return null;
   }
 
   return (
@@ -246,20 +302,13 @@ const Page = () => {
                           Date
                         </p>
                         <p className="text-xs text-gray-600 mt-1 font-medium">
-                          {new Date(entry.createdAt).toLocaleDateString(
-                            "en-GB",
-                            {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            },
-                          )}
+                          {formatDate(entry.createdAt)}
                         </p>
                         {/* Delete Button */}
                         <button
                           onClick={() => handleDelete(entry._id)}
                           disabled={deletingId === entry._id}
-                          className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed mt-3"
                         >
                           {deletingId === entry._id ? "Deleting..." : "Delete"}
                         </button>
