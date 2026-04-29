@@ -62,7 +62,7 @@ const Page = () => {
         throw new Error("Failed to delete entry");
       }
 
-      setHistory(history.filter((item) => item._id !== entryId));
+      setClassificationHistory(classificationHistory.filter((entry) => entry._id !== entryId));
     } catch (err) {
       console.error("Error deleting entry:", err);
       alert("Failed to delete entry");
