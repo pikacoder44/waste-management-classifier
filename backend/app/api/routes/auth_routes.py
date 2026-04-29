@@ -8,7 +8,6 @@ from app.database.collections import user_collection
 from app.models.user import User
 from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
-
 router = APIRouter()
 
 
@@ -147,5 +146,11 @@ def loginUser(user: User):
 def logoutUser():
     # Clear the access token cookie
     response_obj = JSONResponse({"message": "Logout successful"})
-    response_obj.delete_cookie(key="access_token")
+    response_obj.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=False,  # Must match set_cookie parameters
+        samesite="lax",
+        path="/",  # Specify path to ensure deletion
+    )
     return response_obj
