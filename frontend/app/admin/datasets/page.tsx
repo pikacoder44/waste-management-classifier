@@ -221,6 +221,9 @@ const Page = () => {
             </button>
           </div>
         )}
+        <button onClick={() => router.push("/admin/upload")} className="mt-6 px-6 py-3 bg-emerald-500 text-black hover:text-white rounded-lg hover:bg-emerald-700 hover:scale-105 cursor-pointer  transition-all duration-300">
+          Add Dataset
+        </button>
       </div>
     </div>
   );
