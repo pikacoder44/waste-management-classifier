@@ -118,7 +118,7 @@ const Page = () => {
         {loading && (
           <div className="text-center py-12">
             <div className="inline-block">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
             </div>
             <p className="text-gray-400 mt-4">Loading datasets...</p>
           </div>
