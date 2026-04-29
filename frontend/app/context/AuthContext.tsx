@@ -12,9 +12,22 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [role, setRole] = useState<RoleType>("user");
+  const [role, setRole] = useState<RoleType>(() => {
+    if (typeof window !== "undefined") {
+      const savedRole = localStorage.getItem("userRole") as RoleType | null;
+      return savedRole || "user";
+    }
+    return "user";
+  });
+
+  // Save role to localStorage whenever it changes
+  const handleSetRole = (newRole: RoleType) => {
+    setRole(newRole);
+    localStorage.setItem("userRole", newRole);
+  };
+
   return (
-    <AuthContext.Provider value={{ role, setRole }}>
+    <AuthContext.Provider value={{ role, setRole: handleSetRole }}>
       {children}
     </AuthContext.Provider>
   );
