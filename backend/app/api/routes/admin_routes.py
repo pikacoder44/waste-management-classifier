@@ -4,7 +4,7 @@ from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from app.services.admin_check_service import checkAdmin
+from app.utils.auth_utils import verify_admin_from_request
 from app.services.model_evaluation_service import (
     evaluate_model,
     save_evaluation_to_database,
@@ -471,7 +471,7 @@ def run_evaluation_logic():
 @router.post("/admin/dataset/upload")
 async def upload_dataset(request: Request, payload: BatchUploadRequest):
     try:
-        checkAdmin(request)
+        verify_admin_from_request(request)
 
         # Validate dataset name
         if not payload.datasetName or not payload.datasetName.strip():
@@ -589,9 +589,8 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
 @router.put("/admin/dataset/update")
 async def update_dataset(request: Request, payload: UpdateDatasetRequest):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
     try:
+        verify_admin_from_request(request)
         objectId = ObjectId(payload.dataset_id)
         requestedDataset = dataset_collection.find_one({"_id": objectId})
         # If the ID doesn't exist, it returns a 404 Not Found error.
@@ -722,21 +721,27 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
 
 @router.get("/admin/datasets")
 def get_datasets(request: Request):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-    # Logic to retrieve datasets goes here
-    datasets = list(dataset_collection.find())
-    for ds in datasets:
-        ds["_id"] = str(ds["_id"])  # Convert ObjectId to string for JSON serialization
-    return {"message": "Datasets retrieved successfully", "datasets": datasets}
+    try:
+        verify_admin_from_request(request)
+
+        # Logic to retrieve datasets goes here
+        datasets = list(dataset_collection.find())
+        for ds in datasets:
+            ds["_id"] = str(
+                ds["_id"]
+            )  # Convert ObjectId to string for JSON serialization
+        return {"message": "Datasets retrieved successfully", "datasets": datasets}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error retrieving datasets: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
 @router.get("/admin/dataset/{dataset_id}")
 def get_dataset_details(request: Request, dataset_id: str):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-
     try:
+        verify_admin_from_request(request)
         object_id = ObjectId(dataset_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid dataset ID format")
@@ -755,10 +760,8 @@ def get_dataset_details(request: Request, dataset_id: str):
 
 @router.delete("/admin/dataset/delete")
 def delete_dataset(request: Request, payload: DeleteDatasetRequest):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-
     try:
+        verify_admin_from_request(request)
         # Convert the string dataset_id to ObjectId
         object_id = ObjectId(payload.dataset_id)
     except Exception as e:
@@ -809,8 +812,7 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
 
 @router.post("/admin/model/retrain")
 async def retrain_model(request: Request, background_tasks: BackgroundTasks):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    verify_admin_from_request(request)
 
     if training_status["is_training"]:
         return {
@@ -826,8 +828,7 @@ async def retrain_model(request: Request, background_tasks: BackgroundTasks):
 
 @router.get("/admin/model/status")
 def get_model_status(request: Request):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    verify_admin_from_request(request)
 
     return training_status
 
@@ -838,8 +839,7 @@ def get_model_status(request: Request):
 @router.post("/admin/model/evaluate")
 async def evaluate_model_endpoint(request: Request, background_tasks: BackgroundTasks):
     """Trigger model evaluation on saved model."""
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    verify_admin_from_request(request)
 
     if evaluation_status["is_evaluating"]:
         return {
@@ -856,18 +856,15 @@ async def evaluate_model_endpoint(request: Request, background_tasks: Background
 @router.get("/admin/model/evaluation/status")
 def get_evaluation_status(request: Request):
     """Get the current evaluation progress."""
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
+    verify_admin_from_request(request)
 
     return evaluation_status
 
 
 @router.get("/admin/model/evaluation/latest")
 def get_latest_evaluation(request: Request):
-    if not checkAdmin(request):
-        raise HTTPException(status_code=403, detail="Forbidden: Admin access required")
-
     try:
+        verify_admin_from_request(request)
         # Get the latest evaluation result
         from app.database.collections import model_evaluation_collection
 
@@ -907,13 +904,8 @@ def get_latest_evaluation(request: Request):
 @router.get("/admin/classification/history")
 def get_classification_history(request: Request):
     try:
-        # checkAdmin handles both Authorization header and cookies
-        admin_check = checkAdmin(request)
-
-        if not admin_check:
-            raise HTTPException(
-                status_code=403, detail="Only admin users can access this resource"
-            )
+        # Verify admin access
+        verify_admin_from_request(request)
 
         from app.database.collections import waste_collection
 
