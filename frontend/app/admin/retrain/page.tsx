@@ -28,13 +28,16 @@ export default function RetrainPage() {
   // Fetch training status from the API
   const fetchTrainingStatus = async () => {
     try {
-      const response = await fetch("http://localhost:8000/admin/model/status", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/status`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         },
-        credentials: "include",
-      });
+      );
 
       if (response.ok) {
         const data: TrainingStatus = await response.json();
@@ -81,7 +84,7 @@ export default function RetrainPage() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/model/retrain",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/retrain`,
         {
           method: "POST",
           headers: {

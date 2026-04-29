@@ -31,12 +31,15 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ username, password }),
+        },
+      );
 
       const text = await response.text();
       console.log("Response status:", response.status);
@@ -57,7 +60,7 @@ const Register = () => {
         setLoading(false);
         return;
       }
-      if(response.status === 409){
+      if (response.status === 409) {
         setSuccess("User already exists. Please choose a different username.");
       }
 

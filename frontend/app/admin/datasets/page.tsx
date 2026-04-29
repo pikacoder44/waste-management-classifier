@@ -32,13 +32,16 @@ const Page = () => {
   useEffect(() => {
     const fetchDatasets = async () => {
       try {
-        const response = await fetch("http://localhost:8000/admin/datasets", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/datasets`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
           },
-          credentials: "include",
-        });
+        );
 
         console.log("Response status:", response.status);
         const data = await response.json();
@@ -76,7 +79,7 @@ const Page = () => {
     setDeleting(datasetId);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/dataset/delete",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/dataset/delete`,
         {
           method: "DELETE",
           headers: {
@@ -221,7 +224,10 @@ const Page = () => {
             </button>
           </div>
         )}
-        <button onClick={() => router.push("/admin/upload")} className="mt-6 px-6 py-3 bg-emerald-500 text-black hover:text-white rounded-lg hover:bg-emerald-700 hover:scale-105 cursor-pointer  transition-all duration-300">
+        <button
+          onClick={() => router.push("/admin/upload")}
+          className="mt-6 px-6 py-3 bg-emerald-500 text-black hover:text-white rounded-lg hover:bg-emerald-700 hover:scale-105 cursor-pointer  transition-all duration-300"
+        >
           Add Dataset
         </button>
       </div>

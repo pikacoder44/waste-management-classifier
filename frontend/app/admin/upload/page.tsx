@@ -111,18 +111,21 @@ export default function AdminUploadPage() {
       const imageData = await Promise.all(imageDataPromises);
 
       // Send to backend
-      const res = await fetch("http://localhost:8000/admin/dataset/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/dataset/upload`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            datasetName: datasetName.trim(),
+            datasetDescription: datasetDescription.trim() || null,
+            images: imageData,
+          }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-          datasetName: datasetName.trim(),
-          datasetDescription: datasetDescription.trim() || null,
-          images: imageData,
-        }),
-      });
+      );
 
       console.log("Upload response status:", res.status);
       const data: UploadResponse = await res.json();

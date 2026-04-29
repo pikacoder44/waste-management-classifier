@@ -22,16 +22,19 @@ const Login = () => {
     const trimmedPassword = password.trim();
 
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          username: cleanedUsername,
-          password: trimmedPassword,
-          role,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            username: cleanedUsername,
+            password: trimmedPassword,
+            role,
+          }),
+        },
+      );
 
       const text = await response.text();
       console.log("Response status:", response.status);

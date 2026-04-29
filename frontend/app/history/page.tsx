@@ -30,7 +30,7 @@ export default function HistoryPage() {
         setError(null);
 
         const response = await fetch(
-          "http://localhost:8000/classification/history",
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history`,
           {
             method: "GET",
             headers: {
@@ -68,7 +68,7 @@ export default function HistoryPage() {
       setDeletingId(entryId);
 
       const response = await fetch(
-        `http://localhost:8000/classification/history/${entryId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history/${entryId}`,
         {
           method: "DELETE",
           headers: {
@@ -199,7 +199,7 @@ export default function HistoryPage() {
                 {/* Image Preview */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden">
                   <Image
-                    src={`http://localhost:8000/${item.filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${item.filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`}
                     alt={item.predictedLabel}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -287,7 +287,6 @@ export default function HistoryPage() {
             ))}
           </div>
         )}
-
       </div>
     </main>
   );
