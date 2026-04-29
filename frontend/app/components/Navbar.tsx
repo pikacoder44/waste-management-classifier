@@ -15,7 +15,9 @@ const Navbar = () => {
   const [hydrated, setHydrated] = useState(false);
 
   useLayoutEffect(() => {
-    setHydrated(true);
+    queueMicrotask(() => {
+      setHydrated(true);
+    });
   }, []);
   return (
     <nav
