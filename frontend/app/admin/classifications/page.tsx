@@ -39,7 +39,9 @@ const Page = () => {
   const handleDownloadImage = async (filePath: string, wasteType: string) => {
     try {
       setDownloadingId(wasteType);
-      const response = await fetch(filePath);
+      // Construct full URL like the Image component does
+      const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`;
+      const response = await fetch(fullUrl);
       if (!response.ok) {
         throw new Error("Failed to fetch image");
       }
