@@ -13,7 +13,6 @@ from pathlib import Path
 
 from app.services.recommendation_service import get_disposal_recommendation
 
-
 router = APIRouter()
 
 
@@ -117,6 +116,11 @@ async def get_classification_history(request: Request):
 @router.delete("/classification/history/{entry_id}")
 async def delete_classification_entry(entry_id: str, request: Request):
     try:
+        # Check MongoDB connection
+        if waste_collection is None:
+            raise HTTPException(
+                status_code=503, detail="Database connection unavailable"
+            )
 
         user_id = verify_user_from_request(request)
 
@@ -128,12 +132,27 @@ async def delete_classification_entry(entry_id: str, request: Request):
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
         # Fetch the entry BEFORE deletion to get filePath for cleanup
-        entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
+        try:
+            entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
+        except Exception as e:
+            print(f"Database error retrieving entry: {e}")
+            raise HTTPException(
+                status_code=503, detail="Database error retrieving entry"
+            )
+
         if entry is None:
-            raise HTTPException(status_code=404, detail="Entry not found")
+            raise HTTPException(
+                status_code=404, detail="Classification entry not found"
+            )
 
         # Delete the entry from the database
-        result = waste_collection.delete_one({"_id": object_id, "userId": user_id})
+        try:
+            result = waste_collection.delete_one({"_id": object_id, "userId": user_id})
+        except Exception as e:
+            print(f"Database error deleting entry: {e}")
+            raise HTTPException(
+                status_code=503, detail="Failed to delete from database"
+            )
 
         if result.deleted_count == 0:
             raise HTTPException(
@@ -141,18 +160,30 @@ async def delete_classification_entry(entry_id: str, request: Request):
             )
 
         # Delete image file from local storage
-        try:
-            if os.path.exists(entry["filePath"]):
-                os.remove(entry["filePath"])
-            else:
-                print(f"Image file not found: {entry['filePath']}")
-        except Exception as e:
-            print(f"Error deleting image file at {entry['filePath']}: {e}")
+        if entry.get("filePath"):
+            try:
+                if os.path.exists(entry["filePath"]):
+                    os.remove(entry["filePath"])
+                    print(f"✓ Image file deleted: {entry['filePath']}")
+                else:
+                    print(f"⚠ Image file not found: {entry['filePath']}")
+            except PermissionError:
+                print(f"✗ Permission denied deleting file: {entry['filePath']}")
+                raise HTTPException(
+                    status_code=500, detail="Permission denied deleting image file"
+                )
+            except Exception as e:
+                print(f"✗ Error deleting image file at {entry['filePath']}: {e}")
+                raise HTTPException(
+                    status_code=500, detail="Failed to delete image file"
+                )
+        else:
+            print("⚠ No file path found in entry")
 
         return {"status": "success", "message": "Classification entry deleted"}
 
     except HTTPException as e:
         raise e
     except Exception as e:
-        print(f"Error deleting classification entry: {e}")
+        print(f"Unexpected error deleting classification entry: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
