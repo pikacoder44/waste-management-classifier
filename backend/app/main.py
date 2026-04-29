@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.database.connection import db
 import os
-from app.api.routes import user_routes
 from app.api.routes import auth_routes
 from app.api.routes import classification_routes
 from app.api.routes import admin_routes
@@ -57,7 +56,6 @@ def test_db():
     return {"collections": db.list_collection_names()}
 
 
-app.include_router(user_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(classification_routes.router)
 app.include_router(admin_routes.router)
