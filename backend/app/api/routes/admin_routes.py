@@ -26,8 +26,6 @@ from datetime import datetime
 import base64
 import json
 from bson import ObjectId
-from fastapi.responses import FileResponse
-
 
 router = APIRouter()
 
