@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
+import { useState, useLayoutEffect } from "react";
+
 const poppins = Poppins({
   weight: ["600", "700"],
   subsets: ["latin"],
@@ -10,6 +12,11 @@ const poppins = Poppins({
 
 const Navbar = () => {
   const { role } = useAuth();
+  const [hydrated, setHydrated] = useState(false);
+
+  useLayoutEffect(() => {
+    setHydrated(true);
+  }, []);
   return (
     <nav
       className={`bg-white border-b-2 border-emerald-200 shadow-md ${poppins.className}`}
@@ -49,7 +56,7 @@ const Navbar = () => {
               </Link>
 
               {/* Admin Section */}
-              {role === "admin" && (
+              {hydrated && role === "admin" && (
                 <>
                   <div className="h-6 w-px bg-slate-300"></div>
 
@@ -85,30 +92,34 @@ const Navbar = () => {
               )}
 
               {/* Show Classifications for admin, History for regular users */}
-              {role === "admin" ? (
-                <Link
-                  href="/admin/classifications"
-                  className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                >
-                  Classifications
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                </Link>
-              ) : (
+              {hydrated && (
                 <>
-                  <Link
-                    href="/history"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                  >
-                    History
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                  >
-                    About
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                  </Link>
+                  {role === "admin" ? (
+                    <Link
+                      href="/admin/classifications"
+                      className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                    >
+                      Classifications
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/history"
+                        className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                      >
+                        History
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                      </Link>
+                      <Link
+                        href="/about"
+                        className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                      >
+                        About
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
             </div>
