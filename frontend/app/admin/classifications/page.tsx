@@ -128,7 +128,7 @@ const Page = () => {
                 {/* Image */}
                 <div className="relative w-full bg-linear-to-br from-gray-200 to-gray-300 overflow-hidden aspect-square group">
                   <Image
-                    src={entry.filePath}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${entry.filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`}
                     alt={entry.predictedLabel}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -171,7 +171,7 @@ const Page = () => {
                   {/* Waste Type Badge */}
                   <div className="mb-4 flex justify-center">
                     <span className="text-lg font-semibold text-gray-700 capitalize flex flex-col justify-center text-center tracking-wide">
-                      Predicted Label: 
+                      Predicted Label:
                     </span>
                     <span className="text-emerald-600 ml-2 text-2xl font-bold tracking-tight">
                       {entry.predictedLabel.charAt(0).toUpperCase() +
