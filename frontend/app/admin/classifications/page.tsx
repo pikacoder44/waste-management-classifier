@@ -16,6 +16,7 @@ const Page = () => {
   const [classificationHistory, setClassificationHistory] = useState<
     ClassificationEntry[]
   >([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -38,6 +39,35 @@ const Page = () => {
       alert("Failed to download image");
     } finally {
       setDownloadingId(null);
+    }
+  };
+  const handleDelete = async (entryId: string) => {
+    if (!confirm("Are you sure you want to delete this entry?")) return;
+
+    try {
+      setDeletingId(entryId);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history/${entryId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete entry");
+      }
+
+      setHistory(history.filter((item) => item._id !== entryId));
+    } catch (err) {
+      console.error("Error deleting entry:", err);
+      alert("Failed to delete entry");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -225,6 +255,14 @@ const Page = () => {
                             },
                           )}
                         </p>
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => handleDelete(entry._id)}
+                          disabled={deletingId === entry._id}
+                          className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingId === entry._id ? "Deleting..." : "Delete"}
+                        </button>
                       </div>
                     </div>
                   </div>
