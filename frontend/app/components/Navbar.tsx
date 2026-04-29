@@ -129,13 +129,16 @@ const Navbar = () => {
                     </Link>
                   ) : (
                     <>
-                      <Link
-                        href="/history"
-                        className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                      >
-                        History
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                      </Link>
+                      {role === "user" && (
+                        <Link
+                          href="/history"
+                          className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                        >
+                          History
+                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                        </Link>
+                      )}
+
                       <Link
                         href="/about"
                         className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
