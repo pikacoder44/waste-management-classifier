@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 interface ImageFile {
   file: File;
@@ -32,6 +33,8 @@ export default function AdminUploadPage() {
   const [uploading, setUploading] = useState(false);
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const ALLOWED_LABELS = [
     "cardboard",
@@ -132,6 +135,7 @@ export default function AdminUploadPage() {
         setImages([]);
         setDatasetName("");
         setDatasetDescription("");
+        router.push("/admin/datasets");
       }
     } catch (err) {
       setError(
