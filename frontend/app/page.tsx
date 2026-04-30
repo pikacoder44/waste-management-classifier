@@ -160,7 +160,15 @@ export default function Home() {
           setSubmittedFile(file);
         }
       } else {
-        showError("Something went wrong while uploading. Please try again.");
+        try {
+          const errorData = await response.json();
+          showError(
+            errorData.detail ||
+              "Something went wrong while uploading. Please try again.",
+          );
+        } catch {
+          showError("Something went wrong while uploading. Please try again.");
+        }
       }
     } catch (error) {
       showError(
