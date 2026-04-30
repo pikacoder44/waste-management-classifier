@@ -7,10 +7,10 @@ import Image from "next/image";
 import Loader from "../components/Loader";
 import {
   Package,
-  Glasses,
-  Wrench,
+  BottleWine,
+  Hammer,
   FileText,
-  Droplet,
+  Recycle,
   Trash2,
   HelpCircle,
 } from "lucide-react";
@@ -119,10 +119,10 @@ export default function HistoryPage() {
   const getCategoryIcon = (label: string) => {
     const icons: Record<string, React.ReactNode> = {
       cardboard: <Package className="w-8 h-8 text-amber-600" />,
-      glass: <Glasses className="w-8 h-8 text-blue-600" />,
-      metal: <Wrench className="w-8 h-8 text-gray-600" />,
+      glass: <BottleWine className="w-8 h-8 text-blue-600" />,
+      metal: <Hammer className="w-8 h-8 text-gray-600" />,
       paper: <FileText className="w-8 h-8 text-yellow-600" />,
-      plastic: <Droplet className="w-8 h-8 text-purple-600" />,
+      plastic: <Recycle className="w-8 h-8 text-purple-600" />,
       trash: <Trash2 className="w-8 h-8 text-red-600" />,
     };
     return (
