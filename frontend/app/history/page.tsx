@@ -103,31 +103,57 @@ export default function HistoryPage() {
 
   const getCategoryColor = (label: string) => {
     const colors: Record<string, string> = {
-      plastic: "bg-blue-100 text-blue-800 border-blue-300",
-      glass: "bg-cyan-100 text-cyan-800 border-cyan-300",
-      metal: "bg-gray-100 text-gray-800 border-gray-300",
-      paper: "bg-amber-100 text-amber-800 border-amber-300",
-      cardboard: "bg-yellow-100 text-yellow-800 border-yellow-300",
-      trash: "bg-red-100 text-red-800 border-red-300",
+      plastic: "bg-purple-200 text-purple-900 border-purple-300",
+      glass: "bg-blue-200 text-blue-900 border-blue-300",
+      metal: "bg-gray-300 text-gray-900 border-gray-400",
+      paper: "bg-yellow-200 text-yellow-900 border-yellow-300",
+      cardboard: "bg-amber-200 text-amber-900 border-amber-300",
+      trash: "bg-red-200 text-red-900 border-red-300",
     };
     return (
-      colors[label.toLowerCase()] ||
-      "bg-slate-100 text-slate-800 border-slate-300"
+      colors[label.toLowerCase()] || "bg-gray-300 text-gray-900 border-gray-400"
     );
+  };
+
+  const getCategoryHeaderGradient = (label: string) => {
+    const gradients: Record<string, string> = {
+      plastic: "bg-linear-to-r from-purple-500 to-purple-700",
+      glass: "bg-linear-to-r from-blue-500 to-blue-700",
+      metal: "bg-linear-to-r from-gray-500 to-gray-700",
+      paper: "bg-linear-to-r from-yellow-500 to-yellow-700",
+      cardboard: "bg-linear-to-r from-amber-500 to-amber-700",
+      trash: "bg-linear-to-r from-red-500 to-red-700",
+    };
+    return (
+      gradients[label.toLowerCase()] ||
+      "bg-linear-to-r from-gray-500 to-gray-700"
+    );
+  };
+
+  const getCategoryCardGradient = (label: string) => {
+    const gradients: Record<string, string> = {
+      cardboard: "bg-linear-to-br from-amber-100 via-amber-50 to-white",
+      glass: "bg-linear-to-br from-blue-100 via-blue-50 to-white",
+      metal: "bg-linear-to-br from-gray-200 via-gray-100 to-white",
+      paper: "bg-linear-to-br from-yellow-100 via-yellow-50 to-white",
+      plastic: "bg-linear-to-br from-purple-100 via-purple-50 to-white",
+      trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
+    };
+    return gradients[label.toLowerCase()] || "bg-gray-50";
   };
 
   const getCategoryIcon = (label: string) => {
     const icons: Record<string, React.ReactNode> = {
-      cardboard: <Package className="w-8 h-8 text-amber-600" />,
-      glass: <BottleWine className="w-8 h-8 text-blue-600" />,
-      metal: <Hammer className="w-8 h-8 text-gray-600" />,
-      paper: <FileText className="w-8 h-8 text-yellow-600" />,
-      plastic: <Recycle className="w-8 h-8 text-purple-600" />,
-      trash: <Trash2 className="w-8 h-8 text-red-600" />,
+      cardboard: <Package className="w-8 h-8 text-amber-700" />,
+      glass: <BottleWine className="w-8 h-8 text-blue-700" />,
+      metal: <Hammer className="w-8 h-8 text-gray-700" />,
+      paper: <FileText className="w-8 h-8 text-yellow-700" />,
+      plastic: <Recycle className="w-8 h-8 text-purple-700" />,
+      trash: <Trash2 className="w-8 h-8 text-red-700" />,
     };
     return (
       icons[label.toLowerCase()] || (
-        <HelpCircle className="w-8 h-8 text-gray-600" />
+        <HelpCircle className="w-8 h-8 text-gray-700" />
       )
     );
   };
@@ -208,7 +234,7 @@ export default function HistoryPage() {
             {history.map((item) => (
               <div
                 key={item._id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                className={`${getCategoryCardGradient(item.predictedLabel)} rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}
               >
                 {/* Image Preview */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden">
@@ -224,9 +250,15 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Header with Category Badge */}
-                <div className="bg-linear-to-r from-emerald-400 to-emerald-600 p-4 flex items-center justify-between">
+                <div
+                  className={`${getCategoryHeaderGradient(item.predictedLabel)} p-4 flex items-center justify-between text-white`}
+                >
                   <div className="flex items-center gap-3">
-                    <div>{getCategoryIcon(item.predictedLabel)}</div>
+                    <div
+                      className={`p-2 rounded-lg ${getCategoryColor(item.predictedLabel).split(" ")[0]}`}
+                    >
+                      {getCategoryIcon(item.predictedLabel)}
+                    </div>
                     <div>
                       <p className="text-white text-xs opacity-90">
                         Classification
@@ -237,7 +269,7 @@ export default function HistoryPage() {
                     </div>
                   </div>
                   <div
-                    className={`px-3 py-1 rounded-full border-2 text-xs font-bold capitalize ${getCategoryColor(item.predictedLabel)}`}
+                    className={`px-3 py-1 rounded-full border-2 text-xs font-bold capitalize bg-white text-current ${getCategoryColor(item.predictedLabel).split(" ").slice(1).join(" ")}`}
                   >
                     {item.predictedLabel}
                   </div>
@@ -251,13 +283,29 @@ export default function HistoryPage() {
                       <p className="text-slate-700 font-semibold text-sm">
                         Confidence
                       </p>
-                      <p className="text-emerald-600 font-bold">
+                      <p
+                        className={`font-bold ${getCategoryColor(item.predictedLabel).split(" ")[1]}`}
+                      >
                         {(item.confidence * 100).toFixed(1)}%
                       </p>
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-2">
                       <div
-                        className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          item.predictedLabel === "cardboard"
+                            ? "bg-amber-600"
+                            : item.predictedLabel === "glass"
+                              ? "bg-blue-600"
+                              : item.predictedLabel === "metal"
+                                ? "bg-gray-600"
+                                : item.predictedLabel === "paper"
+                                  ? "bg-yellow-600"
+                                  : item.predictedLabel === "plastic"
+                                    ? "bg-purple-600"
+                                    : item.predictedLabel === "trash"
+                                      ? "bg-red-600"
+                                      : "bg-gray-600"
+                        }`}
                         style={{ width: `${item.confidence * 100}%` }}
                       ></div>
                     </div>
@@ -272,11 +320,25 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Disposal Recommendation */}
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-blue-900 text-sm">
-                      <span className="font-semibold">💡 Recommendation:</span>
-                    </p>
-                    <p className="text-blue-800 text-sm mt-1">
+                  <div
+                    className={`mb-4 p-3 rounded-lg border ${
+                      item.predictedLabel === "cardboard"
+                        ? "bg-amber-100 border-amber-300 text-amber-900"
+                        : item.predictedLabel === "glass"
+                          ? "bg-blue-100 border-blue-300 text-blue-900"
+                          : item.predictedLabel === "metal"
+                            ? "bg-gray-200 border-gray-400 text-gray-900"
+                            : item.predictedLabel === "paper"
+                              ? "bg-yellow-100 border-yellow-300 text-yellow-900"
+                              : item.predictedLabel === "plastic"
+                                ? "bg-purple-100 border-purple-300 text-purple-900"
+                                : item.predictedLabel === "trash"
+                                  ? "bg-red-100 border-red-300 text-red-900"
+                                  : "bg-gray-100 border-gray-300 text-gray-900"
+                    }`}
+                  >
+                    <p className="font-semibold text-sm">💡 Recommendation:</p>
+                    <p className="text-sm mt-1">
                       {item.disposalRecommendation}
                     </p>
                   </div>
