@@ -153,21 +153,25 @@ const Navbar = () => {
             </div>
 
             {/* Auth Button */}
-            {role && (
-              <button
-                onClick={handleLogout}
-                className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
-              >
-                Logout
-              </button>
-            )}
-            {!role && (
-              <Link
-                href="/auth/login"
-                className="bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
-              >
-                Login
-              </Link>
+            {hydrated && (
+              <>
+                {role && (
+                  <button
+                    onClick={handleLogout}
+                    className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
+                  >
+                    Logout
+                  </button>
+                )}
+                {!role && (
+                  <Link
+                    href="/auth/login"
+                    className="bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
+                  >
+                    Login
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
