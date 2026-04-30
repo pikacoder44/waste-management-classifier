@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, Request
 from app.ai.model_loader import model
 from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
+from app.ai.imageProcessingService import ImageProcessingService
 from app.models.waste import Waste
 from app.database.collections import waste_collection
 from app.utils.auth_utils import verify_user_from_request
@@ -43,20 +44,46 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         user_upload_dir = Path(f"uploads/{user_id}")
         user_upload_dir.mkdir(parents=True, exist_ok=True)
 
+        # Step 1: Check image quality and auto-enhance if needed
+        processing_result = ImageProcessingService.process_and_validate(image_bytes)
+
+        # If image is not valid, return error
+        if not processing_result["is_valid"]:
+            raise HTTPException(status_code=400, detail=processing_result["message"])
+
+        # Log quality enhancement info to backend terminal if image was enhanced
+        if processing_result["was_enhanced"]:
+            print(
+                f"✓ Image enhanced: Original quality: {processing_result['original_quality']:.1f}% → Enhanced quality: {processing_result['quality_score']:.1f}%"
+            )
+            if processing_result["warnings"]:
+                print(f"  Warnings: {', '.join(processing_result['warnings'])}")
+        else:
+            print(
+                f"✓ Image quality acceptable: {processing_result['quality_score']:.1f}%"
+            )
+
         # Save image locally with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         image_filename = f"{timestamp}.png"
         image_path = user_upload_dir / image_filename
 
+        # Convert enhanced image back to bytes for saving and preprocessing
+        if processing_result["image_array"] is not None:
+            final_image_bytes = ImageProcessingService.convert_to_bytes(
+                processing_result["image_array"]
+            )
+        else:
+            final_image_bytes = image_bytes
+
         with open(image_path, "wb") as f:
-            f.write(image_bytes)
+            f.write(final_image_bytes)
 
-        # Preprocess image
-        preprocessedImage = preprocess_image(image_bytes)
+        # Step 2: Preprocess image for model
+        preprocessedImage = preprocess_image(final_image_bytes)
 
-        # Measure only model inference time
+        # Step 3: Run inference
         inference_start = time.time()
-        # Predict image category
         predicted_class_label, confidence = predict_image(
             preprocessedImage, model, class_labels
         )
@@ -64,7 +91,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 
         disposalRecommendation = get_disposal_recommendation(predicted_class_label)
 
-        # Save classification result to database
+        # Step 4: Save classification result to database
         waste_entry = Waste(
             userId=user_id,
             filePath=str(image_path),
@@ -76,13 +103,15 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         )
         waste_collection.insert_one(waste_entry.dict())
 
-        return {
+        # Return response (quality processing is internal only)
+        response = {
             "status": "success",
             "label": predicted_class_label,
             "confidence": confidence,
             "inferenceTime": inference_time,
             "disposalRecommendation": disposalRecommendation,
         }
+        return response
 
     except HTTPException as e:
         raise e
