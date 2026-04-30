@@ -5,6 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "../components/Loader";
+import {
+  Package,
+  Glasses,
+  Wrench,
+  FileText,
+  Droplet,
+  Trash2,
+  HelpCircle,
+} from "lucide-react";
+
 interface HistoryItem {
   _id: string;
   userId: string;
@@ -107,15 +117,19 @@ export default function HistoryPage() {
   };
 
   const getCategoryIcon = (label: string) => {
-    const icons: Record<string, string> = {
-      plastic: "🔵",
-      glass: "🟦",
-      metal: "⚙️",
-      paper: "📄",
-      cardboard: "📦",
-      trash: "🗑️",
+    const icons: Record<string, React.ReactNode> = {
+      cardboard: <Package className="w-8 h-8 text-amber-600" />,
+      glass: <Glasses className="w-8 h-8 text-blue-600" />,
+      metal: <Wrench className="w-8 h-8 text-gray-600" />,
+      paper: <FileText className="w-8 h-8 text-yellow-600" />,
+      plastic: <Droplet className="w-8 h-8 text-purple-600" />,
+      trash: <Trash2 className="w-8 h-8 text-red-600" />,
     };
-    return icons[label.toLowerCase()] || "🔍";
+    return (
+      icons[label.toLowerCase()] || (
+        <HelpCircle className="w-8 h-8 text-gray-600" />
+      )
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -199,7 +213,7 @@ export default function HistoryPage() {
                 {/* Image Preview */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${item.filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${item.filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`}
                     alt={item.predictedLabel}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -212,9 +226,7 @@ export default function HistoryPage() {
                 {/* Header with Category Badge */}
                 <div className="bg-linear-to-r from-emerald-400 to-emerald-600 p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">
-                      {getCategoryIcon(item.predictedLabel)}
-                    </span>
+                    <div>{getCategoryIcon(item.predictedLabel)}</div>
                     <div>
                       <p className="text-white text-xs opacity-90">
                         Classification
