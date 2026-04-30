@@ -24,33 +24,73 @@ interface ClassificationEntry {
 
 const getCategoryIcon = (label: string) => {
   const icons: Record<string, React.ReactNode> = {
-    cardboard: <Package className="w-12 h-12 text-amber-600" />,
-    glass: <BottleWine className="w-12 h-12 text-blue-600" />,
-    metal: <Hammer className="w-12 h-12 text-gray-600" />,
-    paper: <FileText className="w-12 h-12 text-yellow-600" />,
-    plastic: <Recycle className="w-12 h-12 text-purple-600" />,
-    trash: <Trash2 className="w-12 h-12 text-red-600" />,
+    cardboard: <Package className="w-12 h-12 text-amber-700" />,
+    glass: <BottleWine className="w-12 h-12 text-blue-700" />,
+    metal: <Hammer className="w-12 h-12 text-gray-700" />,
+    paper: <FileText className="w-12 h-12 text-yellow-700" />,
+    plastic: <Recycle className="w-12 h-12 text-purple-700" />,
+    trash: <Trash2 className="w-12 h-12 text-red-700" />,
   };
   return (
     icons[label.toLowerCase()] || (
-      <HelpCircle className="w-12 h-12 text-gray-600" />
+      <HelpCircle className="w-12 h-12 text-gray-700" />
     )
   );
 };
 
 const getCategoryColor = (label: string): string => {
   const colors: Record<string, string> = {
-    cardboard: "bg-amber-100 text-amber-800 border-amber-300",
-    glass: "bg-blue-100 text-blue-800 border-blue-300",
-    metal: "bg-gray-100 text-gray-800 border-gray-300",
-    paper: "bg-yellow-100 text-yellow-800 border-yellow-300",
-    plastic: "bg-purple-100 text-purple-800 border-purple-300",
-    trash: "bg-red-100 text-red-800 border-red-300",
+    cardboard: "bg-amber-200 text-amber-900 border-amber-300",
+    glass: "bg-blue-200 text-blue-900 border-blue-300",
+    metal: "bg-gray-300 text-gray-900 border-gray-400",
+    paper: "bg-yellow-200 text-yellow-900 border-yellow-300",
+    plastic: "bg-purple-200 text-purple-900 border-purple-300",
+    trash: "bg-red-200 text-red-900 border-red-300",
+  };
+  return (
+    colors[label.toLowerCase()] || "bg-gray-300 text-gray-900 border-gray-400"
+  );
+};
+
+const getConfidenceBarColor = (label: string): string => {
+  const colors: Record<string, string> = {
+    cardboard: "bg-linear-to-r from-amber-400 via-amber-500 to-amber-600",
+    glass: "bg-linear-to-r from-blue-400 via-blue-500 to-blue-600",
+    metal: "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600",
+    paper: "bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600",
+    plastic: "bg-linear-to-r from-purple-400 via-purple-500 to-purple-600",
+    trash: "bg-linear-to-r from-red-400 via-red-500 to-red-600",
   };
   return (
     colors[label.toLowerCase()] ||
-    "bg-slate-100 text-slate-800 border-slate-300"
+    "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600"
   );
+};
+
+const getCategoryHeaderGradient = (label: string): string => {
+  const gradients: Record<string, string> = {
+    cardboard: "bg-linear-to-r from-amber-500 to-amber-700",
+    glass: "bg-linear-to-r from-blue-500 to-blue-700",
+    metal: "bg-linear-to-r from-gray-500 to-gray-700",
+    paper: "bg-linear-to-r from-yellow-500 to-yellow-700",
+    plastic: "bg-linear-to-r from-purple-500 to-purple-700",
+    trash: "bg-linear-to-r from-red-500 to-red-700",
+  };
+  return (
+    gradients[label.toLowerCase()] || "bg-linear-to-r from-gray-500 to-gray-700"
+  );
+};
+
+const getCategoryCardGradient = (label: string): string => {
+  const gradients: Record<string, string> = {
+    cardboard: "bg-linear-to-br from-amber-100 via-amber-50 to-white",
+    glass: "bg-linear-to-br from-blue-100 via-blue-50 to-white",
+    metal: "bg-linear-to-br from-gray-200 via-gray-100 to-white",
+    paper: "bg-linear-to-br from-yellow-100 via-yellow-50 to-white",
+    plastic: "bg-linear-to-br from-purple-100 via-purple-50 to-white",
+    trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
+  };
+  return gradients[label.toLowerCase()] || "bg-gray-50";
 };
 
 const Page = () => {
@@ -251,10 +291,10 @@ const Page = () => {
             {classificationHistory.map((entry) => (
               <div
                 key={entry._id}
-                className="bg-white rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full"
+                className={`${getCategoryCardGradient(entry.predictedLabel)} rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full group`}
               >
                 {/* Image */}
-                <div className="relative w-full bg-linear-to-br from-gray-200 to-gray-300 overflow-hidden aspect-square group">
+                <div className="relative h-48 bg-slate-200 overflow-hidden group">
                   <Image
                     src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${entry.filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`}
                     alt={entry.predictedLabel}
@@ -294,36 +334,49 @@ const Page = () => {
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 grow flex flex-col">
-                  {/* Waste Type Badge */}
-                  <div className="mb-4 flex justify-center items-center gap-3">
-                    <div>{getCategoryIcon(entry.predictedLabel)}</div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
-                        Waste Type
+                {/* Header with Category Badge */}
+                <div
+                  className={`${getCategoryHeaderGradient(entry.predictedLabel)} p-4 flex items-center justify-between text-white`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 rounded-lg ${getCategoryColor(entry.predictedLabel).split(" ")[0]}`}
+                    >
+                      {getCategoryIcon(entry.predictedLabel)}
+                    </div>
+                    <div>
+                      <p className="text-white text-xs opacity-90">
+                        Preicted Category
                       </p>
-                      <span
-                        className={`inline-block px-4 py-2 rounded-full text-sm font-bold capitalize border-2 ${getCategoryColor(entry.predictedLabel)}`}
-                      >
+                      <p className="text-white font-bold text-lg capitalize">
                         {entry.predictedLabel}
-                      </span>
+                      </p>
                     </div>
                   </div>
+                  <div
+                    className={`px-3 py-1 rounded-full border-2 text-xs font-bold capitalize bg-white ${getCategoryColor(entry.predictedLabel).split(" ").slice(1).join(" ")}`}
+                  >
+                    {entry.predictedLabel}
+                  </div>
+                </div>
 
+                {/* Content */}
+                <div className="p-5 grow flex flex-col">
                   {/* Confidence */}
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <p className="text-sm font-semibold text-gray-700">
                         Confidence Score
                       </p>
-                      <span className="text-lg font-bold text-emerald-600">
+                      <span
+                        className={`text-lg font-bold ${getCategoryColor(entry.predictedLabel).split(" ")[1]}`}
+                      >
                         {(entry.confidence * 100).toFixed(0)}%
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
                       <div
-                        className="bg-linear-to-r from-emerald-400 via-emerald-500 to-teal-500 h-3 rounded-full shadow-lg"
+                        className={`h-3 rounded-full shadow-lg ${getConfidenceBarColor(entry.predictedLabel)}`}
                         style={{
                           width: `${Math.min(100, entry.confidence * 100)}%`,
                           transition: "width 0.5s ease-out",
@@ -332,14 +385,52 @@ const Page = () => {
                     </div>
                   </div>
 
+                  {/* Disposal Recommendation */}
+                  {entry.disposalRecommendation && (
+                    <div
+                      className={`mb-4 p-3 rounded-lg border ${
+                        entry.predictedLabel === "cardboard"
+                          ? "bg-amber-100 border-amber-300 text-amber-900"
+                          : entry.predictedLabel === "glass"
+                            ? "bg-blue-100 border-blue-300 text-blue-900"
+                            : entry.predictedLabel === "metal"
+                              ? "bg-gray-200 border-gray-400 text-gray-900"
+                              : entry.predictedLabel === "paper"
+                                ? "bg-yellow-100 border-yellow-300 text-yellow-900"
+                                : entry.predictedLabel === "plastic"
+                                  ? "bg-purple-100 border-purple-300 text-purple-900"
+                                  : entry.predictedLabel === "trash"
+                                    ? "bg-red-100 border-red-300 text-red-900"
+                                    : "bg-gray-100 border-gray-300 text-gray-900"
+                      }`}
+                    >
+                      <p className="font-semibold text-sm">
+                        💡 Recommendation:
+                      </p>
+                      <p className="text-sm mt-1">
+                        {entry.disposalRecommendation}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Inference Time */}
+                  <div className="mb-4 p-3 rounded-lg bg-slate-100">
+                    <p className="text-sm font-semibold text-slate-700">
+                      ⚡ Inference Time:{" "}
+                      <span className="text-slate-900">
+                        {entry.inferenceTime.toFixed(3)}s
+                      </span>
+                    </p>
+                  </div>
+
                   {/* Footer Info */}
-                  <div className="border-t border-gray-100 pt-4 mt-auto">
-                    <div className="bg-linear-to-b from-gray-50 to-gray-100 -mx-5 -mb-5 -ml-5 -mr-5 px-5 py-3 rounded-b-xl space-y-2">
+                  <div className="border-t border-gray-200 pt-4 mt-auto">
+                    <div className="space-y-3">
                       <div>
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
                           User ID
                         </p>
-                        <p className="text-xs font-mono text-gray-700 truncate mt-1 bg-white px-2.5 py-1.5 rounded border border-gray-100/50">
+                        <p className="text-xs font-mono text-gray-700 truncate mt-1 bg-gray-100 px-2.5 py-1.5 rounded border border-gray-200">
                           {entry.userId || "—"}
                         </p>
                       </div>
@@ -350,15 +441,15 @@ const Page = () => {
                         <p className="text-xs text-gray-600 mt-1 font-medium">
                           {formatDate(entry.createdAt)}
                         </p>
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => handleDelete(entry._id)}
-                          disabled={deletingId === entry._id}
-                          className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed mt-3"
-                        >
-                          {deletingId === entry._id ? "Deleting..." : "Delete"}
-                        </button>
                       </div>
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDelete(entry._id)}
+                        disabled={deletingId === entry._id}
+                        className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                      >
+                        {deletingId === entry._id ? "Deleting..." : "Delete"}
+                      </button>
                     </div>
                   </div>
                 </div>
