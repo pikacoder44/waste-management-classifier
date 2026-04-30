@@ -63,9 +63,8 @@ class ImageProcessingService:
 
             # Check for extreme blur - if blur score is very low, it's not fixable
             blur_score = quality_result.get("blur_score", 100)
-            if blur_score < 30:
+            if blur_score < 20:
                 print(
-                    f"[Quality Check] ✗ Image blur is extreme (blur score: {blur_score:.2f}), cannot be enhanced"
                 )
                 return {
                     "status": "error",
