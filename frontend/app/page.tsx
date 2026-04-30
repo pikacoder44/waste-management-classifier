@@ -432,7 +432,7 @@ export default function Home() {
                                 📊 Confidence Score
                               </label>
                               <span
-                                className={`text-xl font-black px-3 py-1 rounded-lg text-sm ${
+                                className={` font-black px-3 py-1 rounded-lg text-sm ${
                                   confidence >= 0.8
                                     ? "bg-green-100 text-green-700"
                                     : confidence >= 0.6
@@ -447,10 +447,10 @@ export default function Home() {
                               <div
                                 className={`h-full transition-all duration-700 rounded-full ${
                                   confidence >= 0.8
-                                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                                    ? "bg-linear-to-r from-green-400 to-green-600"
                                     : confidence >= 0.6
-                                      ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
-                                      : "bg-gradient-to-r from-red-400 to-red-600"
+                                      ? "bg-linear-to-r from-yellow-400 to-yellow-600"
+                                      : "bg-linear-to-r from-red-400 to-red-600"
                                 }`}
                                 style={{
                                   width: `${Math.min(
