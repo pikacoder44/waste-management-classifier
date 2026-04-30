@@ -2,6 +2,39 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
+import {
+  Package,
+  Glasses,
+  Wrench,
+  FileText,
+  Droplet,
+  Trash2,
+  HelpCircle,
+} from "lucide-react";
+
+const getCategoryIcon = (category: string) => {
+  const icons: Record<string, React.ReactNode> = {
+    cardboard: <Package className="w-16 h-16 text-amber-600" />,
+    glass: <Glasses className="w-16 h-16 text-blue-600" />,
+    metal: <Wrench className="w-16 h-16 text-gray-600" />,
+    paper: <FileText className="w-16 h-16 text-yellow-600" />,
+    plastic: <Droplet className="w-16 h-16 text-purple-600" />,
+    trash: <Trash2 className="w-16 h-16 text-red-600" />,
+  };
+  return icons[category.toLowerCase()] || <HelpCircle className="w-16 h-16 text-gray-600" />;
+};
+
+const getCategoryColor = (category: string): { bg: string; text: string; badge: string } => {
+  const colors: Record<string, { bg: string; text: string; badge: string }> = {
+    cardboard: { bg: "bg-amber-50", text: "text-amber-700", badge: "bg-amber-100" },
+    glass: { bg: "bg-blue-50", text: "text-blue-700", badge: "bg-blue-100" },
+    metal: { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" },
+    paper: { bg: "bg-yellow-50", text: "text-yellow-700", badge: "bg-yellow-100" },
+    plastic: { bg: "bg-purple-50", text: "text-purple-700", badge: "bg-purple-100" },
+    trash: { bg: "bg-red-50", text: "text-red-700", badge: "bg-red-100" },
+  };
+  return colors[category.toLowerCase()] || { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" };
+};
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -327,15 +360,25 @@ export default function Home() {
                       </div>
 
                       {/* Results Section - Right */}
-                      <div className="p-6 flex flex-col justify-center">
-                        {/* Prediction Result */}
-                        <div className="mb-5">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-                            Prediction Result
+                      <div className={`p-6 flex flex-col justify-center ${result ? getCategoryColor(result).bg : "bg-white"}`}>
+                        {/* Prediction Result with Icon */}
+                        <div className="mb-6">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                            Classification Result
                           </p>
-                          <h2 className="text-4xl font-bold text-slate-900 capitalize">
-                            {result}
-                          </h2>
+                          <div className="flex items-center gap-4">
+                            <div>
+                              {result ? getCategoryIcon(result) : <HelpCircle className="w-16 h-16 text-gray-600" />}
+                            </div>
+                            <div>
+                              <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${result ? getCategoryColor(result).text : "text-gray-700"}`}>
+                                {result}
+                              </p>
+                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${result ? getCategoryColor(result).badge + " " + getCategoryColor(result).text : "bg-gray-100 text-gray-700"}`}>
+                                Detected
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Confidence Score */}
