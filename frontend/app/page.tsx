@@ -4,10 +4,10 @@ import Image from "next/image";
 import Loader from "./components/Loader";
 import {
   Package,
-  Glasses,
-  Wrench,
+  BottleWine,
+  Hammer,
   FileText,
-  Droplet,
+  Recycle,
   Trash2,
   HelpCircle,
 } from "lucide-react";
@@ -15,25 +15,49 @@ import {
 const getCategoryIcon = (category: string) => {
   const icons: Record<string, React.ReactNode> = {
     cardboard: <Package className="w-16 h-16 text-amber-600" />,
-    glass: <Glasses className="w-16 h-16 text-blue-600" />,
-    metal: <Wrench className="w-16 h-16 text-gray-600" />,
+    glass: <BottleWine className="w-16 h-16 text-blue-600" />,
+    metal: <Hammer className="w-16 h-16 text-gray-600" />,
     paper: <FileText className="w-16 h-16 text-yellow-600" />,
-    plastic: <Droplet className="w-16 h-16 text-purple-600" />,
+    plastic: <Recycle className="w-16 h-16 text-purple-600" />,
     trash: <Trash2 className="w-16 h-16 text-red-600" />,
   };
-  return icons[category.toLowerCase()] || <HelpCircle className="w-16 h-16 text-gray-600" />;
+  return (
+    icons[category.toLowerCase()] || (
+      <HelpCircle className="w-16 h-16 text-gray-600" />
+    )
+  );
 };
 
-const getCategoryColor = (category: string): { bg: string; text: string; badge: string } => {
+const getCategoryColor = (
+  category: string,
+): { bg: string; text: string; badge: string } => {
   const colors: Record<string, { bg: string; text: string; badge: string }> = {
-    cardboard: { bg: "bg-amber-50", text: "text-amber-700", badge: "bg-amber-100" },
+    cardboard: {
+      bg: "bg-amber-50",
+      text: "text-amber-700",
+      badge: "bg-amber-100",
+    },
     glass: { bg: "bg-blue-50", text: "text-blue-700", badge: "bg-blue-100" },
     metal: { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" },
-    paper: { bg: "bg-yellow-50", text: "text-yellow-700", badge: "bg-yellow-100" },
-    plastic: { bg: "bg-purple-50", text: "text-purple-700", badge: "bg-purple-100" },
+    paper: {
+      bg: "bg-yellow-50",
+      text: "text-yellow-700",
+      badge: "bg-yellow-100",
+    },
+    plastic: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      badge: "bg-purple-100",
+    },
     trash: { bg: "bg-red-50", text: "text-red-700", badge: "bg-red-100" },
   };
-  return colors[category.toLowerCase()] || { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" };
+  return (
+    colors[category.toLowerCase()] || {
+      bg: "bg-gray-50",
+      text: "text-gray-700",
+      badge: "bg-gray-100",
+    }
+  );
 };
 
 export default function Home() {
@@ -347,118 +371,147 @@ export default function Home() {
                   hasResult && (
                     <div className="grid md:grid-cols-2 gap-0">
                       {/* Image Section - Left */}
-                      <div className="bg-linear-to-br from-slate-50 to-slate-100 p-4 flex items-center justify-center">
-                        <div className="relative w-80 h-80 rounded-2xl overflow-hidden shadow-xl ring-1 ring-slate-200">
+                      <div className="bg-linear-to-br from-slate-50 to-slate-100 p-3 flex items-center justify-center">
+                        <div className="relative w-72 h-72 rounded-2xl overflow-hidden shadow-xl ring-1 ring-slate-200">
                           <Image
                             src={URL.createObjectURL(submittedFile as File)}
                             alt="Waste Classification"
-                            width={320}
-                            height={320}
+                            width={288}
+                            height={288}
                             className="w-full h-full object-cover"
                           />
                         </div>
                       </div>
 
                       {/* Results Section - Right */}
-                      <div className={`p-6 flex flex-col justify-center ${result ? getCategoryColor(result).bg : "bg-white"}`}>
-                        {/* Prediction Result with Icon */}
-                        <div className="mb-6">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-                            Classification Result
-                          </p>
-                          <div className="flex items-center gap-4">
-                            <div>
-                              {result ? getCategoryIcon(result) : <HelpCircle className="w-16 h-16 text-gray-600" />}
+                      <div
+                        className={`relative p-5 flex flex-col justify-center overflow-hidden ${result ? getCategoryColor(result).bg : "bg-white"}`}
+                      >
+                        {/* Animated Background Accent */}
+                        <div className="absolute inset-0 opacity-5">
+                          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl bg-current"></div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="relative z-10 space-y-3">
+                          {/* Main Category Display */}
+                          <div className="space-y-2">
+                            <p className="text-xs font-bold text-slate-600 uppercase tracking-[2px] opacity-75">
+                              🎯 Classification Result
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`p-3 rounded-xl shadow-lg transform transition-transform hover:scale-110 ${result ? getCategoryColor(result).badge : "bg-gray-200"}`}
+                              >
+                                {result ? (
+                                  getCategoryIcon(result)
+                                ) : (
+                                  <HelpCircle className="w-10 h-10 text-gray-600" />
+                                )}
+                              </div>
+                              <div>
+                                <h2
+                                  className={`text-3xl font-black capitalize mb-2 ${result ? getCategoryColor(result).text : "text-gray-700"}`}
+                                >
+                                  {result || "Unknown"}
+                                </h2>
+                                <div
+                                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm ${result ? getCategoryColor(result).badge + " " + getCategoryColor(result).text : "bg-gray-100 text-gray-700"}`}
+                                >
+                                  <span className="w-2.5 h-2.5 rounded-full bg-current"></span>
+                                  Detected
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${result ? getCategoryColor(result).text : "text-gray-700"}`}>
-                                {result}
-                              </p>
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${result ? getCategoryColor(result).badge + " " + getCategoryColor(result).text : "bg-gray-100 text-gray-700"}`}>
-                                Detected
+                          </div>
+
+                          {/* Confidence Score - Enhanced */}
+                          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-sm">
+                            <div className="flex items-center justify-between mb-3">
+                              <label className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                                📊 Confidence Score
+                              </label>
+                              <span
+                                className={`text-xl font-black px-3 py-1 rounded-lg text-sm ${
+                                  confidence >= 0.8
+                                    ? "bg-green-100 text-green-700"
+                                    : confidence >= 0.6
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {(confidence * 100).toFixed(1)}%
                               </span>
                             </div>
-                          </div>
-                        </div>
-
-                        {/* Confidence Score */}
-                        <div className="mb-5">
-                          <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-semibold text-slate-700">
-                              Confidence Score
-                            </label>
-                            <span
-                              className={`text-sm font-bold px-3 py-1 rounded-full ${
+                            <div className="h-4 w-full rounded-full bg-slate-200 overflow-hidden shadow-inner">
+                              <div
+                                className={`h-full transition-all duration-700 rounded-full ${
+                                  confidence >= 0.8
+                                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                                    : confidence >= 0.6
+                                      ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
+                                      : "bg-gradient-to-r from-red-400 to-red-600"
+                                }`}
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    Math.max(0, confidence * 100),
+                                  ).toFixed(1)}%`,
+                                }}
+                              />
+                            </div>
+                            <p
+                              className={`text-xs font-semibold mt-2 ${
                                 confidence >= 0.8
-                                  ? "bg-green-100 text-green-700"
+                                  ? "text-green-700"
                                   : confidence >= 0.6
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
+                                    ? "text-yellow-700"
+                                    : "text-red-700"
                               }`}
                             >
-                              {(confidence * 100).toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="h-2.5 w-full rounded-full bg-slate-200 overflow-hidden">
-                            <div
-                              className={`h-full transition-all duration-700 rounded-full ${
-                                confidence >= 0.8
-                                  ? "bg-green-500"
-                                  : confidence >= 0.6
-                                    ? "bg-yellow-500"
-                                    : "bg-red-500"
-                              }`}
-                              style={{
-                                width: `${Math.min(
-                                  100,
-                                  Math.max(0, confidence * 100),
-                                ).toFixed(1)}%`,
-                              }}
-                            />
-                          </div>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {confidence >= 0.8
-                              ? "High confidence prediction"
-                              : confidence >= 0.6
-                                ? "Medium confidence prediction"
-                                : "Low confidence - please verify"}
-                          </p>
-                        </div>
-
-                        {/* Disposal Method */}
-                        {disposalMethod && (
-                          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <label className="text-xs font-semibold text-blue-700 uppercase tracking-wider block mb-1">
-                              Recommended Disposal
-                            </label>
-                            <p className="text-sm font-semibold text-blue-900">
-                              {disposalMethod}
+                              {confidence >= 0.8
+                                ? "✓ Excellent confidence - Reliable"
+                                : confidence >= 0.6
+                                  ? "⚠ Good confidence - Review suggested"
+                                  : "✕ Low confidence - Please verify"}
                             </p>
                           </div>
-                        )}
 
-                        {/* Metadata */}
-                        <div className="pt-4 border-t border-slate-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                              Inference Time
-                            </label>
-                            <span className="text-sm font-semibold text-slate-900">
-                              {inferenceTime?.toFixed(0)}ms
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                              Timestamp
-                            </label>
-                            <span className="text-sm font-semibold text-slate-900">
-                              {new Date().toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
+                          {/* Disposal Method - More Prominent */}
+                          {disposalMethod && (
+                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-sm">
+                              <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 opacity-75">
+                                ♻️ Recommended Disposal
+                              </p>
+                              <p className="text-lg font-bold text-slate-900">
+                                {disposalMethod}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Metadata */}
+                          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200">
+                            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
+                              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
+                                ⚡ Processing Time
+                              </label>
+                              <span className="text-lg font-bold text-slate-900">
+                                {inferenceTime?.toFixed(0)}ms
+                              </span>
+                            </div>
+                            <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
+                              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
+                                🕐 Timestamp
+                              </label>
+                              <span className="text-xs font-bold text-slate-900">
+                                {new Date().toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
