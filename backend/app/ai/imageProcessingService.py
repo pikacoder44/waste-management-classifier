@@ -40,9 +40,15 @@ class ImageProcessingService:
             # Step 1: Analyze original image quality
             quality_result = ImageQualityAnalyzer.analyze(image_bytes)
             original_quality = quality_result["quality_score"]
+            print(
+                f"[Quality Check] Original quality: {original_quality:.1f}%, Valid: {quality_result['is_valid']}, Issues: {quality_result['issues']}"
+            )
 
             # If image is valid, return immediately
             if quality_result["is_valid"]:
+                print(
+                    f"[Quality Check] ✓ Image quality acceptable, no enhancement needed"
+                )
                 return {
                     "status": "success",
                     "is_valid": True,
@@ -55,11 +61,30 @@ class ImageProcessingService:
                     "message": "Image quality is acceptable",
                 }
 
+            # Check for extreme blur - if blur score is very low, it's not fixable
+            blur_score = quality_result.get("blur_score", 100)
+            if blur_score < 30:
+                print(
+                    f"[Quality Check] ✗ Image blur is extreme (blur score: {blur_score:.2f}), cannot be enhanced"
+                )
+                return {
+                    "status": "error",
+                    "is_valid": False,
+                    "quality_score": original_quality,
+                    "original_quality": original_quality,
+                    "was_enhanced": False,
+                    "issues": quality_result["issues"],
+                    "warnings": [],
+                    "image_array": None,
+                    "message": "Image is too blurry to enhance. Please retake the photo with better focus and lighting.",
+                }
+
             # Step 2: If image quality is too low, try enhancement
             if (
                 quality_result["quality_score"]
                 < ImageProcessingService.ACCEPTABLE_QUALITY_SCORE
             ):
+                print(f"[Quality Check] Attempting to enhance image...")
                 enhanced_image = ImageEnhancer.auto_enhance(
                     quality_result["image_array"], quality_result["issues"]
                 )
@@ -69,9 +94,13 @@ class ImageProcessingService:
                 enhanced_bytes = buffer.tobytes()
 
                 enhanced_quality = ImageQualityAnalyzer.analyze(enhanced_bytes)
+                print(
+                    f"[Quality Check] Enhanced quality: {enhanced_quality['quality_score']:.1f}%, Valid: {enhanced_quality['is_valid']}"
+                )
 
                 # Step 4: Check if enhancement helped
                 if enhanced_quality["is_valid"]:
+                    print(f"[Quality Check] ✓ Enhancement successful, image now valid")
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -89,6 +118,7 @@ class ImageProcessingService:
                     enhanced_quality["quality_score"]
                     >= ImageProcessingService.MINIMUM_QUALITY_SCORE
                 ):
+                    print(f"[Quality Check] ⚠ Enhancement improved but still marginal")
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -104,6 +134,7 @@ class ImageProcessingService:
                         "message": "Image was enhanced but quality remains low. Results may be less accurate.",
                     }
                 else:
+                    print(f"[Quality Check] ✗ Enhancement failed, quality too low")
                     return {
                         "status": "error",
                         "is_valid": False,
@@ -117,6 +148,9 @@ class ImageProcessingService:
                     }
 
             # Original quality is between acceptable and minimum
+            print(
+                f"[Quality Check] ✗ Image quality insufficient, no enhancement attempted"
+            )
             return {
                 "status": "error",
                 "is_valid": False,
@@ -130,7 +164,7 @@ class ImageProcessingService:
             }
 
         except Exception as e:
-            print(f"Error in image processing service: {e}")
+            print(f"[Quality Check] ✗ Error in image processing service: {e}")
             return {
                 "status": "error",
                 "is_valid": False,
