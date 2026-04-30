@@ -1,6 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import {
+  Package,
+  Glasses,
+  Wrench,
+  FileText,
+  Droplet,
+  Trash2,
+  HelpCircle,
+} from "lucide-react";
 
 interface ClassificationEntry {
   _id: string;
@@ -12,6 +21,37 @@ interface ClassificationEntry {
   inferenceTime: number;
   disposalRecommendation: string;
 }
+
+const getCategoryIcon = (label: string) => {
+  const icons: Record<string, React.ReactNode> = {
+    cardboard: <Package className="w-12 h-12 text-amber-600" />,
+    glass: <Glasses className="w-12 h-12 text-blue-600" />,
+    metal: <Wrench className="w-12 h-12 text-gray-600" />,
+    paper: <FileText className="w-12 h-12 text-yellow-600" />,
+    plastic: <Droplet className="w-12 h-12 text-purple-600" />,
+    trash: <Trash2 className="w-12 h-12 text-red-600" />,
+  };
+  return (
+    icons[label.toLowerCase()] || (
+      <HelpCircle className="w-12 h-12 text-gray-600" />
+    )
+  );
+};
+
+const getCategoryColor = (label: string): string => {
+  const colors: Record<string, string> = {
+    cardboard: "bg-amber-100 text-amber-800 border-amber-300",
+    glass: "bg-blue-100 text-blue-800 border-blue-300",
+    metal: "bg-gray-100 text-gray-800 border-gray-300",
+    paper: "bg-yellow-100 text-yellow-800 border-yellow-300",
+    plastic: "bg-purple-100 text-purple-800 border-purple-300",
+    trash: "bg-red-100 text-red-800 border-red-300",
+  };
+  return (
+    colors[label.toLowerCase()] ||
+    "bg-slate-100 text-slate-800 border-slate-300"
+  );
+};
 
 const Page = () => {
   const [classificationHistory, setClassificationHistory] = useState<
@@ -216,7 +256,7 @@ const Page = () => {
                 {/* Image */}
                 <div className="relative w-full bg-linear-to-br from-gray-200 to-gray-300 overflow-hidden aspect-square group">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${entry.filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`}
+                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${entry.filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`}
                     alt={entry.predictedLabel}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -257,14 +297,18 @@ const Page = () => {
                 {/* Content */}
                 <div className="p-5 grow flex flex-col">
                   {/* Waste Type Badge */}
-                  <div className="mb-4 flex justify-center">
-                    <span className="text-lg font-semibold text-gray-700 capitalize flex flex-col justify-center text-center tracking-wide">
-                      Predicted Label:
-                    </span>
-                    <span className="text-emerald-600 ml-2 text-2xl font-bold tracking-tight">
-                      {entry.predictedLabel.charAt(0).toUpperCase() +
-                        entry.predictedLabel.slice(1)}
-                    </span>
+                  <div className="mb-4 flex justify-center items-center gap-3">
+                    <div>{getCategoryIcon(entry.predictedLabel)}</div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-gray-600 uppercase mb-1">
+                        Waste Type
+                      </p>
+                      <span
+                        className={`inline-block px-4 py-2 rounded-full text-sm font-bold capitalize border-2 ${getCategoryColor(entry.predictedLabel)}`}
+                      >
+                        {entry.predictedLabel}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Confidence */}
