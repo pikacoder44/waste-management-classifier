@@ -2,10 +2,15 @@ from PIL import Image
 import numpy as np
 import io
 
+
 def preprocess_image(image_bytes):
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
         image = image.resize((224, 224))
+
+        # Check if image is too small/blurry to be useful
+        if image.width < 100 or image.height < 100:
+            raise ValueError("Image too small (minimum 100×100 pixels required)")
 
         image_array = np.array(image).astype("float32")
         image_array = image_array / 255.0
