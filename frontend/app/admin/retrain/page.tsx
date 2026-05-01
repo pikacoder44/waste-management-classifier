@@ -172,7 +172,7 @@ export default function RetrainPage() {
                   <div className="text-2xl font-bold text-blue-600">20</div>
                   <div className="text-sm text-gray-600">Max Epochs</div>
                 </div>
-                    <div className="text-center col-span-1 sm:col-span-2 lg:col-span-1">
+                <div className="text-center col-span-1 sm:col-span-2 lg:col-span-1">
                   <div className="text-2xl font-bold text-purple-600">
                     MobileNetV2
                   </div>
