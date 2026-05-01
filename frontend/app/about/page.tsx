@@ -1,3 +1,5 @@
+import { Camera, RefreshCw, Cpu, Leaf, CheckCircle2 } from "lucide-react";
+
 const Page = () => {
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans py-16 sm:py-24">
@@ -39,16 +41,25 @@ const Page = () => {
                 AI model will predict its category along with a confidence score
                 to help with proper waste sorting and recycling.
               </p>
-              <div className="pt-4 border-t border-slate-200 mt-4 space-y-1">
-                <p className="text-sm text-emerald-600 font-semibold">
-                  ✓ Real-time classification
-                </p>
-                <p className="text-sm text-emerald-600 font-semibold">
-                  ✓ High accuracy predictions
-                </p>
-                <p className="text-sm text-emerald-600 font-semibold">
-                  ✓ Eco-friendly disposal guidance
-                </p>
+              <div className="pt-4 border-t border-slate-200 mt-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <p className="text-sm text-emerald-600 font-semibold">
+                    Real-time classification
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <p className="text-sm text-emerald-600 font-semibold">
+                    High accuracy predictions
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <p className="text-sm text-emerald-600 font-semibold">
+                    Eco-friendly disposal guidance
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -69,33 +80,33 @@ const Page = () => {
               {[
                 {
                   step: "1",
-                  icon: "📸",
+                  icon: Camera,
                   title: "Upload or Capture",
                   desc: "Choose an image from your device or use your camera to capture a photo of the waste item.",
                 },
                 {
                   step: "2",
-                  icon: "🔄",
+                  icon: RefreshCw,
                   title: "Image Processing",
                   desc: "The image is automatically resized to 224×224 pixels and normalized for model input.",
                 },
                 {
                   step: "3",
-                  icon: "🤖",
+                  icon: Cpu,
                   title: "AI Prediction",
                   desc: "The trained MobileNetV2 model analyzes the image and predicts the waste category.",
                 },
                 {
                   step: "4",
-                  icon: "♻️",
+                  icon: Leaf,
                   title: "View Results",
                   desc: "Get instant results with confidence score and disposal recommendations for proper sorting.",
                 },
               ].map((item) => (
                 <div key={item.step} className="flex gap-4">
-                  <div className="shrink">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-lg font-bold text-emerald-600">
-                      {item.icon}
+                  <div className="shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                      <item.icon className="w-6 h-6" />
                     </div>
                   </div>
                   <div>
