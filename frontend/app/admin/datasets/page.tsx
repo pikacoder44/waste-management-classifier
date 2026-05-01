@@ -2,6 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Loader2,
+  AlertCircle,
+  Database,
+  Edit3,
+  Trash2,
+  Plus,
+} from "lucide-react";
 
 interface Dataset {
   _id: string;
@@ -109,28 +117,38 @@ const Page = () => {
   };
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 to-gray-800 p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Uploaded Datasets
-          </h1>
-          <p className="text-gray-400">View and manage all training datasets</p>
+          <div className="flex items-center gap-3 mb-2">
+            <Database className="w-8 h-8 text-emerald-600" />
+            <h1 className="text-4xl font-bold text-gray-900">
+              Uploaded Datasets
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-11">
+            View and manage all training datasets
+          </p>
         </div>
 
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
+              <p className="text-gray-600 font-medium">Loading datasets...</p>
             </div>
-            <p className="text-gray-400 mt-4">Loading datasets...</p>
           </div>
         )}
 
         {error && (
-          <div className="p-6 bg-red-900 border-l-4 border-red-500 rounded-lg mb-6">
-            <p className="text-red-100 font-semibold">⚠️ Error</p>
-            <p className="text-red-200 mt-1">{error}</p>
+          <div className="p-6 bg-red-50 border border-red-200 rounded-lg mb-6 flex items-start gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-800 font-semibold">
+                Error Loading Datasets
+              </p>
+              <p className="text-red-700 mt-1">{error}</p>
+            </div>
           </div>
         )}
 
@@ -139,68 +157,71 @@ const Page = () => {
             {datasets.map((dataset: Dataset) => (
               <div
                 key={dataset._id}
-                className="group p-6 bg-linear-to-br from-orange-50 to-orange-100 rounded-xl shadow-lg hover:shadow-2xl hover:from-orange-100 hover:to-orange-200 transition-all duration-300 border-l-4 border-orange-500"
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500 overflow-hidden"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-1 group-hover:text-orange-700 transition">
-                      {dataset.name}
-                    </h2>
-                    <p className="text-gray-700">{dataset.description}</p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold">
-                      {dataset.imageCount} Images
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-bold text-gray-900 mb-1 group-hover:text-emerald-700 transition">
+                        {dataset.name}
+                      </h2>
+                      <p className="text-gray-600">{dataset.description}</p>
                     </div>
+                    <div className="flex gap-2 items-center shrink-0">
+                      <div className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-semibold text-sm">
+                        {dataset.imageCount} Images
+                      </div>
 
-                    <button
-                      onClick={() =>
-                        router.push(`/admin/datasets/update/${dataset._id}`)
-                      }
-                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                    >
-                      Update
-                    </button>
+                      <button
+                        onClick={() =>
+                          router.push(`/admin/datasets/update/${dataset._id}`)
+                        }
+                        className="flex items-center gap-2 p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+                        title="Edit dataset"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
 
-                    <button
-                      onClick={() => handleDelete(dataset._id, dataset.name)}
-                      disabled={deleting === dataset._id}
-                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-                      title="Delete this dataset"
-                    >
-                      {deleting === dataset._id ? (
-                        <span>⏳</span>
-                      ) : (
-                        <span>🗑️</span>
-                      )}
-                    </button>
+                      <button
+                        onClick={() => handleDelete(dataset._id, dataset.name)}
+                        disabled={deleting === dataset._id}
+                        className="flex items-center gap-2 p-2 bg-red-50 text-red-600 hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed rounded-lg transition"
+                        title="Delete dataset"
+                      >
+                        {deleting === dataset._id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-orange-300">
-                  <div className="bg-white bg-opacity-70 p-4 rounded-lg hover:bg-opacity-100 transition">
-                    <span className="text-sm font-semibold text-orange-600">
-                      Upload Date
-                    </span>
-                    <p className="text-lg font-bold text-gray-900">
-                      {formatDate(dataset.uploadDate)}
-                    </p>
-                  </div>
-                  <div className="bg-white bg-opacity-70 p-4 rounded-lg hover:bg-opacity-100 transition">
-                    <span className="text-sm font-semibold text-orange-600">
-                      Last Updated
-                    </span>
-                    <p className="text-lg font-bold text-gray-900">
-                      {formatDate(dataset.lastUpdated)}
-                    </p>
-                  </div>
-                  <div className="bg-white bg-opacity-70 p-4 rounded-lg hover:bg-opacity-100 transition">
-                    <span className="text-sm font-semibold text-orange-600">
-                      Version
-                    </span>
-                    <p className="text-lg font-bold text-gray-900">
-                      {dataset.version}
-                    </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
+                    <div className="bg-linear-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg">
+                      <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">
+                        Upload Date
+                      </span>
+                      <p className="text-lg font-bold text-gray-900 mt-1">
+                        {formatDate(dataset.uploadDate)}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                      <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">
+                        Last Updated
+                      </span>
+                      <p className="text-lg font-bold text-gray-900 mt-1">
+                        {formatDate(dataset.lastUpdated)}
+                      </p>
+                    </div>
+                    <div className="bg-linear-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                      <span className="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                        Version
+                      </span>
+                      <p className="text-lg font-bold text-gray-900 mt-1">
+                        {dataset.version}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -209,7 +230,8 @@ const Page = () => {
         )}
 
         {!loading && !error && datasets.length === 0 && (
-          <div className="p-12 bg-linear-to-br from-orange-50 to-orange-100 rounded-xl text-center border-2 border-dashed border-orange-300">
+          <div className="p-12 bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl text-center border-2 border-dashed border-emerald-300">
+            <Database className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
             <p className="text-gray-700 text-lg font-semibold">
               No datasets available yet.
             </p>
@@ -218,17 +240,19 @@ const Page = () => {
             </p>
             <button
               onClick={() => router.push("/admin/upload")}
-              className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              className="mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-semibold mx-auto"
             >
+              <Plus className="w-5 h-5" />
               Add Dataset
             </button>
           </div>
         )}
         <button
           onClick={() => router.push("/admin/upload")}
-          className="mt-6 px-6 py-3 bg-emerald-500 text-black hover:text-white rounded-lg hover:bg-emerald-700 hover:scale-105 cursor-pointer  transition-all duration-300"
+          className="mt-8 flex items-center justify-center gap-2 w-full px-6 py-3 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-semibold"
         >
-          Add Dataset
+          <Plus className="w-5 h-5" />
+          Add New Dataset
         </button>
       </div>
     </div>
