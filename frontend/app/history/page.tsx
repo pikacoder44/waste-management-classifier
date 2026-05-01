@@ -33,6 +33,10 @@ export default function HistoryPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
 
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -205,6 +209,12 @@ export default function HistoryPage() {
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-r-lg">
             <p className="text-red-700 font-semibold">Error</p>
             <p className="text-red-600">{error}</p>
+            <button
+              onClick={handleRetry}
+              className="mt-3 inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+            >
+              Retry
+            </button>
           </div>
         )}
 
