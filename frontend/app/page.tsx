@@ -139,7 +139,6 @@ export default function Home() {
       setSubmittedFile(null);
       setResult(null);
       setConfidence(null);
-      setDisposalMethod(null);
       closeCameraOverlay();
     }, "image/jpeg");
   };
