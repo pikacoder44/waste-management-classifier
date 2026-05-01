@@ -16,6 +16,8 @@ import {
   LogOut,
   LogIn,
   Leaf,
+  Menu,
+  X,
 } from "lucide-react";
 
 const poppins = Poppins({
@@ -49,12 +51,16 @@ const handleLogout = async () => {
 const Navbar = () => {
   const { role } = useAuth();
   const [hydrated, setHydrated] = useState(false);
-
+  const [menuOpen, setMenuOpen] = useState(false);
   useLayoutEffect(() => {
     queueMicrotask(() => {
       setHydrated(true);
     });
   }, []);
+
+  const toggleMenu = () => {
+    setMenuOpen((open) => !open);
+  };
   return (
     <nav
       className={`bg-white border-b-2 border-emerald-200 shadow-md ${poppins.className}`}
@@ -83,8 +89,23 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="flex items-center gap-8">
-            {/* Main Navigation */}
-            <div className="flex items-center gap-6">
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={toggleMenu}
+                aria-label="Open menu"
+                className="p-2 rounded-md bg-slate-100 hover:bg-slate-200"
+              >
+                {menuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+
+            {/* Main Navigation (desktop) */}
+            <div className="hidden md:flex items-center gap-6">
               <Link
                 href="/"
                 className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
@@ -173,29 +194,150 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Auth Button */}
-            {hydrated && (
-              <>
-                {role && (
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                )}
-                {!role && (
+            {/* Auth Button (desktop) */}
+            <div className="hidden md:flex items-center">
+              {hydrated && (
+                <>
+                  {role && (
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  )}
+                  {!role && (
+                    <Link
+                      href="/auth/login"
+                      className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      Login
+                    </Link>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        <div
+          className="md:hidden overflow-hidden border-t border-slate-200 bg-white"
+          style={{
+            maxHeight: menuOpen ? 520 : 0,
+            opacity: menuOpen ? 1 : 0,
+            transform: menuOpen ? "translateY(0)" : "translateY(-8px)",
+            transition:
+              "max-height 320ms ease, opacity 220ms ease, transform 220ms ease",
+            pointerEvents: menuOpen ? "auto" : "none",
+            willChange: "max-height, opacity, transform",
+          }}
+          aria-hidden={!menuOpen}
+        >
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+              >
+                <Home className="w-4 h-4" /> Home
+              </Link>
+
+              {hydrated && role === "admin" && (
+                <>
                   <Link
-                    href="/auth/login"
-                    className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
+                    href="/admin/dashboard"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
                   >
-                    <LogIn className="w-4 h-4" />
-                    Login
+                    <LayoutDashboard className="w-4 h-4" /> Dashboard
                   </Link>
-                )}
-              </>
-            )}
+                  <Link
+                    href="/admin/evaluation"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                  >
+                    <BarChart3 className="w-4 h-4" /> Evaluation
+                  </Link>
+                  <Link
+                    href="/admin/datasets"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                  >
+                    <Database className="w-4 h-4" /> Datasets
+                  </Link>
+                  <Link
+                    href="/admin/retrain"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                  >
+                    <RotateCcw className="w-4 h-4" /> Retrain
+                  </Link>
+                </>
+              )}
+
+              {hydrated && (
+                <>
+                  {role === "admin" ? (
+                    <Link
+                      href="/admin/classifications"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Classifications
+                    </Link>
+                  ) : (
+                    <>
+                      {role === "user" && (
+                        <Link
+                          href="/history"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                        >
+                          <Clock className="w-4 h-4" /> History
+                        </Link>
+                      )}
+
+                      <Link
+                        href="/about"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                      >
+                        <Info className="w-4 h-4" /> About
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Auth actions (mobile) */}
+              {hydrated && (
+                <div className="pt-2">
+                  {role ? (
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  ) : (
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg"
+                    >
+                      <LogIn className="w-4 h-4" /> Login
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
