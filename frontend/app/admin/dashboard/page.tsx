@@ -1,5 +1,14 @@
 import React from "react";
 import Link from "next/link";
+import {
+  BarChart3,
+  Database,
+  Upload,
+  RotateCcw,
+  Zap,
+  Database as DatabaseIcon,
+  Cpu,
+} from "lucide-react";
 
 const Page = () => {
   const adminFeatures = [
@@ -7,7 +16,7 @@ const Page = () => {
       id: 1,
       title: "Classifications",
       description: "View and manage waste classifications",
-      icon: "📊",
+      icon: BarChart3,
       href: "/admin/classifications",
       color: "from-blue-500 to-blue-600",
       textColor: "text-blue-600",
@@ -16,7 +25,7 @@ const Page = () => {
       id: 2,
       title: "Existing Datasets",
       description: "Manage and organize training datasets",
-      icon: "📁",
+      icon: Database,
       href: "/admin/datasets",
       color: "from-green-500 to-green-600",
       textColor: "text-green-600",
@@ -25,7 +34,7 @@ const Page = () => {
       id: 3,
       title: "Upload Dataset",
       description: "Upload new waste images for training",
-      icon: "⬆️",
+      icon: Upload,
       href: "/admin/upload",
       color: "from-purple-500 to-purple-600",
       textColor: "text-purple-600",
@@ -34,7 +43,7 @@ const Page = () => {
       id: 4,
       title: "Retrain Model",
       description: "Retrain the AI model with new data",
-      icon: "🔄",
+      icon: RotateCcw,
       href: "/admin/retrain",
       color: "from-orange-500 to-orange-600",
       textColor: "text-orange-600",
@@ -64,15 +73,15 @@ const Page = () => {
               <Link key={feature.id} href={feature.href}>
                 <div className="group h-full bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer">
                   {/* Top color bar */}
-                  <div
-                    className={`h-2 bg-linear-to-r ${feature.color}`}
-                  ></div>
+                  <div className={`h-2 bg-linear-to-r ${feature.color}`}></div>
 
                   {/* Card Content */}
                   <div className="p-6">
                     {/* Icon */}
-                    <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                      {feature.icon}
+                    <div
+                      className={`mb-4 group-hover:scale-110 transition-transform duration-300 ${feature.textColor}`}
+                    >
+                      <feature.icon className="w-12 h-12" />
                     </div>
 
                     {/* Title */}
@@ -119,7 +128,7 @@ const Page = () => {
                     </span>
                   </div>
                 </div>
-                <span className="text-3xl">⚡</span>
+                <Zap className="w-8 h-8 text-yellow-500" />
               </div>
               <p className="text-xs text-gray-500 mt-3">
                 Last checked: 2 mins ago
@@ -139,7 +148,7 @@ const Page = () => {
                     </span>
                   </div>
                 </div>
-                <span className="text-3xl">💾</span>
+                <DatabaseIcon className="w-8 h-8 text-blue-500" />
               </div>
               <p className="text-xs text-gray-500 mt-3">Response: 12ms</p>
             </div>
@@ -157,7 +166,7 @@ const Page = () => {
                     </span>
                   </div>
                 </div>
-                <span className="text-3xl">🤖</span>
+                <Cpu className="w-8 h-8 text-purple-500" />
               </div>
               <p className="text-xs text-gray-500 mt-3">Avg Response: 340ms</p>
             </div>
@@ -201,7 +210,9 @@ const Page = () => {
                 className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
               >
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="text-2xl">♻️</div>
+                  <div className="text-emerald-600">
+                    <RotateCcw className="w-6 h-6" />
+                  </div>
                   <div>
                     <p className="font-semibold text-gray-800">{item.waste}</p>
                     <p className="text-xs text-gray-500">
