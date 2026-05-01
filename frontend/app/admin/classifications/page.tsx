@@ -264,10 +264,10 @@ const Page = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <h1 className="text-5xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               Classifications
             </h1>
@@ -287,7 +287,7 @@ const Page = () => {
             <p className="text-gray-500 text-lg">No classifications found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {classificationHistory.map((entry) => (
               <div
                 key={entry._id}
