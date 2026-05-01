@@ -478,60 +478,54 @@ export default function Home() {
                             </p>
                           </div>
 
-                          {/* Disposal Method - More Prominent */}
-                          {disposalRecommendation && (
-                            <div className="space-y-3 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-sm">
+                          <div className="space-y-2 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-slate-200">
+                            {disposalRecommendation && (
                               <div>
-                                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 opacity-75">
-                                  ♻️ Recommended Disposal Method
+                                {/* Disposal Method */}
+                                <p className="text-sm text-slate-500">
+                                  <span className="font-semibold text-slate-700">
+                                    Disposal Method:
+                                  </span>{" "}
+                                  <span className="font-semibold text-slate-900">
+                                    {disposalRecommendation.disposal_method}
+                                  </span>
                                 </p>
-                                <p className="text-lg font-bold text-slate-900">
-                                  {disposalRecommendation.disposal_method}
-                                </p>
-                              </div>
-                              <div className="border-t border-slate-200 pt-3">
-                                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
-                                  📝 Instructions
-                                </p>
-                                <p className="text-sm text-slate-800 leading-relaxed">
-                                  {disposalRecommendation.description}
-                                </p>
-                              </div>
-                              <div className="border-t border-slate-200 pt-3">
-                                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
-                                  🌱 Environmental Benefits
-                                </p>
-                                <p className="text-sm text-slate-800 leading-relaxed">
+
+                                {/* Recommendation */}
+                                <div className="mt-2">
+                                  <p className="text-sm font-semibold text-slate-700">
+                                    Recommendation
+                                  </p>
+                                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                                    {disposalRecommendation.description}
+                                  </p>
+                                </div>
+
+                                {/* Benefits */}
+                                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                                   {disposalRecommendation.benefits}
                                 </p>
-                              </div>
-                              {disposalRecommendation.alternatives &&
-                                disposalRecommendation.alternatives.length >
-                                  0 && (
-                                  <div className="border-t border-slate-200 pt-3">
-                                    <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
-                                      🔄 Alternative Options
-                                    </p>
-                                    <ul className="text-sm text-slate-800 space-y-1">
-                                      {disposalRecommendation.alternatives.map(
-                                        (alt, idx) => (
-                                          <li
-                                            key={idx}
-                                            className="flex items-start gap-2"
-                                          >
-                                            <span className="text-emerald-600 font-bold mt-0.5">
-                                              •
-                                            </span>
-                                            <span>{alt}</span>
-                                          </li>
-                                        ),
-                                      )}
-                                    </ul>
-                                  </div>
-                                )}
-                            </div>
-                          )}
 
+                                {/* Optional Alternatives (kept but simplified) */}
+                                {disposalRecommendation.alternatives &&
+                                  disposalRecommendation.alternatives.length >
+                                    0 && (
+                                    <div className="mt-2">
+                                      <p className="text-xs font-semibold text-slate-600">
+                                        Alternatives
+                                      </p>
+                                      <ul className="text-xs text-slate-500 mt-1 space-y-1">
+                                        {disposalRecommendation.alternatives.map(
+                                          (alt, idx) => (
+                                            <li key={idx}>• {alt}</li>
+                                          ),
+                                        )}
+                                      </ul>
+                                    </div>
+                                  )}
+                              </div>
+                            )}
+                          </div>
                           {/* Metadata */}
                           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200">
                             <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
