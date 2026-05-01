@@ -223,7 +223,7 @@ def run_training_logic():
     training_status["is_training"] = True
     training_status["status"] = "preparing_data"
     training_status["message"] = "Preparing dataset..."
-    training_status["started_at"] = datetime.utcnow().isoformat()
+    training_status["started_at"] = datetime.now().isoformat()
     training_status["progress"] = 5
 
     try:
@@ -381,7 +381,7 @@ def run_evaluation_logic():
     evaluation_status["is_evaluating"] = True
     evaluation_status["status"] = "running"
     evaluation_status["message"] = "Loading model..."
-    evaluation_status["started_at"] = datetime.utcnow().isoformat()
+    evaluation_status["started_at"] = datetime.now().isoformat()
     evaluation_status["progress"] = 10
     print(f"✓ Evaluation status initialized (progress: 10%)")
 
@@ -597,8 +597,8 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 version="1.0",
                 filePath=json.dumps(all_file_paths),  # Store as proper JSON
                 imageCount=len(uploaded_results),  # Count of successful uploads
-                uploadDate=datetime.utcnow(),
-                lastUpdated=datetime.utcnow(),
+                uploadDate=datetime.now(),
+                lastUpdated=datetime.now(),
             )
             dataset_collection.insert_one(uploadedDataset.dict())
 
@@ -710,7 +710,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             all_file_paths = existing_file_paths + new_file_paths
             update_fields["filePath"] = json.dumps(all_file_paths)
             update_fields["imageCount"] = len(all_file_paths)
-            update_fields["lastUpdated"] = datetime.utcnow()
+            update_fields["lastUpdated"] = datetime.now()
             # Auto-increment version on upload if not explicitly provided
             if payload.version is None:
                 current_version = requestedDataset.get("version", "1.0")
@@ -720,7 +720,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             # Handle deletion without new uploads
             update_fields["filePath"] = json.dumps(existing_file_paths)
             update_fields["imageCount"] = len(existing_file_paths)
-            update_fields["lastUpdated"] = datetime.utcnow()
+            update_fields["lastUpdated"] = datetime.now()
             # Auto-increment version on deletion
             current_version = requestedDataset.get("version", "1.0")
             update_fields["version"] = increment_version(current_version)
