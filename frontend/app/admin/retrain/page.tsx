@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { Loader2, Zap, CheckCircle, RotateCcw, BookOpen } from "lucide-react";
 
 interface TrainingStatus {
   is_training: boolean;
@@ -128,59 +129,71 @@ export default function RetrainPage() {
   }, [pollingInterval]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 p-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-12 pb-8 border-b border-gray-200">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Model Retraining
           </h1>
-          <p className="text-slate-300">
-            Retrain the waste classification model with your dataset
+          <p className="text-gray-600">
+            Retrain your waste classifier model to improve accuracy with your
+            datasets
           </p>
         </div>
 
         {/* Main Content */}
-        <div className="bg-slate-800 rounded-lg shadow-xl p-8 border border-slate-700">
+        <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-200">
           {!showAcknowledgement ? (
             // Initial State - Button
-            <div className="text-center py-12">
-              <div className="mb-8">
-                <svg
-                  className="w-24 h-24 mx-auto text-blue-400 mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+            <div className="py-16 px-4">
+              <div className="text-center mb-12">
+                <div className="inline-flex p-6 bg-linear-to-br from-emerald-100 to-emerald-50 rounded-full mb-6 shadow-lg">
+                  <Zap className="w-16 h-16 text-emerald-600" />
+                </div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-3">
+                  Ready to Retrain?
+                </h2>
+                <p className="text-xl text-gray-600 max-w-lg mx-auto leading-relaxed">
+                  Start the retraining process to combine your datasets and
+                  enhance the model&apos;s accuracy
+                </p>
               </div>
-              <h2 className="text-2xl font-semibold text-white mb-4">
-                Ready to Retrain?
-              </h2>
-              <p className="text-slate-300 mb-8 max-w-md mx-auto">
-                This process will combine your original and custom datasets,
-                then retrain the model. This may take several minutes.
-              </p>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-emerald-600">
+                    80:20
+                  </div>
+                  <div className="text-sm text-gray-600">Split Ratio</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">20</div>
+                  <div className="text-sm text-gray-600">Max Epochs</div>
+                </div>
+                <div className="text-center col-span-2 md:col-span-1">
+                  <div className="text-2xl font-bold text-purple-600">
+                    MobileNetV2
+                  </div>
+                  <div className="text-sm text-gray-600">Architecture</div>
+                </div>
+              </div>
+
               <button
                 onClick={handleRetrain}
                 disabled={isLoading}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 mx-auto"
+                className="relative px-10 py-4 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-3 mx-auto shadow-lg hover:shadow-xl hover:shadow-emerald-500/40 transform hover:scale-105 active:scale-95"
               >
                 {isLoading ? (
                   <>
-                    <span className="animate-spin">⏳</span>
-                    Starting...
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="text-lg">Starting Training...</span>
                   </>
                 ) : (
                   <>
-                    <span>⚡</span>
-                    Start Retraining
+                    <Zap className="w-6 h-6" />
+                    <span className="text-lg">Start Retraining</span>
                   </>
                 )}
               </button>
@@ -190,28 +203,37 @@ export default function RetrainPage() {
             <div className="space-y-8">
               {/* Acknowledgement Banner */}
               {!showCompletion && (
-                <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4">
-                  <p className="text-blue-200 flex items-center gap-2">
-                    <span className="animate-pulse">✓</span>
-                    Training started successfully! Please wait while we retrain
-                    your model.
-                  </p>
+                <div className="bg-linear-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-600 rounded-lg p-5 flex items-start gap-4 shadow-sm">
+                  <CheckCircle className="w-6 h-6 text-emerald-600 animate-pulse shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-emerald-900 font-bold">
+                      Training in progress!
+                    </p>
+                    <p className="text-emerald-800 mt-1">
+                      Please wait while we retrain your model. This may take
+                      several minutes.
+                    </p>
+                  </div>
                 </div>
               )}
 
               {/* Status Information */}
               {trainingStatus && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-700/50 rounded p-4">
-                    <p className="text-slate-400 text-sm">Status</p>
-                    <p className="text-white font-semibold capitalize">
+                  <div className="bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition">
+                    <p className="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-2">
+                      Training Status
+                    </p>
+                    <p className="text-gray-900 font-bold text-lg capitalize">
                       {trainingStatus.status}
                     </p>
                   </div>
                   {trainingStatus.total_epochs > 0 && (
-                    <div className="bg-slate-700/50 rounded p-4">
-                      <p className="text-slate-400 text-sm">Epoch Progress</p>
-                      <p className="text-white font-semibold">
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition">
+                      <p className="text-blue-700 text-xs font-bold uppercase tracking-widest mb-2">
+                        Epoch Progress
+                      </p>
+                      <p className="text-gray-900 font-bold text-lg">
                         {trainingStatus.epoch} / {trainingStatus.total_epochs}
                       </p>
                     </div>
@@ -220,18 +242,18 @@ export default function RetrainPage() {
               )}
 
               {/* Progress Bar */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-slate-300 font-medium">
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                  <label className="text-gray-900 font-bold text-lg">
                     Overall Progress
                   </label>
-                  <span className="text-blue-400 font-bold">
+                  <span className="text-emerald-600 font-bold text-2xl">
                     {trainingStatus?.progress || 0}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
+                <div className="w-full bg-gray-300 rounded-full h-5 overflow-hidden shadow-inner">
                   <div
-                    className="bg-linear-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-500 ease-out"
+                    className="bg-linear-to-r from-emerald-500 via-emerald-400 to-teal-400 h-full rounded-full transition-all duration-700 ease-out shadow-lg"
                     style={{ width: `${trainingStatus?.progress || 0}%` }}
                   />
                 </div>
@@ -239,78 +261,79 @@ export default function RetrainPage() {
 
               {/* Status Message */}
               {trainingStatus && (
-                <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600">
-                  <p className="text-slate-300">
-                    <span className="text-cyan-400 font-semibold">
-                      Current Task:
-                    </span>{" "}
-                    {trainingStatus.message}
-                  </p>
+                <div className="bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-emerald-100 rounded-lg shrink-0">
+                      <BookOpen className="w-5 h-5 text-emerald-700" />
+                    </div>
+                    <div>
+                      <p className="text-emerald-900 font-bold text-sm uppercase tracking-wide mb-1">
+                        Current Task
+                      </p>
+                      <p className="text-emerald-800 font-medium">
+                        {trainingStatus.message}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Completion Animation */}
               {showCompletion && trainingStatus?.status === "completed" && (
-                <div className="mt-8">
+                <div className="mt-8 bg-linear-to-br from-emerald-50 via-emerald-100 to-teal-50 rounded-2xl p-12 border-2 border-emerald-300 shadow-xl">
                   <div className="text-center">
                     {/* Celebration Animation */}
-                    <div className="mb-6">
+                    <div className="mb-8">
                       {/* Checkmark Animation */}
-                      <div className="flex justify-center">
-                        <svg
-                          className="w-24 h-24 text-green-400 animate-bounce"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                      <div className="flex justify-center mb-6">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-emerald-200 rounded-full blur-2xl animate-pulse"></div>
+                          <CheckCircle className="relative w-28 h-28 text-emerald-500 animate-bounce" />
+                        </div>
                       </div>
 
                       {/* Confetti Effect */}
-                      <div className="mt-6 flex justify-center gap-2">
-                        {[...Array(5)].map((_, i) => (
+                      <div className="flex justify-center gap-3">
+                        {[...Array(6)].map((_, i) => (
                           <div
                             key={i}
-                            className="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                            className="w-3 h-3 bg-linear-to-br from-emerald-400 to-teal-500 rounded-full animate-pulse shadow-lg"
                             style={{
-                              animationDelay: `${i * 0.1}s`,
+                              animationDelay: `${i * 0.15}s`,
                             }}
                           />
                         ))}
                       </div>
                     </div>
 
-                    <h3 className="text-2xl font-bold text-green-400 mb-2">
+                    <h3 className="text-4xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3">
                       Training Complete! 🎉
                     </h3>
-                    <p className="text-slate-300 mb-6">
-                      Your model has been successfully retrained and saved.
+                    <p className="text-gray-700 text-lg mb-8 max-w-lg mx-auto">
+                      Your waste classifier model has been successfully
+                      retrained with improved accuracy.
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4 justify-center">
+                    <div className="flex gap-4 justify-center flex-wrap">
                       <button
                         onClick={() => {
                           setShowAcknowledgement(false);
                           setShowCompletion(false);
                           setTrainingStatus(null);
                         }}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                        className="flex items-center justify-center gap-2 px-8 py-4 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-emerald-500/50 transform hover:scale-105 active:scale-95"
                       >
+                        <RotateCcw className="w-5 h-5" />
                         Retrain Again
                       </button>
                       <button
                         onClick={() =>
                           (window.location.href = "/admin/evaluation")
                         }
-                        className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+                        className="flex items-center justify-center gap-2 px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
                       >
+                        <BookOpen className="w-5 h-5" />
                         View Evaluation
                       </button>
                     </div>
@@ -322,36 +345,54 @@ export default function RetrainPage() {
         </div>
 
         {/* Info Box */}
-        <div className="mt-8 bg-slate-800/50 border border-slate-700 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-3">
+        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <div className="p-2 bg-blue-200 rounded-lg">
+              <BookOpen className="w-6 h-6 text-blue-700" />
+            </div>
             What happens during retraining?
           </h3>
-          <ul className="space-y-2 text-slate-300">
-            <li className="flex gap-3">
-              <span className="text-blue-400">▸</span>
-              <span>
+          <ul className="space-y-4 text-gray-700">
+            <li className="flex gap-4">
+              <span className="text-blue-600 font-bold text-2xl shrink-0">
+                ▸
+              </span>
+              <span className="font-medium">
                 Datasets from{" "}
-                <code className="text-cyan-300">dataset/original</code> and{" "}
-                <code className="text-cyan-300">dataset/custom</code> are
-                combined
+                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
+                  dataset/original
+                </code>{" "}
+                and{" "}
+                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
+                  dataset/custom
+                </code>{" "}
+                are combined
               </span>
             </li>
-            <li className="flex gap-3">
-              <span className="text-blue-400">▸</span>
-              <span>Data is split into 80% training and 20% testing sets</span>
+            <li className="flex gap-4">
+              <span className="text-blue-600 font-bold text-2xl shrink-0">
+                ▸
+              </span>
+              <span className="font-medium">
+                Data is split into 80% training and 20% testing sets
+              </span>
             </li>
-            <li className="flex gap-3">
-              <span className="text-blue-400">▸</span>
-              <span>
+            <li className="flex gap-4">
+              <span className="text-blue-600 font-bold text-2xl shrink-0">
+                ▸
+              </span>
+              <span className="font-medium">
                 MobileNetV2 model is trained for up to 20 epochs with early
                 stopping
               </span>
             </li>
-            <li className="flex gap-3">
-              <span className="text-blue-400">▸</span>
-              <span>
+            <li className="flex gap-4">
+              <span className="text-blue-600 font-bold text-2xl shrink-0">
+                ▸
+              </span>
+              <span className="font-medium">
                 Updated model is saved to{" "}
-                <code className="text-cyan-300">
+                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
                   model/waste_classifier_model.keras
                 </code>
               </span>
