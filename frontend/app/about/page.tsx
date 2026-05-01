@@ -2,7 +2,7 @@ import { Camera, RefreshCw, Cpu, Leaf, CheckCircle2 } from "lucide-react";
 
 const Page = () => {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans py-16 sm:py-24">
+    <div className="min-h-screen bg-white text-slate-900 font-sans py-12 sm:py-16 lg:py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center space-y-4 mb-16">
@@ -20,7 +20,7 @@ const Page = () => {
 
         {/* What It Does Card */}
         <div className="mb-8">
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="mb-6">
               <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
                 Overview
@@ -67,7 +67,7 @@ const Page = () => {
 
         {/* How It Works Card */}
         <div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="mb-8">
               <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
                 Process
@@ -103,7 +103,7 @@ const Page = () => {
                   desc: "Get instant results with confidence score and disposal recommendations for proper sorting.",
                 },
               ].map((item) => (
-                <div key={item.step} className="flex gap-4">
+                <div key={item.step} className="flex flex-col sm:flex-row gap-4">
                   <div className="shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
                       <item.icon className="w-6 h-6" />
