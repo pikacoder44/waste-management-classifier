@@ -117,16 +117,16 @@ const Page = () => {
   };
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <Database className="w-8 h-8 text-emerald-600" />
             <h1 className="text-4xl font-bold text-gray-900">
               Uploaded Datasets
             </h1>
           </div>
-          <p className="text-gray-600 ml-11">
+          <p className="text-gray-600 sm:ml-11">
             View and manage all training datasets
           </p>
         </div>
@@ -160,14 +160,14 @@ const Page = () => {
                 className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500 overflow-hidden"
               >
                 <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+                    <div className="flex-1 min-w-0">
                       <h2 className="text-2xl font-bold text-gray-900 mb-1 group-hover:text-emerald-700 transition">
                         {dataset.name}
                       </h2>
                       <p className="text-gray-600">{dataset.description}</p>
                     </div>
-                    <div className="flex gap-2 items-center shrink-0">
+                    <div className="flex flex-wrap gap-2 items-center shrink-0">
                       <div className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-semibold text-sm">
                         {dataset.imageCount} Images
                       </div>
@@ -197,7 +197,7 @@ const Page = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
                     <div className="bg-linear-to-br from-emerald-50 to-emerald-100 p-4 rounded-lg">
                       <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">
                         Upload Date
