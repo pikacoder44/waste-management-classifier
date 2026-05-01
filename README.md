@@ -51,7 +51,7 @@ The model classifies waste into 6 categories:
 | **Optimizer**           | Adam (learning rate: 0.001)                                                                                    |
 | **Loss Function**       | Categorical Crossentropy                                                                                       |
 | **Batch Size**          | 32                                                                                                             |
-| **Epochs**              | 10 (with EarlyStopping, patience: 5)                                                                           |
+| **Epochs**              | 20 (with EarlyStopping, patience: 5)                                                                           |
 | **Training/Test Split** | 70/30                                                                                                          |
 
 ## 🏗️ Tech Stack
