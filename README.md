@@ -19,6 +19,7 @@ A full-stack machine learning web application for waste classification with user
 - **Model Evaluation:** Evaluate model performance with metrics (accuracy, precision, recall, F1-score, confusion matrix)
 - **Training/Evaluation Progress:** Real-time progress tracking with background task processing
 - **Classification Monitoring:** View all user classifications and system activity
+- **Image Quality Checks:** Automatically validate and enhance low-quality uploads before inference
 
 ## 📊 Waste Categories
 
@@ -38,6 +39,7 @@ The model classifies waste into 6 categories:
 - **Preprocessing:** Images resized to 224×224 pixels, normalized (0–1 range)
 - **Augmentation:** Rotation (20°), width/height shift (0.2), zoom (0.2), horizontal flip
 - **Custom Datasets:** Support for uploading additional training data via admin panel
+- **Storage:** Uploaded images are stored locally in the backend `uploads/` folder and served through FastAPI
 
 ## 🤖 Model Architecture
 
@@ -60,7 +62,7 @@ The model classifies waste into 6 categories:
 - **ML/AI:** TensorFlow/Keras, scikit-learn
 - **Database:** MongoDB (with Motor async driver)
 - **Authentication:** JWT, bcrypt
-- **Image Upload:** Cloudinary CDN
+- **Image Upload:** Local filesystem storage exposed through FastAPI static mounts
 - **Server:** Uvicorn
 
 ### Frontend
@@ -72,7 +74,7 @@ The model classifies waste into 6 categories:
 
 ### Key Dependencies
 
-**Backend:** absl-py, annotated-types, anyio, astunparse, bcrypt, certifi, charset-normalizer, click, cloudinary, colorama, contourpy, cycler, dnspython, fastapi, flatbuffers, fonttools, gast, google-pasta, grpcio, h11, h5py, idna, itsdangerous, Jinja2, joblib, keras, kiwisolver, libclang, Markdown, MarkupSafe, matplotlib, mdurl, ml_dtypes, motor, namex, numpy, opencv-python, opt_einsum, optree, packaging, pandas, passlib, pillow, protobuf, pydantic, PyJWT, pymongo, pyparsing, python-dateutil, python-dotenv, python-multipart, requests, rich, scikit-learn, scipy, seaborn, six, starlette, tensorboard, tensorflow, termcolor, threadpoolctl, typing-extensions, tzdata, urllib3, uvicorn, Werkzeug, wrapt
+**Backend:** absl-py, annotated-types, anyio, astunparse, bcrypt, certifi, charset-normalizer, click, colorama, contourpy, cycler, dnspython, fastapi, flatbuffers, fonttools, gast, google-pasta, grpcio, h11, h5py, idna, itsdangerous, Jinja2, joblib, keras, kiwisolver, libclang, Markdown, MarkupSafe, matplotlib, mdurl, ml_dtypes, motor, namex, numpy, opencv-python, opt_einsum, optree, packaging, pandas, passlib, pillow, protobuf, pydantic, PyJWT, pymongo, pyparsing, python-dateutil, python-dotenv, python-multipart, requests, rich, scikit-learn, scipy, seaborn, six, starlette, tensorboard, tensorflow, termcolor, threadpoolctl, typing-extensions, tzdata, urllib3, uvicorn, Werkzeug, wrapt
 
 ## 📁 Project Structure
 
@@ -104,9 +106,6 @@ code/
 │   │   │   └── waste.py                   # Waste classification schema
 │   │   ├── security/
 │   │   ├── services/
-│   │   │   ├── admin_check_service.py     # Admin authorization
-│   │   │   ├── ai_service.py              # AI/ML service
-│   │   │   ├── history_service.py         # History management
 │   │   │   ├── model_evaluation_service.py # Evaluation logic
 │   │   │   ├── recommendation_service.py  # Disposal recommendations
 │   │   │   └── split_dataset_services.py  # Dataset splitting
@@ -118,16 +117,18 @@ code/
 │   │   └── custom/                        # User-uploaded custom datasets
 │   ├── model/
 │   │   └── waste_classifier_model.keras   # Trained model file
-│   ├── evaluation_results/                # Stored evaluation metrics
+│   ├── evaluation_results/                # Stored confusion matrices and metrics
 │   ├── model_training.py                  # Model training script
 │   ├── evaluation_of_model.py             # Model evaluation script
 │   ├── requirements.txt                   # Python dependencies
 │   └── venv/                              # Virtual environment
 ├── frontend/
 │   ├── app/
+│   │   ├── about/                         # About page
 │   │   ├── admin/
 │   │   │   ├── classifications/           # View all classifications
 │   │   │   ├── datasets/                  # Dataset management
+│   │   │   ├── evaluation/                # Model evaluation results
 │   │   │   ├── retrain/                   # Model retraining
 │   │   │   └── upload/                    # Dataset upload
 │   │   ├── auth/
@@ -135,8 +136,6 @@ code/
 │   │   ├── components/
 │   │   │   ├── Loader.tsx                 # Loading indicator
 │   │   │   └── Navbar.tsx                 # Navigation bar
-│   │   ├── evaluation/                    # Model evaluation results
-│   │   ├── about/                         # About page
 │   │   ├── globals.css                    # Global styles
 │   │   ├── layout.tsx                     # Root layout
 │   │   └── page.tsx                       # Home page (classification)
@@ -146,7 +145,6 @@ code/
 │   ├── package.json                       # Node.js dependencies
 │   ├── tsconfig.json                      # TypeScript config
 │   ├── next.config.ts                     # Next.js config
-│   ├── tailwind.config.js                 # Tailwind config
 │   └── eslint.config.mjs                  # ESLint config
 ├── LICENSE                                # MIT License
 └── README.md                              # This file
@@ -194,8 +192,10 @@ code/
 - **waste_images** - Classification results with image metadata
 - **datasets** - Custom training datasets
 - **model_evaluations** - Model performance metrics & confusion matrices
-- **recommendations** - Disposal recommendations per waste type
-- **waste_categories** - Waste category reference data
+
+## 🗃️ Storage
+
+- **Uploaded images** - Stored locally under `backend/uploads/` and served by FastAPI
 
 ## 🚀 Getting Started
 
@@ -204,7 +204,7 @@ code/
 - Python 3.9+
 - Node.js 18+
 - MongoDB 4.4+
-- Cloudinary account (for image storage)
+- MongoDB running locally or in your network environment
 
 ### Backend Setup
 
@@ -231,9 +231,6 @@ DATABASE_NAME=waste_classifier
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
 EOF
 
 # 6. Run backend server
