@@ -52,6 +52,32 @@ body {
   }
 }
 
+@keyframes dropdownOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-0.75rem) scaleY(0.98);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 32rem;
+  }
+}
+
+@keyframes dropdownClose {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 32rem;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.75rem) scaleY(0.98);
+    max-height: 0;
+  }
+}
+
 @layer utilities {
   .animate-slideDown {
     animation: slideDown 0.3s ease-out;
@@ -59,5 +85,13 @@ body {
 
   .animate-slideInFromRight {
     animation: slideInFromRight 0.4s ease-out;
+  }
+
+  .animate-dropdownOpen {
+    animation: dropdownOpen 0.28s ease-out forwards;
+  }
+
+  .animate-dropdownClose {
+    animation: dropdownClose 0.22s ease-in forwards;
   }
 }
