@@ -101,7 +101,6 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
 
   // Format date safely after hydration
   const formatDate = (dateString: string) => {
@@ -193,8 +192,6 @@ const Page = () => {
   };
 
   useEffect(() => {
-    setHydrated(true);
-
     // Fetch classification history from the backend
     const fetchClassificationHistory = async () => {
       try {
@@ -256,11 +253,6 @@ const Page = () => {
         </div>
       </div>
     );
-  }
-
-  // Only render hydrated content to avoid hydration mismatch
-  if (!hydrated) {
-    return null;
   }
 
   return (
