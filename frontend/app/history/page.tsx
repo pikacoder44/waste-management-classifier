@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "../components/Loader";
 import {
+  Clock,
   Package,
   BottleWine,
   Hammer,
@@ -176,7 +177,10 @@ export default function HistoryPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center">
-        <Loader />
+        <Loader
+          message="Loading history..."
+          icon={<Clock className="w-8 h-8 text-emerald-400 absolute inset-4 m-auto" />}
+        />
       </div>
     );
   }
