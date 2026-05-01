@@ -3,6 +3,16 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  Loader2,
+  AlertCircle,
+  Edit3,
+  Trash2,
+  X,
+  Save,
+  RotateCcw,
+} from "lucide-react";
 
 interface FileItem {
   filePath: string;
@@ -153,19 +163,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     selectedFiles.length > 0 ||
     imagesToDelete.length > 0;
 
-  const handleUpdateDatasetInfo = async () => {
-    try {
-      await apiCall("/admin/dataset/update", "PUT", {
-        dataset_id: datasetId,
-        new_name: datasetName,
-        datasetDescription: datasetDescription,
-      });
-      alert("Dataset information updated successfully!");
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Update failed");
-    }
-  };
-
   const handleUploadImages = async () => {
     if (selectedFiles.length > 0 && selectedFiles.some((item) => !item.label)) {
       alert("Please select a label for all images");
@@ -241,167 +238,261 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   return (
-    <div>
-      {loading && <p>Loading dataset details...</p>}
-      {error && <p className="text-red-500">Error: {error}</p>}
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+      {loading && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="relative w-16 h-16">
+                <Loader2 className="w-16 h-16 text-emerald-600 animate-spin" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Loading Dataset
+            </h2>
+            <p className="text-gray-600">
+              Please wait while we fetch your dataset details...
+            </p>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+            <div className="flex items-center justify-center mb-4 w-12 h-12 bg-red-100 rounded-full mx-auto">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+              Error Loading Dataset
+            </h2>
+            <p className="text-center text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
       {datasetName && (
-        <div className="bg-gray-100 p-8">
-          <h1 className="text-4xl font-bold mb-8 text-emerald-800">
-            Dataset Update
-          </h1>
+        <div className="p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-2">
+                <Edit3 className="w-8 h-8 text-emerald-600" />
+                <h1 className="text-4xl font-bold text-gray-900">
+                  Update Dataset
+                </h1>
+              </div>
+              <p className="text-gray-600 ml-11">
+                Make changes to your dataset information and images
+              </p>
+            </div>
 
-          <div className="flex items-center gap-4 mb-4">
-            <label className="text-xl font-bold min-w-fit">Name:</label>
-            <input
-              type="text"
-              value={datasetName}
-              onChange={(e) => setDatasetName(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 flex-1"
-            />
-          </div>
-
-          <div className="flex items-center gap-4 mb-4">
-            <label className="text-xl font-bold min-w-fit">Description:</label>
-            <input
-              type="text"
-              value={datasetDescription}
-              onChange={(e) => setDatasetDescription(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2 flex-1"
-            />
-          </div>
-
-          <div className="flex justify-between items-center mb-6">
-            <p className="text-lg font-semibold">Version: {datasetVersion}</p>
-            <p className="text-sm text-gray-600">Uploaded: {uploadDate}</p>
-          </div>
-
-          {/* Images display in cards: */}
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-6 text-emerald-800">
-              Images ({filePaths.length + selectedFiles.length})
-            </h3>
-            <div className="flex flex-wrap gap-6">
-              {/* Existing images */}
-              {Array.isArray(filePaths) &&
-                filePaths.map((item, index) => {
-                  // Extract filePath from object
-                  const filePath =
-                    typeof item === "string" ? item : item.filePath;
-                  const originalFilename =
-                    typeof item === "object"
-                      ? item.originalFilename
-                      : filePath.split("/").pop();
-
-                  const imageUrl = `http://localhost:8000/${filePath}`;
-                  return (
-                    <div
-                      key={`existing-${index}`}
-                      className="bg-white rounded-lg shadow-md p-4 w-56 relative"
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Dataset Image ${index + 1}`}
-                        className="w-full h-56 object-cover rounded-md mb-4"
-                        onError={(e) => {
-                          e.currentTarget.src =
-                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='14' fill='%23999'%3EImage not found%3C/text%3E%3C/svg%3E";
-                        }}
-                      />
-                      <p className="text-xs text-gray-600 truncate mb-2">
-                        {originalFilename}
-                      </p>
-                      <button
-                        onClick={() => handleDeleteExistingImage(filePath)}
-                        className="w-full px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  );
-                })}
-
-              {/* New images to be added */}
-              {selectedFiles.map((item, index) => (
-                <div
-                  key={`new-${index}`}
-                  className="bg-white rounded-lg shadow-md p-4 w-56 relative"
-                >
-                  <img
-                    src={URL.createObjectURL(item.file)}
-                    alt={item.file.name}
-                    className="w-full h-56 object-cover rounded-md mb-3"
+            {/* Info Card */}
+            <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Dataset Name
+                  </label>
+                  <input
+                    type="text"
+                    value={datasetName}
+                    onChange={(e) => setDatasetName(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition"
                   />
-                  <p className="text-xs text-gray-600 mb-3 truncate">
-                    {item.file.name}
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={datasetDescription}
+                    onChange={(e) => setDatasetDescription(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent transition"
+                  />
+                </div>
+              </div>
+
+              {/* Version and Upload Date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-600">
+                    Version:
+                  </span>
+                  <span className="text-lg font-bold text-emerald-600">
+                    {datasetVersion}
+                  </span>
+                </div>
+                <div className="flex items-center justify-end">
+                  <span className="text-sm text-gray-600">
+                    Uploaded:{" "}
+                    <span className="font-semibold">{uploadDate}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Images display in cards: */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
+                <span>Images</span>
+                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-lg font-semibold">
+                  {filePaths.length + selectedFiles.length}
+                </span>
+              </h3>
+              <div className="flex flex-wrap gap-6">
+                {/* Existing images */}
+                {Array.isArray(filePaths) &&
+                  filePaths.map((item, index) => {
+                    // Extract filePath from object
+                    const filePath =
+                      typeof item === "string" ? item : item.filePath;
+                    const originalFilename =
+                      typeof item === "object"
+                        ? item.originalFilename
+                        : filePath.split("/").pop();
+
+                    const imageUrl = `http://localhost:8000/${filePath}`;
+                    return (
+                      <div
+                        key={`existing-${index}`}
+                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-56 relative"
+                      >
+                        <div className="relative h-56 bg-gray-100 overflow-hidden">
+                          <Image
+                            src={imageUrl}
+                            alt={`Dataset Image ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            priority={false}
+                            onError={(e) => {
+                              e.currentTarget.src = "/fallback-image.png";
+                            }}
+                          />
+                        </div>
+                        <div className="p-4">
+                          <p className="text-xs text-gray-600 truncate mb-3">
+                            {originalFilename}
+                          </p>
+                          <button
+                            onClick={() => handleDeleteExistingImage(filePath)}
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-medium text-sm transition"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                {/* New images to be added */}
+                {selectedFiles.map((item, index) => (
+                  <div
+                    key={`new-${index}`}
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-56"
+                  >
+                    <div className="relative h-56 bg-gray-100">
+                      <Image
+                        src={URL.createObjectURL(item.file)}
+                        alt={item.file.name}
+                        fill
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs text-gray-600 mb-3 truncate">
+                        {item.file.name}
+                      </p>
+                      <div className="flex gap-2">
+                        <select
+                          value={item.label}
+                          onChange={(e) =>
+                            handleLabelChange(index, e.target.value)
+                          }
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                        >
+                          {ALLOWED_LABELS.map((label) => (
+                            <option key={label} value={label}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => handleRemoveFile(index)}
+                          className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add new images card */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="group bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-md p-6 w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-dashed border-emerald-300 hover:border-emerald-500"
+                >
+                  <span className="text-5xl text-emerald-600 font-bold mb-2 transition-transform duration-500 group-hover:rotate-180">
+                    +
+                  </span>
+                  <p className="text-xs text-gray-600 text-center font-medium">
+                    Add images
                   </p>
-                  <div className="flex gap-2">
-                    <select
-                      value={item.label}
-                      onChange={(e) => handleLabelChange(index, e.target.value)}
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs"
-                    >
-                      {ALLOWED_LABELS.map((label) => (
-                        <option key={label} value={label}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+
+            {/* Update button - shown when there are changes */}
+            {hasChanges && (
+              <div className="mt-8">
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <p className="text-sm text-gray-600 mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    You have unsaved changes
+                  </p>
+                  <div className="flex gap-4">
                     <button
-                      onClick={() => handleRemoveFile(index)}
-                      className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition"
+                      onClick={handleUploadImages}
+                      disabled={uploading}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-emerald-500/50"
                     >
-                      ✕
+                      <Save className="w-5 h-5" />
+                      {uploading ? "Updating..." : "Update Dataset"}
+                    </button>
+                    <button
+                      onClick={() => (
+                        setSelectedFiles([]),
+                        router.push("/admin/datasets")
+                      )}
+                      disabled={uploading}
+                      className="flex items-center justify-center gap-2 px-6 py-3 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold rounded-lg disabled:cursor-not-allowed transition-all"
+                    >
+                      <X className="w-5 h-5" />
+                      Cancel
                     </button>
                   </div>
                 </div>
-              ))}
-
-              {/* Add new images card */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="group bg-white rounded-lg shadow-md p-4 w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 hover:bg-emerald-50 transition-all duration-200 border-2 border-dashed border-emerald-200 hover:border-emerald-400"
-              >
-                <span className="text-5xl text-emerald-600 font-bold mb-2 transition-transform duration-500 group-hover:rotate-180">
-                  +
-                </span>
-                <p className="text-xs text-gray-600 text-center font-medium">
-                  Add images
-                </p>
               </div>
-            </div>
+            )}
           </div>
-
-          {/* Hidden file input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-
-          {/* Update button - shown when there are changes */}
-          {hasChanges && (
-            <div className="mt-8 pt-2">
-              <div className="flex gap-4">
-                <button
-                  onClick={handleUploadImages}
-                  disabled={uploading}
-                  className="px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
-                >
-                  {uploading ? "Uploading..." : "Update Dataset"}
-                </button>
-                <button
-                  onClick={() => setSelectedFiles([])}
-                  disabled={uploading}
-                  className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 disabled:cursor-not-allowed transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
