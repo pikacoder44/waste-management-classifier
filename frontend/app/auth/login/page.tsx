@@ -2,6 +2,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import {
+  User,
+  Lock,
+  LogIn,
+  AlertCircle,
+  CheckCircle,
+  Shield,
+} from "lucide-react";
 const Login = () => {
   const router = useRouter();
   const { setRole } = useAuth();
@@ -83,79 +91,134 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <p>
-        Don&apos;t have an account?{" "}
-        <a href="/auth/register" className="text-blue-500 hover:underline">
-          Register here
-        </a>
-      </p>
-      <h1 className="text-3xl text-black mb-8">Login Account</h1>
-
-      <form
-        onSubmit={loginUser}
-        className="flex flex-col gap-4 mt-4 bg-white p-8 rounded-lg shadow-lg w-96"
-      >
-        {error && (
-          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-emerald-50 via-white to-emerald-50 p-4">
+      {/* Form Container */}
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Shield className="w-8 h-8 text-emerald-600" />
+            <h1 className="text-4xl font-bold text-gray-900">
+              WasteClassifier
+            </h1>
           </div>
-        )}
+          <p className="text-gray-600 text-base">Sign in to your account</p>
+        </div>
 
-        {success && (
-          <div className="p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-            {success}
+        {/* Form */}
+        <form
+          onSubmit={loginUser}
+          className="bg-white rounded-2xl shadow-xl p-8 space-y-6"
+        >
+          {/* Error Alert */}
+          {error && (
+            <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Alert */}
+          {success && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+              <p className="text-sm text-green-700">{success}</p>
+            </div>
+          )}
+
+          {/* Username Field */}
+          <div>
+            <label
+              htmlFor="username"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Username
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition"
+                placeholder="Enter your username"
+              />
+            </div>
           </div>
-        )}
 
-        <label htmlFor="username" className="font-semibold text-gray-700">
-          Username:
-        </label>
-        <input
-          type="text"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          disabled={loading}
-          className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700 disabled:bg-gray-200"
-        />
+          {/* Password Field */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition"
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
 
-        <label htmlFor="password" className="font-semibold text-gray-700">
-          Password:
-        </label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          disabled={loading}
-          className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700 disabled:bg-gray-200"
-        />
+          {/* Role Field */}
+          <div>
+            <label
+              htmlFor="role"
+              className="block text-sm font-semibold text-gray-700 mb-2"
+            >
+              Role
+            </label>
+            <div className="relative">
+              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRoleState(e.target.value)}
+                disabled={loading}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
 
-        <label htmlFor="role" className="font-semibold text-gray-700">
-          Role:
-        </label>
-        <select
-          id="role"
-          value={role}
-          onChange={(e) => setRoleState(e.target.value)}
-          disabled={loading}
-          className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-700 disabled:bg-gray-200"
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold py-3 px-4 rounded-lg transition disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg hover:shadow-emerald-500/50"
+          >
+            <LogIn className="w-5 h-5" />
+            {loading ? "Logging in..." : "Login"}
+          </button>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-green-700 text-white py-2 px-4 rounded mt-4 font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-green-800 transition"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          {/* Navigation Link */}
+          <div className="text-center pt-4">
+            <p className="text-sm text-gray-600">
+              Don&apos;t have an account?{" "}
+              <a
+                href="/auth/register"
+                className="text-emerald-600 font-semibold hover:text-emerald-700 underline"
+              >
+                Register here
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
