@@ -321,26 +321,83 @@ export default function HistoryPage() {
 
                   {/* Disposal Recommendation */}
                   <div
-                    className={`mb-4 p-3 rounded-lg border ${
+                    className={`mb-4 p-4 rounded-lg border ${
                       item.predictedLabel === "cardboard"
-                        ? "bg-amber-100 border-amber-300 text-amber-900"
+                        ? "bg-amber-50 border-amber-200"
                         : item.predictedLabel === "glass"
-                          ? "bg-blue-100 border-blue-300 text-blue-900"
+                          ? "bg-blue-50 border-blue-200"
                           : item.predictedLabel === "metal"
-                            ? "bg-gray-200 border-gray-400 text-gray-900"
+                            ? "bg-gray-50 border-gray-200"
                             : item.predictedLabel === "paper"
-                              ? "bg-yellow-100 border-yellow-300 text-yellow-900"
+                              ? "bg-yellow-50 border-yellow-200"
                               : item.predictedLabel === "plastic"
-                                ? "bg-purple-100 border-purple-300 text-purple-900"
+                                ? "bg-purple-50 border-purple-200"
                                 : item.predictedLabel === "trash"
-                                  ? "bg-red-100 border-red-300 text-red-900"
-                                  : "bg-gray-100 border-gray-300 text-gray-900"
+                                  ? "bg-red-50 border-red-200"
+                                  : "bg-gray-50 border-gray-200"
                     }`}
                   >
-                    <p className="font-semibold text-sm">💡 Recommendation:</p>
-                    <p className="text-sm mt-1">
-                      {item.disposalRecommendation}
-                    </p>
+                    {typeof item.disposalRecommendation === "object" ? (
+                      <div className="space-y-3">
+                        <div>
+                          <p className="font-semibold text-sm mb-1">
+                            ♻️ Disposal Method
+                          </p>
+                          <p className="text-sm font-bold text-emerald-700">
+                            {item.disposalRecommendation.disposal_method}
+                          </p>
+                        </div>
+                        <div className="border-t pt-2">
+                          <p className="font-semibold text-xs mb-1 opacity-75">
+                            📝 Instructions
+                          </p>
+                          <p className="text-sm">
+                            {item.disposalRecommendation.description}
+                          </p>
+                        </div>
+                        <div className="border-t pt-2">
+                          <p className="font-semibold text-xs mb-1 opacity-75">
+                            🌱 Environmental Benefits
+                          </p>
+                          <p className="text-sm">
+                            {item.disposalRecommendation.benefits}
+                          </p>
+                        </div>
+                        {item.disposalRecommendation.alternatives &&
+                          item.disposalRecommendation.alternatives.length >
+                            0 && (
+                            <div className="border-t pt-2">
+                              <p className="font-semibold text-xs mb-1 opacity-75">
+                                🔄 Alternatives
+                              </p>
+                              <ul className="text-sm space-y-1">
+                                {item.disposalRecommendation.alternatives.map(
+                                  (alt: string, idx: number) => (
+                                    <li
+                                      key={idx}
+                                      className="flex items-start gap-2"
+                                    >
+                                      <span className="text-emerald-600 font-bold">
+                                        •
+                                      </span>
+                                      <span>{alt}</span>
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-semibold text-sm">
+                          💡 Recommendation:
+                        </p>
+                        <p className="text-sm mt-1">
+                          {item.disposalRecommendation}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Timestamp */}
