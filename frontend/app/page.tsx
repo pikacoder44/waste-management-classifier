@@ -255,13 +255,9 @@ export default function Home() {
         </div>
 
         {/* Main Container */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+        <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start justify-center">
           {/* Upload Form - Compact */}
-          <div
-            className={`transition-all duration-500 ${
-              hasResult || isLoading ? "lg:w-96" : "lg:w-96"
-            }`}
-          >
+          <div className="w-full max-w-md mx-auto transition-all duration-500 lg:w-96">
             <form
               className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300"
               onSubmit={(e) => {
