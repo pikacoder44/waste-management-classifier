@@ -116,6 +116,10 @@ const Page = () => {
     }
   };
   const router = useRouter();
+
+  const handleRetry = () => {
+    window.location.reload();
+  };
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8">
       <div className="max-w-5xl mx-auto">
@@ -148,6 +152,12 @@ const Page = () => {
                 Error Loading Datasets
               </p>
               <p className="text-red-700 mt-1">{error}</p>
+              <button
+                onClick={handleRetry}
+                className="mt-3 inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+              >
+                Retry
+              </button>
             </div>
           </div>
         )}
