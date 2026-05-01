@@ -60,11 +60,19 @@ const getCategoryColor = (
   );
 };
 
+interface DisposalRecommendation {
+  disposal_method: string;
+  description: string;
+  benefits: string;
+  alternatives?: string[] | null;
+}
+
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
-  const [disposalMethod, setDisposalMethod] = useState<string | null>(null);
+  const [disposalRecommendation, setDisposalRecommendation] =
+    useState<DisposalRecommendation | null>(null);
   const [inferenceTime, setInferenceTime] = useState<number | null>(null);
   const [submittedFile, setSubmittedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -169,7 +177,7 @@ export default function Home() {
     setIsLoading(true);
     setResult(null);
     setConfidence(null);
-    setDisposalMethod(null);
+    setDisposalRecommendation(null);
     setSubmittedFile(null);
 
     const formData = new FormData();
@@ -202,16 +210,9 @@ export default function Home() {
           setConfidence(data.confidence);
           setInferenceTime(data.inferenceTime);
 
-          // Handle disposal recommendation
+          // Handle disposal recommendation - now structured
           if (data.disposalRecommendation) {
-            if (typeof data.disposalRecommendation === "object") {
-              setDisposalMethod(
-                data.disposalRecommendation.method ||
-                  data.disposalRecommendation.disposal_method,
-              );
-            } else {
-              setDisposalMethod(data.disposalRecommendation);
-            }
+            setDisposalRecommendation(data.disposalRecommendation);
           }
 
           setSubmittedFile(file);
@@ -478,14 +479,56 @@ export default function Home() {
                           </div>
 
                           {/* Disposal Method - More Prominent */}
-                          {disposalMethod && (
-                            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-sm">
-                              <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 opacity-75">
-                                ♻️ Recommended Disposal
-                              </p>
-                              <p className="text-lg font-bold text-slate-900">
-                                {disposalMethod}
-                              </p>
+                          {disposalRecommendation && (
+                            <div className="space-y-3 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-sm">
+                              <div>
+                                <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1 opacity-75">
+                                  ♻️ Recommended Disposal Method
+                                </p>
+                                <p className="text-lg font-bold text-slate-900">
+                                  {disposalRecommendation.disposal_method}
+                                </p>
+                              </div>
+                              <div className="border-t border-slate-200 pt-3">
+                                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
+                                  📝 Instructions
+                                </p>
+                                <p className="text-sm text-slate-800 leading-relaxed">
+                                  {disposalRecommendation.description}
+                                </p>
+                              </div>
+                              <div className="border-t border-slate-200 pt-3">
+                                <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
+                                  🌱 Environmental Benefits
+                                </p>
+                                <p className="text-sm text-slate-800 leading-relaxed">
+                                  {disposalRecommendation.benefits}
+                                </p>
+                              </div>
+                              {disposalRecommendation.alternatives &&
+                                disposalRecommendation.alternatives.length >
+                                  0 && (
+                                  <div className="border-t border-slate-200 pt-3">
+                                    <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2 opacity-75">
+                                      🔄 Alternative Options
+                                    </p>
+                                    <ul className="text-sm text-slate-800 space-y-1">
+                                      {disposalRecommendation.alternatives.map(
+                                        (alt, idx) => (
+                                          <li
+                                            key={idx}
+                                            className="flex items-start gap-2"
+                                          >
+                                            <span className="text-emerald-600 font-bold mt-0.5">
+                                              •
+                                            </span>
+                                            <span>{alt}</span>
+                                          </li>
+                                        ),
+                                      )}
+                                    </ul>
+                                  </div>
+                                )}
                             </div>
                           )}
 
