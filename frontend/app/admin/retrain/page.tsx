@@ -129,7 +129,7 @@ export default function RetrainPage() {
   }, [pollingInterval]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 px-4 py-8 sm:p-8">
       <div className="max-w-5xl mx-auto">
         {/* Header Section */}
         <div className="mb-12 pb-8 border-b border-gray-200">
@@ -143,10 +143,10 @@ export default function RetrainPage() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-10 border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200">
           {!showAcknowledgement ? (
             // Initial State - Button
-            <div className="py-16 px-4">
+            <div className="py-12 sm:py-16 px-4">
               <div className="text-center mb-12">
                 <div className="inline-flex p-6 bg-linear-to-br from-emerald-100 to-emerald-50 rounded-full mb-6 shadow-lg">
                   <Zap className="w-16 h-16 text-emerald-600" />
@@ -161,7 +161,7 @@ export default function RetrainPage() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-emerald-600">
                     80:20
@@ -172,7 +172,7 @@ export default function RetrainPage() {
                   <div className="text-2xl font-bold text-blue-600">20</div>
                   <div className="text-sm text-gray-600">Max Epochs</div>
                 </div>
-                <div className="text-center col-span-2 md:col-span-1">
+                    <div className="text-center col-span-1 sm:col-span-2 lg:col-span-1">
                   <div className="text-2xl font-bold text-purple-600">
                     MobileNetV2
                   </div>
@@ -219,7 +219,7 @@ export default function RetrainPage() {
 
               {/* Status Information */}
               {trainingStatus && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition">
                     <p className="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-2">
                       Training Status
@@ -315,7 +315,7 @@ export default function RetrainPage() {
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4 justify-center flex-wrap">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
                       <button
                         onClick={() => {
                           setShowAcknowledgement(false);
@@ -345,7 +345,7 @@ export default function RetrainPage() {
         </div>
 
         {/* Info Box */}
-        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
+        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 sm:p-8 shadow-lg">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
             <div className="p-2 bg-blue-200 rounded-lg">
               <BookOpen className="w-6 h-6 text-blue-700" />
