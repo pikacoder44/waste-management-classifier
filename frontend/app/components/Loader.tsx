@@ -1,14 +1,23 @@
+import { ReactNode } from "react";
 import { Loader2, Zap } from "lucide-react";
 
-export default function Loader() {
+interface LoaderProps {
+  message?: string;
+  icon?: ReactNode;
+}
+
+export default function Loader({
+  message = "Analyzing image...",
+  icon = <Zap className="w-8 h-8 text-emerald-400 absolute inset-4 m-auto" />,
+}: LoaderProps) {
   return (
     <div className="flex h-full items-center justify-center py-20">
       <div className="flex flex-col items-center gap-4">
         <div className="relative w-16 h-16">
           <Loader2 className="w-16 h-16 text-emerald-600 animate-spin absolute inset-0" />
-          <Zap className="w-8 h-8 text-emerald-400 absolute inset-4 m-auto" />
+          {icon}
         </div>
-        <p className="text-sm text-slate-600 font-medium">Analyzing image...</p>
+        <p className="text-sm text-slate-600 font-medium">{message}</p>
         <div className="flex gap-1">
           <div
             className="w-2 h-2 bg-emerald-600 rounded-full animate-bounce"
