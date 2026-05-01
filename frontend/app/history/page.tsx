@@ -179,7 +179,9 @@ export default function HistoryPage() {
       <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center">
         <Loader
           message="Loading history..."
-          icon={<Clock className="w-8 h-8 text-emerald-400 absolute inset-4 m-auto" />}
+          icon={
+            <Clock className="w-8 h-8 text-emerald-400 absolute inset-4 m-auto" />
+          }
         />
       </div>
     );
