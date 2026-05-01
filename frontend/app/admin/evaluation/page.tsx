@@ -48,7 +48,7 @@ const Page = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/model/evaluation/latest",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/latest`,
         {
           method: "GET",
           headers: {
@@ -94,7 +94,7 @@ const Page = () => {
   const pollEvaluationStatus = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/model/evaluation/status",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
         {
           method: "GET",
           headers: {
@@ -161,7 +161,7 @@ const Page = () => {
     try {
       // Trigger evaluation
       const response = await fetch(
-        "http://localhost:8000/admin/model/evaluate",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluate`,
         {
           method: "POST",
           headers: {
