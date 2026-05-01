@@ -210,7 +210,7 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-16 sm:py-24">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center space-y-4 mb-12">
@@ -224,7 +224,7 @@ const Page = () => {
 
           {/* Fetch and Run Buttons */}
           <div className="flex flex-col items-center gap-4 mt-10">
-            <div className="flex gap-3 flex-wrap justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full">
               <button
                 onClick={fetchLatestEvaluation}
                 disabled={loading || isRunningEval}
@@ -432,7 +432,7 @@ const Page = () => {
         {/* Confusion Matrix Section */}
         {data && (
           <div className="mt-12">
-            <div className="bg-white border-2 border-slate-200 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
               <div className="mb-8">
                 <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">
                   Confusion Matrix
@@ -444,18 +444,18 @@ const Page = () => {
               </div>
 
               <div className="flex justify-center mb-8">
-                <div className="rounded-xl overflow-hidden border-2 border-slate-300 bg-linear-to-br from-slate-50 to-slate-100 p-3 shadow-md">
+                <div className="w-full max-w-3xl rounded-xl overflow-hidden border-2 border-slate-300 bg-linear-to-br from-slate-50 to-slate-100 p-3 shadow-md">
                   <Image
                     src="/Confusion_Matrix.PNG"
                     alt="Confusion Matrix"
                     width={550}
                     height={550}
-                    className="w-full h-auto max-w-2xl"
+                    className="w-full h-auto max-w-full"
                   />
                 </div>
               </div>
 
-              <div className="bg-linear-to-rrounded-xl p-4">
+              <div className="bg-linear-to-r rounded-xl p-4">
                 <p className="text-sm text-slate-700 text-center leading-relaxed">
                   The confusion matrix visualizes the model&apos;s
                   classification performance across all waste categories.
