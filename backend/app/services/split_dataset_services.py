@@ -136,7 +136,7 @@ def ensure_split_dataset(split_type: str, train_split: float = 0.7):
         image_count = get_source_image_count()
         os.makedirs(split_path, exist_ok=True)
         metadata = {
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now().isoformat(),
             "image_count": image_count,
             "train_split": train_split,
         }
