@@ -2,13 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  User,
-  Lock,
-  UserPlus,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+import { User, Lock, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
 
 const Register = () => {
   const router = useRouter();
@@ -94,9 +88,9 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-emerald-50 via-white to-emerald-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-emerald-50 via-white to-emerald-50 px-4 py-8 sm:p-4">
       {/* Form Container */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -109,7 +103,7 @@ const Register = () => {
         {/* Form */}
         <form
           onSubmit={registerUser}
-          className="bg-white rounded-2xl shadow-xl p-8 space-y-6"
+          className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6"
         >
           {/* Error Alert */}
           {error && (
