@@ -48,6 +48,7 @@ const Page = () => {
               "Content-Type": "application/json",
             },
             credentials: "include",
+            cache: "no-store",
           },
         );
 
