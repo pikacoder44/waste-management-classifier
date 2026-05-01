@@ -49,9 +49,15 @@ const handleLogout = async () => {
 };
 
 const Navbar = () => {
-  const { role } = useAuth();
+  const { role, setRole } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
+    setRole(null);
+    router.push("/auth/login");
+  };
 
   const toggleMenu = () => {
     setMenuOpen((open) => !open);
@@ -189,10 +195,7 @@ const Navbar = () => {
             <div className="hidden md:flex items-center">
               {role ? (
                 <button
-                  onClick={async () => {
-                    await handleLogout();
-                    router.push("/auth/login");
-                  }}
+                  onClick={handleLogoutClick}
                   className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
                 >
                   <LogOut className="w-4 h-4" />
@@ -305,6 +308,7 @@ const Navbar = () => {
                     onClick={async () => {
                       setMenuOpen(false);
                       await handleLogout();
+                      setRole(null);
                       router.push("/auth/login");
                     }}
                     className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
