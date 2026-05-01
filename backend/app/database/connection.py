@@ -16,12 +16,12 @@ waste_collection = None
 
 try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
-    # Verify connection by pinging the server
-    client.admin.command("ping")
-    print("✓ MongoDB connection successful")
 
     db = client["waste_classifier"]
     waste_collection = db["waste_collection"]
+    # Verify connection by pinging the server after the handles exist.
+    client.admin.command("ping")
+    print("✓ MongoDB connection successful")
     print("✓ Database and collection initialized successfully")
 except (ConnectionFailure, ServerSelectionTimeoutError) as e:
     print(f"✗ MongoDB connection failed (Network issue): {e}")
