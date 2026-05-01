@@ -175,10 +175,7 @@ export default function Home() {
     if (!file) return;
 
     setIsLoading(true);
-    setResult(null);
-    setConfidence(null);
-    setDisposalRecommendation(null);
-    setSubmittedFile(null);
+    const hasBackup = Boolean(result && submittedFile);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -230,7 +227,9 @@ export default function Home() {
       }
     } catch (error) {
       showError(
-        "Could not connect to the server. Please make sure the backend is running.",
+        hasBackup
+          ? "Could not connect to the server. Showing the last successful result."
+          : "Could not connect to the server. Please make sure the backend is running.",
         error,
       );
     } finally {
