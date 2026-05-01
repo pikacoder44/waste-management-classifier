@@ -164,7 +164,7 @@ export default function RetrainPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-emerald-600">
-                    80:20
+                    70:30
                   </div>
                   <div className="text-sm text-gray-600">Split Ratio</div>
                 </div>
@@ -374,7 +374,7 @@ export default function RetrainPage() {
                 ▸
               </span>
               <span className="font-medium">
-                Data is split into 80% training and 20% testing sets
+                Data is split into 70% training and 30% testing sets
               </span>
             </li>
             <li className="flex gap-4">
