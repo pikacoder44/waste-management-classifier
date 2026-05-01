@@ -251,7 +251,7 @@ export default function HistoryPage() {
 
                 {/* Header with Category Badge */}
                 <div
-                  className={`${getCategoryHeaderGradient(item.predictedLabel)} p-4 flex items-center justify-between text-white`}
+                  className={`${getCategoryHeaderGradient(item.predictedLabel)} p-4 flex items-center justify-between text-black `}
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -320,83 +320,38 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Disposal Recommendation */}
-                  <div
-                    className={`mb-4 p-4 rounded-lg border ${
-                      item.predictedLabel === "cardboard"
-                        ? "bg-amber-50 border-amber-200"
-                        : item.predictedLabel === "glass"
-                          ? "bg-blue-50 border-blue-200"
-                          : item.predictedLabel === "metal"
-                            ? "bg-gray-50 border-gray-200"
-                            : item.predictedLabel === "paper"
-                              ? "bg-yellow-50 border-yellow-200"
-                              : item.predictedLabel === "plastic"
-                                ? "bg-purple-50 border-purple-200"
-                                : item.predictedLabel === "trash"
-                                  ? "bg-red-50 border-red-200"
-                                  : "bg-gray-50 border-gray-200"
-                    }`}
-                  >
+                  <div className="mb-4 p-4 rounded-lg bg-white/60 backdrop-blur-sm space-y-2">
                     {typeof item.disposalRecommendation === "object" ? (
-                      <div className="space-y-3">
-                        <div>
-                          <p className="font-semibold text-sm mb-1">
-                            ♻️ Disposal Method
-                          </p>
-                          <p className="text-sm font-bold text-emerald-700">
+                      <div>
+                        {/* Disposal Method */}
+                        <p className="text-sm text-slate-500">
+                          <span className="font-semibold text-slate-700">
+                            Disposal Method:
+                          </span>{" "}
+                          <span className="font-semibold text-slate-900">
                             {item.disposalRecommendation.disposal_method}
+                          </span>
+                        </p>
+
+                        {/* Recommendation */}
+                        <div className="mt-2">
+                          <p className="text-sm font-semibold text-slate-700">
+                            Recommendation
                           </p>
-                        </div>
-                        <div className="border-t pt-2">
-                          <p className="font-semibold text-xs mb-1 opacity-75">
-                            📝 Instructions
-                          </p>
-                          <p className="text-sm">
+                          <p className="text-sm text-slate-600 mt-1 leading-relaxed">
                             {item.disposalRecommendation.description}
                           </p>
                         </div>
-                        <div className="border-t pt-2">
-                          <p className="font-semibold text-xs mb-1 opacity-75">
-                            🌱 Environmental Benefits
-                          </p>
-                          <p className="text-sm">
-                            {item.disposalRecommendation.benefits}
-                          </p>
-                        </div>
-                        {item.disposalRecommendation.alternatives &&
-                          item.disposalRecommendation.alternatives.length >
-                            0 && (
-                            <div className="border-t pt-2">
-                              <p className="font-semibold text-xs mb-1 opacity-75">
-                                🔄 Alternatives
-                              </p>
-                              <ul className="text-sm space-y-1">
-                                {item.disposalRecommendation.alternatives.map(
-                                  (alt: string, idx: number) => (
-                                    <li
-                                      key={idx}
-                                      className="flex items-start gap-2"
-                                    >
-                                      <span className="text-emerald-600 font-bold">
-                                        •
-                                      </span>
-                                      <span>{alt}</span>
-                                    </li>
-                                  ),
-                                )}
-                              </ul>
-                            </div>
-                          )}
+
+                        {/* Benefits */}
+                        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                          {item.disposalRecommendation.benefits}
+                        </p>
                       </div>
                     ) : (
-                      <div>
-                        <p className="font-semibold text-sm">
-                          💡 Recommendation:
-                        </p>
-                        <p className="text-sm mt-1">
-                          {item.disposalRecommendation}
-                        </p>
-                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed">
+                        {item.disposalRecommendation}
+                      </p>
                     )}
                   </div>
 
