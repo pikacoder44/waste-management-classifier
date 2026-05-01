@@ -4,6 +4,19 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
 import { useState, useLayoutEffect } from "react";
+import {
+  Home,
+  LayoutDashboard,
+  BarChart3,
+  Database,
+  RotateCcw,
+  CheckCircle2,
+  Clock,
+  Info,
+  LogOut,
+  LogIn,
+  Leaf,
+} from "lucide-react";
 
 const poppins = Poppins({
   weight: ["600", "700"],
@@ -55,7 +68,7 @@ const Navbar = () => {
               <div className="absolute inset-0 bg-linear-to-br from-emerald-400 to-emerald-600 rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
               {/* Logo */}
               <div className="relative w-14 h-14 rounded-xl bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg group-hover:shadow-emerald-500/50 transition-all duration-300 transform group-hover:scale-110">
-                <span className="text-white font-bold text-3xl">♻</span>
+                <Leaf className="text-white w-8 h-8" />
               </div>
             </div>
             <div className="flex flex-col">
@@ -74,8 +87,9 @@ const Navbar = () => {
             <div className="flex items-center gap-6">
               <Link
                 href="/"
-                className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
               >
+                <Home className="w-4 h-4" />
                 Home
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
@@ -87,29 +101,33 @@ const Navbar = () => {
 
                   <Link
                     href="/admin/dashboard"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                   >
+                    <LayoutDashboard className="w-4 h-4" />
                     Dashboard
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                   <Link
                     href="/admin/evaluation"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                   >
+                    <BarChart3 className="w-4 h-4" />
                     Evaluation
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                   <Link
                     href="/admin/datasets"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                   >
+                    <Database className="w-4 h-4" />
                     Datasets
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                   <Link
                     href="/admin/retrain"
-                    className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                   >
+                    <RotateCcw className="w-4 h-4" />
                     Retrain
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                   </Link>
@@ -122,8 +140,9 @@ const Navbar = () => {
                   {role === "admin" ? (
                     <Link
                       href="/admin/classifications"
-                      className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                      className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                     >
+                      <CheckCircle2 className="w-4 h-4" />
                       Classifications
                       <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                     </Link>
@@ -132,8 +151,9 @@ const Navbar = () => {
                       {role === "user" && (
                         <Link
                           href="/history"
-                          className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                          className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                         >
+                          <Clock className="w-4 h-4" />
                           History
                           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                         </Link>
@@ -141,8 +161,9 @@ const Navbar = () => {
 
                       <Link
                         href="/about"
-                        className="text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                        className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                       >
+                        <Info className="w-4 h-4" />
                         About
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                       </Link>
@@ -158,16 +179,18 @@ const Navbar = () => {
                 {role && (
                   <button
                     onClick={handleLogout}
-                    className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
+                    className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
                   >
+                    <LogOut className="w-4 h-4" />
                     Logout
                   </button>
                 )}
                 {!role && (
                   <Link
                     href="/auth/login"
-                    className="bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
+                    className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
                   >
+                    <LogIn className="w-4 h-4" />
                     Login
                   </Link>
                 )}
