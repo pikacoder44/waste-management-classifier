@@ -103,7 +103,10 @@ const Page = () => {
                   desc: "Get instant results with confidence score and disposal recommendations for proper sorting.",
                 },
               ].map((item) => (
-                <div key={item.step} className="flex flex-col sm:flex-row gap-4">
+                <div
+                  key={item.step}
+                  className="flex flex-col sm:flex-row gap-4"
+                >
                   <div className="shrink-0">
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
                       <item.icon className="w-6 h-6" />
