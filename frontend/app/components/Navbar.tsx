@@ -324,7 +324,8 @@ const Navbar = () => {
                     <button
                       onClick={() => {
                         setMenuOpen(false);
-                        handleLogout();
+                        await handleLogout();
+                        router.push("/auth/login");
                       }}
                       className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
                     >
