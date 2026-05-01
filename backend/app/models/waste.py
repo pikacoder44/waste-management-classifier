@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Union, Dict, Any
 
 
 class Waste(BaseModel):
@@ -18,8 +18,9 @@ class Waste(BaseModel):
         ...,
         description="The time taken for the AI model to make the prediction (in seconds)",
     )
-    disposalRecommendation: Optional[str] = Field(
-        None, description="Recommended disposal method based on the predicted label"
+    disposalRecommendation: Optional[Union[str, Dict[str, Any]]] = Field(
+        None,
+        description="Structured disposal recommendation with method, description, benefits, and alternatives",
     )
 
     class Config:
