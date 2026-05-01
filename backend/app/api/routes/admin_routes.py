@@ -32,7 +32,6 @@ router = APIRouter()
 # Allowed labels (same as model)
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 
-BASE_DATASET_PATH = "dataset/original"
 CUSTOM_DATASET_PATH = "dataset/custom"
 
 
@@ -140,6 +139,34 @@ def normalize_path_for_filesystem(file_path: str) -> str:
     E.g., "dataset/custom/metal/uuid.jpg" -> "dataset\\custom\\metal\\uuid.jpg" (on Windows)
     """
     return file_path.replace("/", os.sep)
+
+
+def save_image_file(
+    label: str, file_bytes: bytes, file_ext: str
+) -> tuple[str, str, str]:
+    """Save an uploaded image under the custom dataset tree and return paths."""
+    label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
+    os.makedirs(label_folder, exist_ok=True)
+
+    new_filename = f"{uuid4()}.{file_ext}"
+    file_path = os.path.join(label_folder, new_filename)
+
+    with open(file_path, "wb") as file_handle:
+        file_handle.write(file_bytes)
+
+    return file_path, new_filename, normalize_path_for_storage(file_path)
+
+
+def delete_stored_file(file_path: str) -> bool:
+    """Delete a stored file path if it exists."""
+    os_specific_path = normalize_path_for_filesystem(file_path)
+    if os.path.exists(os_specific_path):
+        os.remove(os_specific_path)
+        print(f"✓ Deleted file: {os_specific_path}")
+        return True
+
+    print(f"⚠ File not found: {os_specific_path}")
+    return False
 
 
 # Training status tracking
@@ -496,19 +523,11 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
             filename = validated["filename"]
 
             try:
-                # Create label folder if it doesn't exist
-                label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
-                os.makedirs(label_folder, exist_ok=True)
-
-                # Save file locally
-                new_filename = f"{uuid4()}.{file_ext}"
-                filePath = os.path.join(label_folder, new_filename)
-
-                with open(filePath, "wb") as f:
-                    f.write(file_bytes)
+                _, new_filename, normalized_file_path = save_image_file(
+                    label, file_bytes, file_ext
+                )
 
                 # Collect file path and upload result
-                normalized_file_path = normalize_path_for_storage(filePath)
                 all_file_paths.append(
                     {
                         "filePath": normalized_file_path,
@@ -618,10 +637,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             # Delete specified images from disk
             for file_path in paths_to_delete_normalized:
                 try:
-                    os_specific_path = normalize_path_for_filesystem(file_path)
-                    if os.path.exists(os_specific_path):
-                        os.remove(os_specific_path)
-                        print(f"✓ Deleted image file: {os_specific_path}")
+                    delete_stored_file(file_path)
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
 
@@ -657,19 +673,9 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                 filename = validated["filename"]
 
                 try:
-                    # Create label folder if it doesn't exist
-                    label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
-                    os.makedirs(label_folder, exist_ok=True)
-
-                    # Save file locally
-                    new_filename = f"{uuid4()}.{file_ext}"
-                    filePath = os.path.join(label_folder, new_filename)
-
-                    with open(filePath, "wb") as f:
-                        f.write(file_bytes)
-
-                    # Normalize path for storage
-                    normalized_file_path = normalize_path_for_storage(filePath)
+                    _, _, normalized_file_path = save_image_file(
+                        label, file_bytes, file_ext
+                    )
 
                     new_file_paths.append(
                         {
@@ -784,14 +790,8 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
                     file_path = file_info
 
                 if file_path:
-                    # Convert stored path (with /) back to OS-specific format
-                    os_specific_path = normalize_path_for_filesystem(file_path)
-                    if os.path.exists(os_specific_path):
-                        os.remove(os_specific_path)
+                    if delete_stored_file(file_path):
                         deleted_count += 1
-                        print(f"✓ Deleted file: {os_specific_path}")
-                    else:
-                        print(f"⚠ File not found: {os_specific_path}")
             except Exception as file_error:
                 print(f"✗ Error deleting file {file_path}: {file_error}")
 
@@ -977,11 +977,7 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
         # Delete image file from local storage
         if entry.get("filePath"):
             try:
-                if os.path.exists(entry["filePath"]):
-                    os.remove(entry["filePath"])
-                    print(f"✓ Image file deleted: {entry['filePath']}")
-                else:
-                    print(f"⚠ Image file not found: {entry['filePath']}")
+                delete_stored_file(entry["filePath"])
             except PermissionError:
                 print(f"✗ Permission denied deleting file: {entry['filePath']}")
                 raise HTTPException(
