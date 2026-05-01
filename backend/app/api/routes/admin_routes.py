@@ -169,6 +169,25 @@ def delete_stored_file(file_path: str) -> bool:
     return False
 
 
+def increment_version(current_version: str) -> str:
+    """Increment semantic version string (e.g., '1.0' -> '1.1', '1.9' -> '2.0')."""
+    try:
+        parts = current_version.split(".")
+        if len(parts) >= 2:
+            major = int(parts[0])
+            minor = int(parts[1])
+            # Increment minor version; reset to 0 if it reaches 10
+            minor += 1
+            if minor >= 10:
+                major += 1
+                minor = 0
+            return f"{major}.{minor}"
+    except (ValueError, IndexError):
+        pass
+    # Fallback: return next patch version
+    return f"{current_version}.1"
+
+
 # Training status tracking
 training_status = {
     "is_training": False,
@@ -692,12 +711,19 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             update_fields["filePath"] = json.dumps(all_file_paths)
             update_fields["imageCount"] = len(all_file_paths)
             update_fields["lastUpdated"] = datetime.utcnow()
+            # Auto-increment version on upload if not explicitly provided
+            if payload.version is None:
+                current_version = requestedDataset.get("version", "1.0")
+                update_fields["version"] = increment_version(current_version)
 
         elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
             # Handle deletion without new uploads
             update_fields["filePath"] = json.dumps(existing_file_paths)
             update_fields["imageCount"] = len(existing_file_paths)
             update_fields["lastUpdated"] = datetime.utcnow()
+            # Auto-increment version on deletion
+            current_version = requestedDataset.get("version", "1.0")
+            update_fields["version"] = increment_version(current_version)
 
         # Execute database update
         if update_fields:
