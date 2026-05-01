@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
-import { useState, useLayoutEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Home,
@@ -50,13 +50,7 @@ const handleLogout = async () => {
 
 const Navbar = () => {
   const { role } = useAuth();
-  const [hydrated, setHydrated] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  useLayoutEffect(() => {
-    queueMicrotask(() => {
-      setHydrated(true);
-    });
-  }, []);
   const router = useRouter();
 
   const toggleMenu = () => {
@@ -117,7 +111,7 @@ const Navbar = () => {
               </Link>
 
               {/* Admin Section */}
-              {hydrated && role === "admin" && (
+              {role === "admin" && (
                 <>
                   <div className="h-6 w-px bg-slate-300"></div>
 
@@ -157,70 +151,61 @@ const Navbar = () => {
               )}
 
               {/* Show Classifications for admin, History for regular users */}
-              {hydrated && (
+              {role === "admin" ? (
+                <Link
+                  href="/admin/classifications"
+                  className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Classifications
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                </Link>
+              ) : (
                 <>
-                  {role === "admin" ? (
+                  {role === "user" && (
                     <Link
-                      href="/admin/classifications"
+                      href="/history"
                       className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                      Classifications
+                      <Clock className="w-4 h-4" />
+                      History
                       <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
                     </Link>
-                  ) : (
-                    <>
-                      {role === "user" && (
-                        <Link
-                          href="/history"
-                          className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                        >
-                          <Clock className="w-4 h-4" />
-                          History
-                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                        </Link>
-                      )}
-
-                      <Link
-                        href="/about"
-                        className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
-                      >
-                        <Info className="w-4 h-4" />
-                        About
-                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
-                      </Link>
-                    </>
                   )}
+
+                  <Link
+                    href="/about"
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold text-base transition-colors duration-200 relative group"
+                  >
+                    <Info className="w-4 h-4" />
+                    About
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-emerald-600 group-hover:w-full transition-all duration-300"></span>
+                  </Link>
                 </>
               )}
             </div>
 
             {/* Auth Button (desktop) */}
             <div className="hidden md:flex items-center">
-              {hydrated && (
-                <>
-                  {role && (
-                    <button
-                      onClick={async () => {
-                        await handleLogout();
-                        router.push("/auth/login");
-                      }}
-                      className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  )}
-                  {!role && (
-                    <Link
-                      href="/auth/login"
-                      className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
-                    >
-                      <LogIn className="w-4 h-4" />
-                      Login
-                    </Link>
-                  )}
-                </>
+              {role ? (
+                <button
+                  onClick={async () => {
+                    await handleLogout();
+                    router.push("/auth/login");
+                  }}
+                  className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-emerald-500/50 transition-all duration-300 text-base"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Login
+                </Link>
               )}
             </div>
           </div>
@@ -250,7 +235,7 @@ const Navbar = () => {
                 <Home className="w-4 h-4" /> Home
               </Link>
 
-              {hydrated && role === "admin" && (
+              {role === "admin" && (
                 <>
                   <Link
                     href="/admin/dashboard"
@@ -283,65 +268,59 @@ const Navbar = () => {
                 </>
               )}
 
-              {hydrated && (
+              {role === "admin" ? (
+                <Link
+                  href="/admin/classifications"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                >
+                  <CheckCircle2 className="w-4 h-4" /> Classifications
+                </Link>
+              ) : (
                 <>
-                  {role === "admin" ? (
+                  {role === "user" && (
                     <Link
-                      href="/admin/classifications"
+                      href="/history"
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
                     >
-                      <CheckCircle2 className="w-4 h-4" /> Classifications
+                      <Clock className="w-4 h-4" /> History
                     </Link>
-                  ) : (
-                    <>
-                      {role === "user" && (
-                        <Link
-                          href="/history"
-                          onClick={() => setMenuOpen(false)}
-                          className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
-                        >
-                          <Clock className="w-4 h-4" /> History
-                        </Link>
-                      )}
-
-                      <Link
-                        href="/about"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
-                      >
-                        <Info className="w-4 h-4" /> About
-                      </Link>
-                    </>
                   )}
+
+                  <Link
+                    href="/about"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 text-slate-700 hover:text-emerald-600 font-semibold"
+                  >
+                    <Info className="w-4 h-4" /> About
+                  </Link>
                 </>
               )}
 
               {/* Auth actions (mobile) */}
-              {hydrated && (
-                <div className="pt-2">
-                  {role ? (
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        await handleLogout();
-                        router.push("/auth/login");
-                      }}
-                      className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
-                    >
-                      <LogOut className="w-4 h-4" /> Logout
-                    </button>
-                  ) : (
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setMenuOpen(false)}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg"
-                    >
-                      <LogIn className="w-4 h-4" /> Login
-                    </Link>
-                  )}
-                </div>
-              )}
+              <div className="pt-2">
+                {role ? (
+                  <button
+                    onClick={async () => {
+                      setMenuOpen(false);
+                      await handleLogout();
+                      router.push("/auth/login");
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4" /> Logout
+                  </button>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg"
+                  >
+                    <LogIn className="w-4 h-4" /> Login
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
