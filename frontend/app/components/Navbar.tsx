@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
 import { useState, useLayoutEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   LayoutDashboard,
@@ -57,6 +58,7 @@ const Navbar = () => {
       setHydrated(true);
     });
   }, []);
+  const router = useRouter();
 
   const toggleMenu = () => {
     setMenuOpen((open) => !open);
@@ -200,7 +202,10 @@ const Navbar = () => {
                 <>
                   {role && (
                     <button
-                      onClick={handleLogout}
+                      onClick={async () => {
+                        await handleLogout();
+                        router.push("/auth/login");
+                      }}
                       className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
                     >
                       <LogOut className="w-4 h-4" />
