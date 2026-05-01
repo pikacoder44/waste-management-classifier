@@ -43,7 +43,6 @@ const handleLogout = async () => {
     }
     // Clear localStorage and reload the page
     localStorage.removeItem("userRole");
-    window.location.reload();
   } catch (error) {
     console.error("Error during logout:", error);
   }
