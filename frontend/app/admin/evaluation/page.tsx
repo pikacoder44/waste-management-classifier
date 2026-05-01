@@ -21,7 +21,6 @@ interface EvaluationStatus {
 const Page = () => {
   const [data, setData] = useState<EvaluationData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   // Evaluation tracking
   const [isRunningEval, setIsRunningEval] = useState(false);
@@ -36,15 +35,6 @@ const Page = () => {
   const fetchLatestEvaluation = async () => {
     setLoading(true);
     setError(null);
-    setProgress(0);
-
-    // Simulate progress
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 30;
-      });
-    }, 300);
 
     try {
       const response = await fetch(
@@ -57,8 +47,6 @@ const Page = () => {
           credentials: "include",
         },
       );
-
-      setProgress(95);
 
       if (!response.ok) {
         let errorMessage = `Failed to fetch evaluation: ${response.status}`;
@@ -73,7 +61,6 @@ const Page = () => {
 
       const evaluationData: EvaluationData = await response.json();
       setData(evaluationData);
-      setProgress(100);
 
       console.log("✓ Evaluation data loaded successfully:", evaluationData);
     } catch (err) {
@@ -83,9 +70,7 @@ const Page = () => {
           ? err.message
           : "Failed to fetch evaluation report",
       );
-      setProgress(0);
     } finally {
-      clearInterval(progressInterval);
       setLoading(false);
     }
   };
@@ -260,20 +245,12 @@ const Page = () => {
               </button>
             </div>
 
-            {/* Fetch Progress Bar */}
+            {/* Fetch Status */}
             {loading && (
               <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md">
-                <p className="text-xs font-semibold text-slate-700 mb-3">
-                  Loading Evaluation Report
-                </p>
-                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-linear-to-r from-emerald-500 to-emerald-600 rounded-full transition-all duration-300 shadow-lg"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-slate-600 mt-2 text-center font-medium">
-                  {Math.round(progress)}% Complete
+                <p className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                  <span className="inline-block h-3 w-3 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+                  Loading evaluation report
                 </p>
               </div>
             )}
