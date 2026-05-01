@@ -51,10 +51,10 @@ const Page = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="mb-12">
+        <div className="mb-10 sm:mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
             Admin Dashboard
           </h1>
@@ -68,7 +68,7 @@ const Page = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Admin Features
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             {adminFeatures.map((feature) => (
               <Link key={feature.id} href={feature.href}>
                 <div className="group h-full bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer">
@@ -114,7 +114,7 @@ const Page = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             System Health
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
@@ -174,7 +174,7 @@ const Page = () => {
         </div>
 
         {/* Recent Activity Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-8 border border-gray-100">
+        <div className="mt-8 bg-white rounded-lg shadow-md p-6 sm:p-8 border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Recent Classifications
           </h2>
@@ -207,9 +207,9 @@ const Page = () => {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
               >
-                <div className="flex items-center gap-4 flex-1">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="text-emerald-600">
                     <RotateCcw className="w-6 h-6" />
                   </div>
@@ -235,7 +235,7 @@ const Page = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6 mt-6">
           Stats Overview
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
           <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
             <div className="flex items-center justify-between">
               <div>
