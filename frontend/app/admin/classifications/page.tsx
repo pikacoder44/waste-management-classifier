@@ -149,7 +149,7 @@ const Page = () => {
 
       // Use /admin/classification/history endpoint which doesn't check user ownership
       const response = await fetch(
-        `http://localhost:8000/admin/classification/history/${entryId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/classification/history/${entryId}`,
         {
           method: "DELETE",
           headers: {
@@ -199,7 +199,7 @@ const Page = () => {
     const fetchClassificationHistory = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/admin/classification/history",
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/classification/history`,
           {
             credentials: "include", // Send cookies with request
           },
