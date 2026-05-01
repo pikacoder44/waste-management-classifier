@@ -277,23 +277,23 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         </div>
       )}
       {datasetName && (
-        <div className="p-8">
+        <div className="px-4 py-8 sm:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
                 <Edit3 className="w-8 h-8 text-emerald-600" />
                 <h1 className="text-4xl font-bold text-gray-900">
                   Update Dataset
                 </h1>
               </div>
-              <p className="text-gray-600 ml-11">
+              <p className="text-gray-600 sm:ml-11">
                 Make changes to your dataset information and images
               </p>
             </div>
 
             {/* Info Card */}
-            <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -320,7 +320,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
               </div>
 
               {/* Version and Upload Date */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-gray-600">
                     Version:
@@ -329,7 +329,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                     {datasetVersion}
                   </span>
                 </div>
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-start sm:justify-end">
                   <span className="text-sm text-gray-600">
                     Uploaded:{" "}
                     <span className="font-semibold">{uploadDate}</span>
@@ -346,7 +346,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                   {filePaths.length + selectedFiles.length}
                 </span>
               </h3>
-              <div className="flex flex-wrap gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {/* Existing images */}
                 {Array.isArray(filePaths) &&
                   filePaths.map((item, index) => {
@@ -362,7 +362,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                     return (
                       <div
                         key={`existing-${index}`}
-                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-56 relative"
+                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 relative"
                       >
                         <div className="relative h-56 bg-gray-100 overflow-hidden">
                           <Image
@@ -396,7 +396,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                 {selectedFiles.map((item, index) => (
                   <div
                     key={`new-${index}`}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-56"
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56"
                   >
                     <div className="relative h-56 bg-gray-100">
                       <Image
@@ -438,7 +438,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                 {/* Add new images card */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="group bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-md p-6 w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-dashed border-emerald-300 hover:border-emerald-500"
+                  className="group bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-md p-6 w-full max-w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-dashed border-emerald-300 hover:border-emerald-500"
                 >
                   <span className="text-5xl text-emerald-600 font-bold mb-2 transition-transform duration-500 group-hover:rotate-180">
                     +
@@ -468,7 +468,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                     <AlertCircle className="w-4 h-4" />
                     You have unsaved changes
                   </p>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={handleUploadImages}
                       disabled={uploading}
