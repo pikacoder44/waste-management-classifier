@@ -20,16 +20,16 @@ class DisposalRecommendation(BaseModel):
 
 recommendations = {
     "cardboard": {
-        "disposal_method": "Recycle Bin",
-        "description": "Place cardboard in the recycling bin. Remove any plastic tape or non-paper materials before recycling.",
-        "benefits": "Cardboard recycling reduces landfill waste by 15% and saves natural resources. Recycled cardboard is used to create new packaging and paper products.",
-        "alternatives": ["Compost (if uncoated and chemical-free)"],
+        "disposal_method": "Compost",
+        "description": "As an organic material, cardboard should be composted. Remove any plastic tape or non-paper materials before composting. Ensure it is uncoated and chemical-free.",
+        "benefits": "Cardboard composting reduces landfill waste and returns nutrients to soil. It breaks down naturally and enriches compost for gardens and landscaping.",
+        "alternatives": ["Recycle Bin (for plastic-coated cardboard)"],
     },
     "paper": {
-        "disposal_method": "Recycle Bin",
-        "description": "Place paper waste in the recycling bin. Separate glossy or plastic-coated papers for special disposal.",
-        "benefits": "Paper recycling conserves trees and reduces landfill space. One ton of recycled paper saves 17 trees and 7,000 gallons of water.",
-        "alternatives": ["Compost (if unbleached and uncoated)"],
+        "disposal_method": "Compost",
+        "description": "As an organic material, paper waste should be composted. Separate glossy or plastic-coated papers for recycling or special disposal instead.",
+        "benefits": "Paper composting reduces landfill space and returns organic matter to soil. One ton of paper returns valuable carbon to composting systems.",
+        "alternatives": ["Recycle Bin (for uncoated paper)"],
     },
     "metal": {
         "disposal_method": "Recycle Bin",
