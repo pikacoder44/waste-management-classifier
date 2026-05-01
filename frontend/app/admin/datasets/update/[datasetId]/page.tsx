@@ -73,7 +73,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     }
 
     const response = await fetch(
-      `http://localhost:8000${endpoint}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`,
       fetchOptions,
     );
 
@@ -358,7 +358,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                         ? item.originalFilename
                         : filePath.split("/").pop();
 
-                    const imageUrl = `http://localhost:8000/${filePath}`;
+                    const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath}`;
                     return (
                       <div
                         key={`existing-${index}`}
