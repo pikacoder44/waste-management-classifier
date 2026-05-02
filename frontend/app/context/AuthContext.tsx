@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // If token already expired on mount, clear stored role and redirect
       localStorage.removeItem("userRole");
       if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
-        router.push("/auth/login");
+        router.replace("/auth/login");
       }
       return;
     }
