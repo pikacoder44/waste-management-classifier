@@ -14,7 +14,7 @@ from app.services.model_evaluation_service import (
 )
 from app.services.split_dataset_services import ensure_split_dataset
 
-# Training status tracking
+# Shared training state
 training_status = {
     "is_training": False,
     "progress": 0,
@@ -25,7 +25,7 @@ training_status = {
     "total_epochs": 0,
 }
 
-# Evaluation status tracking (separate from training)
+# Separate evaluation state
 evaluation_status = {
     "is_evaluating": False,
     "progress": 0,
