@@ -22,14 +22,14 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 // Helper function to get token expiry time
 const getTokenExpiry = (): number | null => {
   if (typeof window === "undefined") return null;
-  
+
   // Read expiry from localStorage (set during login)
   const expiryStr = localStorage.getItem("tokenExpiry");
   if (!expiryStr) return null;
-  
+
   const expirySeconds = parseInt(expiryStr, 10);
   if (isNaN(expirySeconds)) return null;
-  
+
   return expirySeconds * 1000; // Convert from seconds to milliseconds
 };
 
