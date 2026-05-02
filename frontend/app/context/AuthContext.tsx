@@ -76,19 +76,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!expiry) return;
 
     const timeUntilExpiry = expiry - Date.now();
-    if (timeUntilExpiry <= 0) return; // Token already expired
 
-    // Set timeout to logout exactly when token expires
-    const logoutTimer = setTimeout(() => {
-      console.log("Session expired - logging out");
-      localStorage.removeItem("userRole");
-      setRole(null);
-      if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
-        router.push("/auth/login");
-      }
-    }, timeUntilExpiry);
+    // Declare timer variable upfront
+    let logoutTimer: NodeJS.Timeout;
 
-    return () => clearTimeout(logoutTimer);
+    if (timeUntilExpiry > 0) {
+      // Set timeout to logout exactly when token expires
+      logoutTimer = setTimeout(() => {
+        console.log("Session expired - logging out");
+        localStorage.removeItem("userRole");
+        setRole(null);
+        if (
+          pathname?.startsWith("/admin") ||
+          pathname?.startsWith("/history")
+        ) {
+          router.push("/auth/login");
+        }
+      }, timeUntilExpiry);
+    }
+
+    return () => {
+      if (logoutTimer) clearTimeout(logoutTimer);
+    };
   }, [router, pathname, role]);
 
   // Save role to localStorage whenever it changes
