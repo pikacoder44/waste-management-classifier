@@ -118,8 +118,6 @@ code/
 │   ├── model/
 │   │   └── waste_classifier_model.keras   # Trained model file
 │   ├── evaluation_results/                # Stored confusion matrices and metrics
-│   ├── model_training.py                  # Model training script
-│   ├── evaluation_of_model.py             # Model evaluation script
 │   ├── requirements.txt                   # Python dependencies
 │   └── venv/                              # Virtual environment
 ├── frontend/
@@ -346,15 +344,12 @@ DATABASE_NAME=waste_classifier
 SECRET_KEY=<your-secret-key>
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
-CLOUDINARY_CLOUD_NAME=<your-cloud-name>
-CLOUDINARY_API_KEY=<your-api-key>
-CLOUDINARY_API_SECRET=<your-api-secret>
 ```
 
 ## 📝 Development Notes
 
 - Dataset preprocessing happens automatically during model training
-- Images are stored on Cloudinary CDN for efficient delivery
+- Uploaded images are stored locally in `backend/uploads/` directory
 - Classification history is tied to user ID for privacy
 - Admin actions are executed as background tasks to prevent blocking
 - Model evaluation uses the same 70/30 split as training for consistency
@@ -378,25 +373,26 @@ CLOUDINARY_API_SECRET=<your-api-secret>
 
 ### Image Upload Fails
 
-- Verify Cloudinary credentials in .env
-- Check file size limits and supported formats (jpg, jpeg, png, gif, webp)
+- Check file size limits and supported formats (jpg, jpeg, png, webp)
+- Verify `backend/uploads/` directory is writable
 
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
+Use the Admin API endpoint to train the model:
+
 ```bash
-cd backend
-python model_training.py
+POST /admin/model/retrain
 ```
 
-This script will:
+The training process will:
 
 - Load images from `dataset/train/` and `dataset/test/`
 - Apply data augmentation (rotation, shift, zoom, flip)
 - Train a MobileNetV2-based CNN for waste classification
 - Save the trained model to `model/waste_classifier_model.keras`
-- Display training and validation loss/accuracy plots
+- Execute as a background task with progress polling via `GET /admin/model/status`
 
 ### Evaluating the Model
 
