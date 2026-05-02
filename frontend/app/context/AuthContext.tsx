@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, timeUntilExpiry);
 
     return () => clearTimeout(logoutTimer);
-  }, [router, pathname]);
+  }, [router, pathname, role]);
 
   // Save role to localStorage whenever it changes
   const handleSetRole = (newRole: RoleType) => {
