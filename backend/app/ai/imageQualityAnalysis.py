@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 class ImageQualityAnalyzer:
     """Analyzes image quality and provides detailed metrics."""
 
-    # Configuration constants
+    # Analyzer thresholds.
     MIN_RESOLUTION = 224
     BLUR_THRESHOLD = 100
     MIN_BRIGHTNESS = 30
@@ -33,7 +33,7 @@ class ImageQualityAnalyzer:
             }
         """
         try:
-            # Decode image
+
             nparr = np.frombuffer(image_bytes, np.uint8)
             image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -48,17 +48,13 @@ class ImageQualityAnalyzer:
                     "image_array": None,
                 }
 
-            # Extract metrics
             height, width = image.shape[:2]
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            # Calculate blur score (Laplacian variance)
             laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-            # Calculate brightness
             brightness = np.mean(gray)
 
-            # Check for issues
             issues = []
             quality_score = 100
 
