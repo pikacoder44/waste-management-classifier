@@ -66,6 +66,11 @@ const Login = () => {
 
       if (response.ok) {
         setRole(role);
+        // Store token expiry from response
+        const data = JSON.parse(text);
+        if (data.expiresAt) {
+          localStorage.setItem("tokenExpiry", data.expiresAt.toString());
+        }
       }
 
       const data = JSON.parse(text);
