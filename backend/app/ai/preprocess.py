@@ -7,22 +7,19 @@ def preprocess_image(image_bytes):
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
-        # Check if image is too small/blurry to be useful
         if image.width < 100 or image.height < 100:
             raise ValueError("Image too small (minimum 100×100 pixels required)")
 
-        # Preserve aspect ratio: resize to fit within 224x224
+        # Resize while keeping the aspect ratio.
         target_size = 224
         image.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
 
-        # Center crop/pad: create 224x224 black background
+        # Pad the image to a fixed 224x224 canvas.
         final_image = Image.new("RGB", (target_size, target_size), (0, 0, 0))
 
-        # Calculate offset to center the image
         offset_x = (target_size - image.width) // 2
         offset_y = (target_size - image.height) // 2
 
-        # Paste resized image onto center of black background
         final_image.paste(image, (offset_x, offset_y))
         image = final_image
 
