@@ -12,13 +12,13 @@ if not MONGO_URL:
 
 client = None
 db = None
-waste_collection = None
+# Collection handles are provided from collections.py; keep only db here
 
 try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
 
     db = client["waste_classifier"]
-    waste_collection = db["waste_collection"]
+    # collection bindings are handled in app.database.collections
     # Verify connection by pinging the server after the handles exist.
     client.admin.command("ping")
     print("✓ MongoDB connection successful")
