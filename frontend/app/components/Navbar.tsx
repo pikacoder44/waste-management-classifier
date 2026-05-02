@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Home,
   LayoutDashboard,
@@ -26,38 +25,9 @@ const poppins = Poppins({
   subsets: ["latin"],
 });
 
-const handleLogout = async () => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Include cookies in request/response
-      },
-    );
-    if (!response.ok) {
-      throw new Error("Logout failed");
-    }
-    // Clear localStorage and reload the page
-    localStorage.removeItem("userRole");
-  } catch (error) {
-    console.error("Error during logout:", error);
-  }
-};
-
 const Navbar = () => {
-  const { role, setRole } = useAuth();
+  const { role, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const router = useRouter();
-
-  const handleLogoutClick = async () => {
-    await handleLogout();
-    setRole(null);
-    router.push("/auth/login");
-  };
 
   const toggleMenu = () => {
     setMenuOpen((open) => !open);
@@ -195,7 +165,7 @@ const Navbar = () => {
             <div className="hidden md:flex items-center">
               {role ? (
                 <button
-                  onClick={handleLogoutClick}
+                  onClick={logout}
                   className="flex items-center gap-2 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-red-500/50 transition-all duration-300 text-base"
                 >
                   <LogOut className="w-4 h-4" />
@@ -307,9 +277,7 @@ const Navbar = () => {
                   <button
                     onClick={async () => {
                       setMenuOpen(false);
-                      await handleLogout();
-                      setRole(null);
-                      router.push("/auth/login");
+                      await logout();
                     }}
                     className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg"
                   >
