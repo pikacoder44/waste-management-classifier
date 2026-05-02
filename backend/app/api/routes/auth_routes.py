@@ -19,7 +19,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode.update({"exp": expire})
+    # Convert datetime to Unix timestamp (seconds since epoch)
+    to_encode.update({"exp": int(expire.timestamp())})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -129,8 +130,14 @@ def loginUser(user: User):
     # Use helper function for login logic
     login_result = _login_user_helper(user.username, user.password, user.role)
 
+    # Calculate expiry time (Unix timestamp in seconds)
+    expiry_time = int((datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)).timestamp())
+
     # Set token as HTTP-only cookie on response
-    response_obj = JSONResponse({"message": login_result["message"]})
+    response_obj = JSONResponse({
+        "message": login_result["message"],
+        "expiresAt": expiry_time  # Send expiry time to frontend
+    })
     response_obj.set_cookie(
         key="access_token",
         value=login_result["access_token"],
