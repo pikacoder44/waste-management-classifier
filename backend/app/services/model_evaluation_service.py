@@ -149,7 +149,8 @@ def evaluate_model(
     print(f"📦 Creating evaluation document...")
     evaluation_doc: Dict[str, Any] = {
         "modelVersion": model_version,
-        "evaluationDate": datetime.now().isoformat(),
+        # store as a real datetime so MongoDB stores a proper Date type
+        "evaluationDate": datetime.now(),
         "accuracy": accuracy,
         "precision": weighted_precision,
         "recall": weighted_recall,
