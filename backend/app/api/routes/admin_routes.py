@@ -21,6 +21,7 @@ from app.services.admin_model_service import (
     run_training_logic,
     run_evaluation_logic,
 )
+from app.utils.db_helpers import sanitize_doc
 from datetime import datetime
 import json
 from bson import ObjectId
@@ -273,11 +274,7 @@ def get_datasets(request: Request):
         verify_admin_from_request(request)
 
         # Logic to retrieve datasets goes here
-        datasets = list(dataset_collection.find())
-        for ds in datasets:
-            ds["_id"] = str(
-                ds["_id"]
-            )  # Convert ObjectId to string for JSON serialization
+        datasets = [sanitize_doc(ds) for ds in dataset_collection.find()]
         return {"message": "Datasets retrieved successfully", "datasets": datasets}
     except HTTPException:
         raise
@@ -299,9 +296,7 @@ def get_dataset_details(request: Request, dataset_id: str):
     if not dataset:
         raise HTTPException(status_code=404, detail="Dataset not found")
 
-    dataset["_id"] = str(
-        dataset["_id"]
-    )  # Convert ObjectId to string for JSON serialization
+    dataset = sanitize_doc(dataset)
 
     return {"message": "Dataset details retrieved successfully", "dataset": dataset}
 
@@ -423,16 +418,7 @@ def get_latest_evaluation(request: Request):
                 detail="No evaluation results found. Please run model retraining first.",
             )
 
-        # Convert ObjectId to string for JSON serialization
-        latest_evaluation["_id"] = str(latest_evaluation["_id"])
-        if isinstance(latest_evaluation.get("evaluationDate"), str):
-            latest_evaluation["evaluationDate"] = latest_evaluation["evaluationDate"]
-        else:
-            latest_evaluation["evaluationDate"] = latest_evaluation[
-                "evaluationDate"
-            ].isoformat()
-
-        return latest_evaluation
+        return sanitize_doc(latest_evaluation)
     except HTTPException:
         # Re-raise HTTP exceptions (404, etc.) without catching them
         raise
@@ -455,13 +441,10 @@ def get_classification_history(request: Request):
         from app.database.collections import waste_collection
 
         # Get all classification history
-        classification_history = list(waste_collection.find().sort("createdAt", -1))
-
-        # Convert ObjectId to string for JSON serialization
-        for entry in classification_history:
-            entry["_id"] = str(entry["_id"])
-            if "userId" in entry:
-                entry["userId"] = str(entry["userId"])
+        classification_history = [
+            sanitize_doc(entry)
+            for entry in waste_collection.find().sort("createdAt", -1)
+        ]
 
         return {"status": "success", "history": classification_history}
     except HTTPException:
