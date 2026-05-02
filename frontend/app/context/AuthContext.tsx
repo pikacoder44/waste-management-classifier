@@ -19,21 +19,18 @@ type AuthContextType = {
 // Create a context for authentication
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Helper function to decode JWT and get expiry time
+// Helper function to get token expiry time
 const getTokenExpiry = (): number | null => {
-  try {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("access_token="))
-      ?.split("=")[1];
-
-    if (!token) return null;
-
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.exp * 1000; // Convert to milliseconds
-  } catch {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
+  
+  // Read expiry from localStorage (set during login)
+  const expiryStr = localStorage.getItem("tokenExpiry");
+  if (!expiryStr) return null;
+  
+  const expirySeconds = parseInt(expiryStr, 10);
+  if (isNaN(expirySeconds)) return null;
+  
+  return expirySeconds * 1000; // Convert from seconds to milliseconds
 };
 
 // Compute initial role based on stored role and token expiry
@@ -43,6 +40,7 @@ const getInitialRole = (): RoleType => {
   const expiry = getTokenExpiry();
   if (!expiry || Date.now() >= expiry) {
     localStorage.removeItem("userRole");
+    localStorage.removeItem("tokenExpiry");
     return null;
   }
   return savedRole || null;
@@ -69,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       // Always clear local state regardless of API response
       localStorage.removeItem("userRole");
+      localStorage.removeItem("tokenExpiry");
       setRole(null);
       router.replace("/auth/login"); // Use replace to prevent back-button access
     }
@@ -83,6 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!expiry || Date.now() >= expiry) {
       // If token already expired on mount, clear stored role and redirect
       localStorage.removeItem("userRole");
+      localStorage.removeItem("tokenExpiry");
       if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
         router.replace("/auth/login");
       }
