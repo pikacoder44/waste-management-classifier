@@ -5,6 +5,7 @@ from app.ai.predict import predict_image
 from app.ai.imageProcessingService import ImageProcessingService
 from app.models.waste import Waste
 from app.database.collections import waste_collection
+from app.utils.db_helpers import sanitize_doc
 from app.utils.auth_utils import verify_user_from_request
 from datetime import datetime
 import time
@@ -95,7 +96,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         waste_entry = Waste(
             userId=user_id,
             filePath=str(image_path),
-            createdAt=datetime.now().isoformat(),
+            createdAt=datetime.now(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
             inferenceTime=inference_time,
@@ -129,11 +130,10 @@ async def get_classification_history(request: Request):
         # Fetch classification history from database
         history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
 
-        # Convert ObjectId to string
-        for entry in history:
-            entry["_id"] = str(entry["_id"])
+        # Sanitize documents (ObjectId -> str, datetime -> ISO)
+        sanitized = [sanitize_doc(entry) for entry in history]
 
-        return {"status": "success", "history": history}
+        return {"status": "success", "history": sanitized}
 
     except HTTPException as e:
         raise e
