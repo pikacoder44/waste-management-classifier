@@ -60,9 +60,9 @@ The model classifies waste into 6 categories:
 
 - **Framework:** FastAPI (Python)
 - **ML/AI:** TensorFlow/Keras, scikit-learn
-- **Database:** MongoDB (with Motor async driver)
-- **Authentication:** JWT, bcrypt
-- **Image Upload:** Local filesystem storage exposed through FastAPI static mounts
+- **Database:** MongoDB
+- **Authentication:** JWT and bcrypt
+- **Image Upload:** Local filesystem storage
 - **Server:** Uvicorn
 
 ### Frontend
@@ -71,10 +71,6 @@ The model classifies waste into 6 categories:
 - **Styling:** Tailwind CSS 4
 - **State Management:** React hooks
 - **HTTP Client:** Fetch API with credentials support
-
-### Key Dependencies
-
-**Backend:** absl-py, annotated-types, anyio, astunparse, bcrypt, certifi, charset-normalizer, click, colorama, contourpy, cycler, dnspython, fastapi, flatbuffers, fonttools, gast, google-pasta, grpcio, h11, h5py, idna, itsdangerous, Jinja2, joblib, keras, kiwisolver, libclang, Markdown, MarkupSafe, matplotlib, mdurl, ml_dtypes, motor, namex, numpy, opencv-python, opt_einsum, optree, packaging, pandas, passlib, pillow, protobuf, pydantic, PyJWT, pymongo, pyparsing, python-dateutil, python-dotenv, python-multipart, requests, rich, scikit-learn, scipy, seaborn, six, starlette, tensorboard, tensorflow, termcolor, threadpoolctl, typing-extensions, tzdata, urllib3, uvicorn, Werkzeug, wrapt
 
 ## 📁 Project Structure
 
@@ -282,46 +278,6 @@ Role: user (automatic)
 - **Role-Based Access Control:** Admin vs User permissions
 - **Trusted Host Middleware:** Prevents Host header attacks
 
-## 📈 Model Training & Evaluation
-
-### Training the Model
-
-```bash
-cd backend
-python -m app.model_training
-```
-
-Or via Admin API:
-
-```bash
-POST /admin/model/retrain
-# Returns background task confirmation
-# Poll /admin/model/status for progress
-```
-
-### Evaluating the Model
-
-```bash
-cd backend
-python -m app.evaluation_of_model
-```
-
-Or via Admin API:
-
-```bash
-POST /admin/model/evaluate
-# Returns background task confirmation
-# Poll /admin/model/evaluation/status for progress
-# Get results with /admin/model/evaluation/latest
-```
-
-### Evaluation Metrics
-
-- Accuracy, Precision, Recall, F1-Score per class
-- Overall confusion matrix
-- Class-wise performance breakdown
-- Timestamp of evaluation run
-
 ## 🎨 Frontend Pages
 
 - **Home (`/`)** - Main classification interface
@@ -346,79 +302,6 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 ```
 
-## 📝 Development Notes
-
-- Dataset preprocessing happens automatically during model training
-- Uploaded images are stored locally in `backend/uploads/` directory
-- Classification history is tied to user ID for privacy
-- Admin actions are executed as background tasks to prevent blocking
-- Model evaluation uses the same 70/30 split as training for consistency
-
-## 🐛 Troubleshooting
-
-### Database Connection Issues
-
-- Ensure MongoDB is running on localhost:27017
-- Check DATABASE_URL in .env file
-
-### CORS Errors
-
-- Verify frontend is running on localhost:3000
-- Check CORS middleware configuration in main.py
-
-### Model Not Found
-
-- Ensure waste_classifier_model.keras exists in `backend/model/`
-- Run model training if model doesn't exist
-
-### Image Upload Fails
-
-- Check file size limits and supported formats (jpg, jpeg, png, webp)
-- Verify `backend/uploads/` directory is writable
-
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-Use the Admin API endpoint to train the model:
-
-```bash
-POST /admin/model/retrain
-```
-
-The training process will:
-
-- Load images from `dataset/train/` and `dataset/test/`
-- Apply data augmentation (rotation, shift, zoom, flip)
-- Train a MobileNetV2-based CNN for waste classification
-- Save the trained model to `model/waste_classifier_model.keras`
-- Execute as a background task with progress polling via `GET /admin/model/status`
-
-### Evaluating the Model
-
-To evaluate the trained model on test data:
-
-```bash
-cd backend
-python evaluation_of_model.py
-```
-
-This script will:
-
-- Load the trained model from `model/waste_classifier_model.keras`
-- Run predictions on test images in `dataset/test/`
-- Generate evaluation metrics: **Accuracy**, **Precision**, **Recall**, **F1-Score**
-- Create a **Confusion Matrix** heatmap visualization
-- Save results to `frontend/utils/evaluation_results.json` for frontend display
-
-## API Endpoints
-
-- `POST /predict` — classify an image
-
-# Conclusion
-
-This is a prototype of my CS619 Final Year Project. The requirements were given to me by my supervisor, and I implemented the project based on those requirements. The project is a waste classification system that uses a machine learning model to classify images of waste into different categories. The backend is built using FastAPI, and the frontend is built using Next.js with Tailwind CSS for styling. The machine learning model is a convolutional neural network (CNN) built using TensorFlow/Keras.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details
