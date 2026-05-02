@@ -35,17 +35,12 @@ const getTokenExpiry = (): number | null => {
   }
 };
 
-// Helper function to check if JWT token is expired
-const isTokenExpired = (): boolean => {
-  const expiry = getTokenExpiry();
-  return !expiry || Date.now() >= expiry;
-};
-
 // Compute initial role based on stored role and token expiry
 const getInitialRole = (): RoleType => {
   if (typeof window === "undefined") return null;
   const savedRole = localStorage.getItem("userRole") as RoleType | null;
-  if (isTokenExpired()) {
+  const expiry = getTokenExpiry();
+  if (!expiry || Date.now() >= expiry) {
     localStorage.removeItem("userRole");
     return null;
   }
@@ -62,18 +57,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // If token already expired on mount, clear stored role and redirect
-    if (isTokenExpired()) {
+    // Decode expiry and check if token is expired
+    const expiry = getTokenExpiry();
+    if (!expiry || Date.now() >= expiry) {
+      // If token already expired on mount, clear stored role and redirect
       localStorage.removeItem("userRole");
       if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
         router.push("/auth/login");
       }
       return;
     }
-
-    // Decode expiry and set timeout for exact expiry moment
-    const expiry = getTokenExpiry();
-    if (!expiry) return;
 
     const timeUntilExpiry = expiry - Date.now();
 
