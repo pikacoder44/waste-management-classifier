@@ -28,7 +28,7 @@ from bson import ObjectId
 
 router = APIRouter()
 
-# ------------------------------- Dataset Routes -------------------------------
+# Dataset routes
 
 
 @router.post("/admin/dataset/upload")
@@ -36,7 +36,6 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
     try:
         verify_admin_from_request(request)
 
-        # Validate dataset name
         if not payload.datasetName or not payload.datasetName.strip():
             raise HTTPException(status_code=400, detail="Dataset name is required")
 
@@ -47,9 +46,8 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
 
         uploaded_results = []
         errors = []
-        all_file_paths = []  # Store all file paths for this batch
+        all_file_paths = []
 
-        # Process each image with its corresponding label
         for image_data in payload.images:
             validated = validate_and_process_image(image_data, errors)
             if validated is None:
@@ -65,7 +63,6 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                     label, file_bytes, file_ext
                 )
 
-                # Collect file path and upload result
                 all_file_paths.append(
                     {
                         "filePath": normalized_file_path,
@@ -86,9 +83,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
             except Exception as e:
                 errors.append({"file": filename, "error": str(e)})
 
-        # Create single database entry for this batch upload if there are successful uploads
         if uploaded_results:
-            # Use the dataset name provided by the admin
             dataset_name = payload.datasetName.strip()
             dataset_description = (
                 payload.datasetDescription.strip()
@@ -96,15 +91,12 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 else None
             )
 
-            # Get the latest version for this dataset
-            # Use find with sort to get the most recent version
             existing_dataset = list(
                 dataset_collection.find({"name": dataset_name})
                 .sort("uploadDate", -1)
                 .limit(1)
             )
             if existing_dataset:
-                # Raise error if dataset with same name already exists to prevent confusion
                 raise HTTPException(
                     status_code=400,
                     detail=f"A dataset with the name '{dataset_name}' already exists. Please choose a different name.",
@@ -114,14 +106,13 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 name=dataset_name,
                 description=dataset_description,
                 version="1.0",
-                filePath=json.dumps(all_file_paths),  # Store as proper JSON
-                imageCount=len(uploaded_results),  # Count of successful uploads
+                filePath=json.dumps(all_file_paths),
+                imageCount=len(uploaded_results),
                 uploadDate=datetime.now(),
                 lastUpdated=datetime.now(),
             )
             dataset_collection.insert_one(uploadedDataset.dict())
 
-        # Prepare response
         response = {
             "status": "completed",
             "totalFiles": len(payload.images),
@@ -136,7 +127,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
         return response
 
     except HTTPException:
-        raise  # Let HTTP exceptions pass through
+        raise
     except Exception as e:
         print(f"Error uploading dataset: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
@@ -148,11 +139,9 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         verify_admin_from_request(request)
         objectId = ObjectId(payload.dataset_id)
         requestedDataset = dataset_collection.find_one({"_id": objectId})
-        # If the ID doesn't exist, it returns a 404 Not Found error.
         if not requestedDataset:
             raise HTTPException(status_code=404, detail="Dataset not found")
 
-        # -- Preparing the fields to update --
         update_fields = {}
 
         if payload.new_name:
@@ -162,24 +151,19 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         if payload.datasetDescription is not None:
             update_fields["description"] = payload.datasetDescription.strip()
 
-        # Handle image deletion and uploads
         existing_file_paths = []
         if requestedDataset.get("filePath"):
             existing_file_paths = parse_file_paths_json(requestedDataset["filePath"])
 
-        # Delete specified images from disk and database
         if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
-            # Paths to delete are already in normalized format (with /)
             paths_to_delete_normalized = set(payload.images_to_delete)
 
-            # Delete specified images from disk
             for file_path in paths_to_delete_normalized:
                 try:
                     delete_stored_file(file_path)
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
 
-            # Remove deleted images from the database
             existing_file_paths = [
                 item
                 for item in existing_file_paths
@@ -195,7 +179,6 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                 f"✓ Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
             )
 
-        # Handle Image Uploads using the shared validation helper
         new_file_paths = []
         upload_errors = []
 
@@ -225,26 +208,21 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                 except Exception as e:
                     upload_errors.append({"file": filename, "error": str(e)})
 
-            # Merge old and new file paths
             all_file_paths = existing_file_paths + new_file_paths
             update_fields["filePath"] = json.dumps(all_file_paths)
             update_fields["imageCount"] = len(all_file_paths)
             update_fields["lastUpdated"] = datetime.now()
-            # Auto-increment version on upload if not explicitly provided
             if payload.version is None:
                 current_version = requestedDataset.get("version", "1.0")
                 update_fields["version"] = increment_version(current_version)
 
         elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
-            # Handle deletion without new uploads
             update_fields["filePath"] = json.dumps(existing_file_paths)
             update_fields["imageCount"] = len(existing_file_paths)
             update_fields["lastUpdated"] = datetime.now()
-            # Auto-increment version on deletion
             current_version = requestedDataset.get("version", "1.0")
             update_fields["version"] = increment_version(current_version)
 
-        # Execute database update
         if update_fields:
             dataset_collection.update_one({"_id": objectId}, {"$set": update_fields})
 
@@ -273,7 +251,6 @@ def get_datasets(request: Request):
     try:
         verify_admin_from_request(request)
 
-        # Logic to retrieve datasets goes here
         datasets = [sanitize_doc(ds) for ds in dataset_collection.find()]
         return {"message": "Datasets retrieved successfully", "datasets": datasets}
     except HTTPException:
@@ -305,24 +282,23 @@ def get_dataset_details(request: Request, dataset_id: str):
 def delete_dataset(request: Request, payload: DeleteDatasetRequest):
     try:
         verify_admin_from_request(request)
-        # Convert the string dataset_id to ObjectId
         object_id = ObjectId(payload.dataset_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid dataset ID format")
 
-    # IMPORTANT: Retrieve dataset FIRST before deleting from database!
+    # Retrieve the dataset before deleting it.
     dataset = dataset_collection.find_one({"_id": object_id})
     if not dataset:
         raise HTTPException(status_code=404, detail="Dataset not found")
 
-    # Delete associated files from the filesystem
+    # Remove the saved images from disk.
     if dataset.get("filePath"):
         file_paths = parse_file_paths_json(dataset["filePath"])
 
         deleted_count = 0
         for file_info in file_paths:
             try:
-                # Handle both dict and string formats
+                # File paths can be stored as dicts or strings.
                 if isinstance(file_info, dict):
                     file_path = file_info.get("filePath")
                 else:
@@ -347,7 +323,7 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
     }
 
 
-# ------------------------------- Model Training Routes -------------------------------
+# Model training routes
 
 
 @router.post("/admin/model/retrain")
@@ -360,7 +336,7 @@ async def retrain_model(request: Request, background_tasks: BackgroundTasks):
             "message": "Training is already in progress. Please wait for it to complete.",
         }
 
-    # This starts the 'offline' training without blocking the API
+    # Keep training off the request thread.
     background_tasks.add_task(run_training_logic)
 
     return {"message": "Retraining started offline. Check status for updates."}
@@ -373,7 +349,7 @@ def get_model_status(request: Request):
     return training_status
 
 
-# ------------------------------- Model Evaluation Routes -------------------------------
+# Model evaluation routes
 
 
 @router.post("/admin/model/evaluate")
@@ -405,7 +381,6 @@ def get_evaluation_status(request: Request):
 def get_latest_evaluation(request: Request):
     try:
         verify_admin_from_request(request)
-        # Get the latest evaluation result
         from app.database.collections import model_evaluation_collection
 
         latest_evaluation = model_evaluation_collection.find_one(
@@ -420,7 +395,6 @@ def get_latest_evaluation(request: Request):
 
         return sanitize_doc(latest_evaluation)
     except HTTPException:
-        # Re-raise HTTP exceptions (404, etc.) without catching them
         raise
     except Exception as e:
         print(f"Error fetching evaluation results: {e}")
@@ -429,7 +403,7 @@ def get_latest_evaluation(request: Request):
         )
 
 
-# ------------------------------- Classification History Route -------------------------------
+# Classification history route
 
 
 @router.get("/admin/classification/history")
@@ -440,7 +414,6 @@ def get_classification_history(request: Request):
 
         from app.database.collections import waste_collection
 
-        # Get all classification history
         classification_history = [
             sanitize_doc(entry)
             for entry in waste_collection.find().sort("createdAt", -1)
@@ -463,7 +436,6 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
         from app.database.collections import waste_collection
         from bson import ObjectId
 
-        # Check MongoDB connection
         if waste_collection is None:
             raise HTTPException(
                 status_code=503, detail="Database connection unavailable"
