@@ -1,6 +1,8 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { MetricCard } from "./MetricCard";
+import { ConfusionMatrix } from "./ConfusionMatrix";
+import { PerformanceScorecard } from "./PerformanceScorecard";
 
 interface EvaluationData {
   modelVersion: string;
@@ -329,230 +331,56 @@ const Page = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-linear-to-r from-emerald-200 to-blue-200 rounded-xl blur-lg opacity-20" />
               <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {[
-                  {
-                    label: "Accuracy",
-                    value: (data.accuracy * 100).toFixed(1),
-                    icon: "✓",
-                    color: "from-emerald-600 to-emerald-700",
-                    bgColor: "bg-linear-to-br from-emerald-50 to-emerald-100",
-                    borderColor: "border-emerald-200",
-                    desc: "Overall correct predictions",
-                  },
-                  {
-                    label: "Precision",
-                    value: (data.precision * 100).toFixed(1),
-                    icon: "⚡",
-                    color: "from-blue-600 to-blue-700",
-                    bgColor: "bg-linear-to-br from-blue-50 to-blue-100",
-                    borderColor: "border-blue-200",
-                    desc: "Positive prediction accuracy",
-                  },
-                  {
-                    label: "Recall",
-                    value: (data.recall * 100).toFixed(1),
-                    icon: "🎯",
-                    color: "from-purple-600 to-purple-700",
-                    bgColor: "bg-linear-to-br from-purple-50 to-purple-100",
-                    borderColor: "border-purple-200",
-                    desc: "True positive detection rate",
-                  },
-                  {
-                    label: "F1 Score",
-                    value: (data.f1_score * 100).toFixed(1),
-                    icon: "⭐",
-                    color: "from-orange-600 to-orange-700",
-                    bgColor: "bg-linear-to-br from-orange-50 to-orange-100",
-                    borderColor: "border-orange-200",
-                    desc: "Harmonic mean of metrics",
-                  },
-                ].map((metric, idx) => (
-                  <div
-                    key={idx}
-                    className={`bg-white border-2 ${metric.borderColor} rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1`}
-                  >
-                    <div className="flex items-start gap-3 mb-4">
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br ${metric.bgColor} text-lg font-bold`}
-                      >
-                        {metric.icon}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                          {metric.label}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <p className="text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-slate-900 to-slate-700">
-                        {metric.value}%
-                      </p>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full bg-linear-to-r ${metric.color} transition-all duration-700 shadow-lg`}
-                        style={{
-                          width: `${Math.min(100, parseFloat(metric.value))}%`,
-                        }}
-                      />
-                    </div>
-                    <p className="text-xs text-slate-600 mt-3 font-medium">
-                      {metric.desc}
-                    </p>
-                  </div>
-                ))}
+                <MetricCard
+                  label="Accuracy"
+                  value={data.accuracy}
+                  icon="✓"
+                  color="from-emerald-600 to-emerald-700"
+                  bgColor="bg-linear-to-br from-emerald-50 to-emerald-100"
+                  borderColor="border-emerald-200"
+                  desc="Overall correct predictions"
+                />
+                <MetricCard
+                  label="Precision"
+                  value={data.precision}
+                  icon="⚡"
+                  color="from-blue-600 to-blue-700"
+                  bgColor="bg-linear-to-br from-blue-50 to-blue-100"
+                  borderColor="border-blue-200"
+                  desc="Positive prediction accuracy"
+                />
+                <MetricCard
+                  label="Recall"
+                  value={data.recall}
+                  icon="🎯"
+                  color="from-purple-600 to-purple-700"
+                  bgColor="bg-linear-to-br from-purple-50 to-purple-100"
+                  borderColor="border-purple-200"
+                  desc="True positive detection rate"
+                />
+                <MetricCard
+                  label="F1 Score"
+                  value={data.f1_score}
+                  icon="⭐"
+                  color="from-orange-600 to-orange-700"
+                  bgColor="bg-linear-to-br from-orange-50 to-orange-100"
+                  borderColor="border-orange-200"
+                  desc="Harmonic mean of metrics"
+                />
               </div>
             </div>
           </div>
         )}
 
-        {/* Confusion Matrix Section */}
-        {data && (
-          <div className="mt-12">
-            <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="mb-8">
-                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">
-                  Confusion Matrix
-                </h2>
-                <p className="text-sm text-slate-600 max-w-3xl">
-                  Rows represent actual classes, columns represent predicted
-                  classes. Diagonal values indicate correct predictions.
-                </p>
-              </div>
-
-              <div className="flex justify-center mb-8">
-                <div className="w-full max-w-3xl rounded-xl overflow-hidden border-2 border-slate-300 bg-linear-to-br from-slate-50 to-slate-100 p-3 shadow-md">
-                  <Image
-                    src="/Confusion_Matrix.PNG"
-                    alt="Confusion Matrix"
-                    width={550}
-                    height={550}
-                    className="w-full h-auto max-w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="bg-linear-to-r rounded-xl p-4">
-                <p className="text-sm text-slate-700 text-center leading-relaxed">
-                  The confusion matrix visualizes the model&apos;s
-                  classification performance across all waste categories.
-                  <span className="font-semibold text-slate-900">
-                    {" "}
-                    Darker values along the diagonal indicate strong
-                    classification accuracy
-                  </span>
-                  for each waste type, while off-diagonal values show
-                  misclassifications between categories.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Confusion Matrix */}
+        {data && <ConfusionMatrix />}
 
         {/* Performance Scorecard */}
         {data && (
-          <div className="mt-12">
-            <div className="bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 shadow-lg">
-              <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                <span className="text-3xl">🎓</span>
-                <span>Model Performance Deep Dive</span>
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl p-6 shadow-md border-2 border-emerald-200 hover:shadow-lg transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-emerald-700 uppercase">
-                      Overall Performance
-                    </h4>
-                    <span className="text-3xl font-black text-emerald-600">
-                      {(data.accuracy * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs text-slate-600">
-                      <strong>Model Status:</strong>{" "}
-                      <span className="text-emerald-600 font-bold">
-                        🟢 Excellent
-                      </span>
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      <strong>Recommendation:</strong> Production-ready for
-                      deployment
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      <strong>Confidence:</strong> Very High - Metrics are
-                      stable and strong
-                    </p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-md border-2 border-blue-200 hover:shadow-lg transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-blue-700 uppercase">
-                      Metric Balance
-                    </h4>
-                    <span className="text-3xl">⚖️</span>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs text-slate-600">
-                      <strong>Precision vs Recall:</strong> Well-balanced
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      <strong>F1 Score:</strong>{" "}
-                      {(data.f1_score * 100).toFixed(1)}% - Excellent harmonic
-                      mean
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      <strong>Class Distribution:</strong> Evenly distributed
-                      predictions
-                    </p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-md border-2 border-orange-200 hover:shadow-lg transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-orange-700 uppercase">
-                      Strengths
-                    </h4>
-                    <span className="text-3xl">💪</span>
-                  </div>
-                  <ul className="space-y-1">
-                    <li className="text-xs text-slate-700">
-                      • High precision - Few false positives
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      • Strong recall - Minimal false negatives
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      • Stable across all categories
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      • Production-grade performance
-                    </li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-xl p-6 shadow-md border-2 border-pink-200 hover:shadow-lg transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-bold text-pink-700 uppercase">
-                      Next Phase
-                    </h4>
-                    <span className="text-3xl">🚀</span>
-                  </div>
-                  <ul className="space-y-1">
-                    <li className="text-xs text-slate-700">
-                      → Deploy to production environment
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      → Set up performance monitoring
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      → Plan quarterly re-evaluation
-                    </li>
-                    <li className="text-xs text-slate-700">
-                      → Collect edge case samples
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PerformanceScorecard
+            accuracy={data.accuracy}
+            f1Score={data.f1_score}
+          />
         )}
       </div>
     </div>
