@@ -49,7 +49,6 @@ def verify_admin_from_request(request: Request) -> dict:
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid access token")
 
-    # Fetch user from DB
     try:
         user = user_collection.find_one({"_id": ObjectId(user_id)})
     except Exception as e:
@@ -59,10 +58,9 @@ def verify_admin_from_request(request: Request) -> dict:
     if not user:
         raise HTTPException(status_code=404, detail="Admin not found")
 
-    # Check role instead of hardcoded ID
     if user.get("role") != "admin":
         raise HTTPException(
             status_code=403, detail="Only admin can access this resource"
         )
 
-    return user  # Return full user object
+    return user
