@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Lock, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
