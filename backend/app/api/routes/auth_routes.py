@@ -19,7 +19,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     else:
         expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    # Convert datetime to Unix timestamp (seconds since epoch)
     to_encode.update({"exp": int(expire.timestamp())})
     encoded_jwt = encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -38,31 +37,35 @@ def get_user_id_from_token(token: str) -> Optional[str]:
 
 def _login_user_helper(username: str, password: str, role: str):
     """Helper function to handle login logic for both admin and user roles."""
-    # Validate input
+    # Check if username is empty
     if not username or not username.strip():
         raise HTTPException(status_code=400, detail="Username cannot be empty")
+    # Check if password is empty
     if not password:
         raise HTTPException(status_code=400, detail="Password cannot be empty")
+    # Check if role is valid (only admin or user)
     if role not in ["admin", "user"]:
         raise HTTPException(status_code=400, detail="Invalid role")
 
+    # Convert username to lowercase for consistency
     username = username.lower().strip()
+    # Look up user in the database
     try:
         existing_user = user_collection.find_one({"username": username, "role": role})
     except Exception as e:
         print(f"Database error during {role} lookup: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+    # Check if user was found
     if not existing_user:
         raise HTTPException(status_code=404, detail=f"{role.capitalize()} not found")
 
-    # Verify password
+    # Check if the password matches the one stored in database
     if not bcrypt.checkpw(
         password.encode("utf-8"), existing_user["password"].encode("utf-8")
     ):
         raise HTTPException(status_code=401, detail="Invalid password")
 
-    # Create JWT token
     access_token = create_access_token(
         data={
             "sub": username,
@@ -71,7 +74,6 @@ def _login_user_helper(username: str, password: str, role: str):
         }
     )
 
-    # Return token and user info
     return {
         "access_token": access_token,
         "message": f"{role.capitalize()} login successful",
@@ -80,35 +82,39 @@ def _login_user_helper(username: str, password: str, role: str):
 
 @router.post("/auth/register")
 def registerUser(user: User):
-    # Validate input
+    # Check if username is empty
     if not user.username or not user.username.strip():
         raise HTTPException(status_code=400, detail="Username cannot be empty")
+    # Check if password is at least 8 characters
     if not user.password or len(user.password) < 8:
         raise HTTPException(
             status_code=400, detail="Password must be at least 8 characters long"
         )
 
-    # Logic-based checks
-    username = user.username.lower().strip()  # Normalize username to lowercase
+    # Convert username to lowercase for consistency
+    username = user.username.lower().strip()
+    # Check if user already exists in database
     try:
         existing_user = user_collection.find_one({"username": username})
     except Exception as e:
         print(f"Database error during user lookup: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+    # If user exists, stop and return error
     if existing_user:
         raise HTTPException(status_code=409, detail="User already exists")
-    # Hash password
+    # Hash the password before saving
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), salt)
 
+    # Prepare user data for saving
     user_dict = {
         "username": username,
-        "password": hashed_password.decode("utf-8"),  # Store as string
-        "role": "user",  # Force role to 'user' for all registered users
+        "password": hashed_password.decode("utf-8"),
+        "role": "user",
     }
 
-    # Only wrap the unpredictable DB operation
+    # Save user to database
     try:
         result = user_collection.insert_one(user_dict)
     except Exception as e:
@@ -123,30 +129,26 @@ def registerUser(user: User):
 
 @router.post("/auth/login")
 def loginUser(user: User):
-    # Validate role is provided
     if not user.role:
         raise HTTPException(status_code=400, detail="Role is required")
 
-    # Use helper function for login logic
     login_result = _login_user_helper(user.username, user.password, user.role)
 
-    # Calculate expiry time (Unix timestamp in seconds)
     expiry_time = int(
         (datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)).timestamp()
     )
 
-    # Set token as HTTP-only cookie on response
     response_obj = JSONResponse(
         {
             "message": login_result["message"],
-            "expiresAt": expiry_time,  # Send expiry time to frontend
+            "expiresAt": expiry_time,
         }
     )
     response_obj.set_cookie(
         key="access_token",
         value=login_result["access_token"],
         httponly=True,
-        secure=False,  # Set to True in production with HTTPS
+        secure=False,
         samesite="lax",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
@@ -155,13 +157,8 @@ def loginUser(user: User):
 
 @router.post("/auth/logout")
 def logoutUser():
-    # Clear the access token cookie
     response_obj = JSONResponse({"message": "Logout successful"})
     response_obj.delete_cookie(
-        key="access_token",
-        httponly=True,
-        secure=False,  # Must match set_cookie parameters
-        samesite="lax",
-        path="/",  # Specify path to ensure deletion
+        key="access_token", httponly=True, secure=False, samesite="lax", path="/"
     )
     return response_obj
