@@ -1,5 +1,12 @@
 "use client";
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 type RoleType = "admin" | "user" | null;
 type AuthContextType = {
@@ -10,15 +17,78 @@ type AuthContextType = {
 // Create a context for authentication
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+// Helper function to decode JWT and get expiry time
+const getTokenExpiry = (): number | null => {
+  try {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("access_token="))
+      ?.split("=")[1];
+
+    if (!token) return null;
+
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000; // Convert to milliseconds
+  } catch {
+    return null;
+  }
+};
+
+// Helper function to check if JWT token is expired
+const isTokenExpired = (): boolean => {
+  const expiry = getTokenExpiry();
+  return !expiry || Date.now() >= expiry;
+};
+
+// Compute initial role based on stored role and token expiry
+const getInitialRole = (): RoleType => {
+  if (typeof window === "undefined") return null;
+  const savedRole = localStorage.getItem("userRole") as RoleType | null;
+  if (isTokenExpired()) {
+    localStorage.removeItem("userRole");
+    return null;
+  }
+  return savedRole || null;
+};
+
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [role, setRole] = useState<RoleType>(() => {
-    if (typeof window !== "undefined") {
-      const savedRole = localStorage.getItem("userRole") as RoleType | null;
-      return savedRole || null; // Return null if no saved role
+  const [role, setRole] = useState<RoleType>(() => getInitialRole());
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Check token on mount and set up timeout to logout at exact expiry
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // If token already expired on mount, clear stored role and redirect
+    if (isTokenExpired()) {
+      localStorage.removeItem("userRole");
+      if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
+        router.push("/auth/login");
+      }
+      return;
     }
-    return null;
-  });
+
+    // Decode expiry and set timeout for exact expiry moment
+    const expiry = getTokenExpiry();
+    if (!expiry) return;
+
+    const timeUntilExpiry = expiry - Date.now();
+    if (timeUntilExpiry <= 0) return; // Token already expired
+
+    // Set timeout to logout exactly when token expires
+    const logoutTimer = setTimeout(() => {
+      console.log("Session expired - logging out");
+      localStorage.removeItem("userRole");
+      setRole(null);
+      if (pathname?.startsWith("/admin") || pathname?.startsWith("/history")) {
+        router.push("/auth/login");
+      }
+    }, timeUntilExpiry);
+
+    return () => clearTimeout(logoutTimer);
+  }, [router, pathname]);
 
   // Save role to localStorage whenever it changes
   const handleSetRole = (newRole: RoleType) => {
