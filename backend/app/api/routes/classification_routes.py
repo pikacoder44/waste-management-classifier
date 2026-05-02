@@ -31,28 +31,28 @@ class_labels = {
 @router.post("/classification/analyze")
 async def analyze_classification_result(file: UploadFile, request: Request):
     try:
-        # Validate file is an image
+        # Check if the file is an image
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Invalid image file")
 
-        # Read image bytes
+        # Read the image file
         image_bytes = await file.read()
 
-        # Get user ID from JWT token
+        # Check if user is logged in and get their ID
         user_id = verify_user_from_request(request)
 
-        # Create user upload directory if it doesn't exist
+        # Create a folder for this user's uploads
         user_upload_dir = Path(f"uploads/{user_id}")
         user_upload_dir.mkdir(parents=True, exist_ok=True)
 
-        # Step 1: Check image quality and auto-enhance if needed
+        # Check if image quality is good enough for the model
         processing_result = ImageProcessingService.process_and_validate(image_bytes)
 
-        # If image is not valid, return error
+        # If image quality is not good enough, reject it
         if not processing_result["is_valid"]:
             raise HTTPException(status_code=400, detail=processing_result["message"])
 
-        # Log quality enhancement info to backend terminal if image was enhanced
+        # Log if image was improved
         if processing_result["was_enhanced"]:
             print(
                 f"✓ Image enhanced: Original quality: {processing_result['original_quality']:.1f}% → Enhanced quality: {processing_result['quality_score']:.1f}%"
@@ -64,12 +64,12 @@ async def analyze_classification_result(file: UploadFile, request: Request):
                 f"✓ Image quality acceptable: {processing_result['quality_score']:.1f}%"
             )
 
-        # Save image locally with timestamp
+        # Create a filename with current date and time
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         image_filename = f"{timestamp}.png"
         image_path = user_upload_dir / image_filename
 
-        # Convert enhanced image back to bytes for saving and preprocessing
+        # Get the final image (after enhancement if it happened)
         if processing_result["image_array"] is not None:
             final_image_bytes = ImageProcessingService.convert_to_bytes(
                 processing_result["image_array"]
@@ -77,22 +77,24 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         else:
             final_image_bytes = image_bytes
 
+        # Save the image to disk
         with open(image_path, "wb") as f:
             f.write(final_image_bytes)
 
-        # Step 2: Preprocess image for model
+        # Resize and prepare the image for the model
         preprocessedImage = preprocess_image(final_image_bytes)
 
-        # Step 3: Run inference
+        # Run the image through the model and measure how long it takes
         inference_start = time.time()
         predicted_class_label, confidence = predict_image(
             preprocessedImage, model, class_labels
         )
         inference_time = time.time() - inference_start
 
+        # Get disposal instructions based on what the model predicted
         disposalRecommendation = get_disposal_recommendation(predicted_class_label)
 
-        # Step 4: Save classification result to database
+        # Create a record of this classification result
         waste_entry = Waste(
             userId=user_id,
             filePath=str(image_path),
@@ -102,9 +104,9 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             inferenceTime=inference_time,
             disposalRecommendation=disposalRecommendation,
         )
+        # Save the record to database
         waste_collection.insert_one(waste_entry.dict())
 
-        # Return response (quality processing is internal only)
         response = {
             "status": "success",
             "label": predicted_class_label,
@@ -124,13 +126,13 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 @router.get("/classification/history")
 async def get_classification_history(request: Request):
     try:
-        # Get user ID from JWT token
+        # Check if user is logged in and get their ID
         user_id = verify_user_from_request(request)
 
-        # Fetch classification history from database
+        # Get all past classifications for this user
         history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
 
-        # Sanitize documents (ObjectId -> str, datetime -> ISO)
+        # Clean up the data before sending to user
         sanitized = [sanitize_doc(entry) for entry in history]
 
         return {"status": "success", "history": sanitized}
@@ -145,7 +147,6 @@ async def get_classification_history(request: Request):
 @router.delete("/classification/history/{entry_id}")
 async def delete_classification_entry(entry_id: str, request: Request):
     try:
-        # Check MongoDB connection
         if waste_collection is None:
             raise HTTPException(
                 status_code=503, detail="Database connection unavailable"
@@ -153,14 +154,12 @@ async def delete_classification_entry(entry_id: str, request: Request):
 
         user_id = verify_user_from_request(request)
 
-        # Convert entry_id string to ObjectId for MongoDB query
         try:
             object_id = ObjectId(entry_id)
         except Exception as e:
             print(f"Invalid ObjectId format: {entry_id} - {e}")
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
-        # Fetch the entry BEFORE deletion to get filePath for cleanup
         try:
             entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
         except Exception as e:
@@ -174,7 +173,6 @@ async def delete_classification_entry(entry_id: str, request: Request):
                 status_code=404, detail="Classification entry not found"
             )
 
-        # Delete the entry from the database
         try:
             result = waste_collection.delete_one({"_id": object_id, "userId": user_id})
         except Exception as e:
@@ -188,7 +186,6 @@ async def delete_classification_entry(entry_id: str, request: Request):
                 status_code=404, detail="Failed to delete classification entry"
             )
 
-        # Delete image file from local storage
         if entry.get("filePath"):
             try:
                 if os.path.exists(entry["filePath"]):
