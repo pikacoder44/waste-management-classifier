@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Union, Dict, Any
+from datetime import datetime
 
 
 class Waste(BaseModel):
@@ -7,7 +8,7 @@ class Waste(BaseModel):
     filePath: str = Field(
         ..., description="Local file path where the uploaded image is stored"
     )
-    createdAt: str
+    createdAt: datetime
     predictedLabel: str = Field(
         ..., description="The predicted class label for the waste item"
     )
