@@ -12,6 +12,7 @@ type RoleType = "admin" | "user" | null;
 type AuthContextType = {
   role: RoleType;
   setRole: (role: RoleType) => void;
+  logout: () => Promise<void>;
 };
 
 // Create a context for authentication
@@ -100,8 +101,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Centralized logout function
+  const logout = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Error during logout API call:", error);
+    } finally {
+      // Always clear local state regardless of API response
+      localStorage.removeItem("userRole");
+      setRole(null);
+      router.push("/auth/login");
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ role, setRole: handleSetRole }}>
+    <AuthContext.Provider value={{ role, setRole: handleSetRole, logout }}>
       {children}
     </AuthContext.Provider>
   );
