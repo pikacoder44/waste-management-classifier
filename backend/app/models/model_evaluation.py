@@ -12,7 +12,7 @@ class ModelEvaluation(BaseModel):
     datasetId: ObjectId = Field(
         ..., description="Reference to the dataset used for evaluation"
     )
-    evaluationDate: datetime = Field(default_factory=datetime.utcnow)
+    evaluationDate: datetime = Field(default_factory=datetime.now)
 
     # Overall Metrics
     overallAccuracy: float = Field(
