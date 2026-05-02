@@ -11,9 +11,9 @@ class ImageProcessingService:
     Implements auto-reprocessing for low-quality images.
     """
 
-    # Quality thresholds
-    ACCEPTABLE_QUALITY_SCORE = 70  # 70+ is acceptable
-    MINIMUM_QUALITY_SCORE = 50  # Below 50 is unusable even after enhancement
+    # Quality thresholds.
+    ACCEPTABLE_QUALITY_SCORE = 70
+    MINIMUM_QUALITY_SCORE = 50
 
     @staticmethod
     def process_and_validate(image_bytes: bytes) -> Dict[str, Any]:
@@ -37,17 +37,17 @@ class ImageProcessingService:
             }
         """
         try:
-            # Step 1: Analyze original image quality
+            # Analyze the image quality
             quality_result = ImageQualityAnalyzer.analyze(image_bytes)
             original_quality = quality_result["quality_score"]
             print(
                 f"[Quality Check] Original quality: {original_quality:.1f}%, Valid: {quality_result['is_valid']}, Issues: {quality_result['issues']}"
             )
 
-            # If image is valid, return immediately
+            # If image quality is already good, return it as-is
             if quality_result["is_valid"]:
                 print(
-                    f"[Quality Check] ✓ Image quality acceptable, no enhancement needed"
+                    f"[Quality Check] ✓ Image quality is acceptable; no enhancement needed"
                 )
                 return {
                     "status": "success",
@@ -61,11 +61,11 @@ class ImageProcessingService:
                     "message": "Image quality is acceptable",
                 }
 
-            # Check for extreme blur - if blur score is very low, it's not fixable
+            # Check how blurry the image is
             blur_score = quality_result.get("blur_score", 100)
+            # If the image is too blurry, we can't fix it
             if blur_score < 20:
-                print(
-                )
+
                 return {
                     "status": "error",
                     "is_valid": False,
@@ -78,28 +78,32 @@ class ImageProcessingService:
                     "message": "Image is too blurry to enhance. Please retake the photo with better focus and lighting.",
                 }
 
-            # Step 2: If image quality is too low, try enhancement
+            # If image quality is below acceptable threshold, try to improve it
             if (
                 quality_result["quality_score"]
                 < ImageProcessingService.ACCEPTABLE_QUALITY_SCORE
             ):
-                print(f"[Quality Check] Attempting to enhance image...")
+                # Try to automatically improve the image
+                print(f"[Quality Check] Attempting image enhancement...")
                 enhanced_image = ImageEnhancer.auto_enhance(
                     quality_result["image_array"], quality_result["issues"]
                 )
 
-                # Step 3: Convert enhanced image back to bytes and re-analyze
+                # Convert the improved image to bytes
                 _, buffer = cv2.imencode(".png", enhanced_image)
                 enhanced_bytes = buffer.tobytes()
 
+                # Check the quality of the improved image
                 enhanced_quality = ImageQualityAnalyzer.analyze(enhanced_bytes)
                 print(
                     f"[Quality Check] Enhanced quality: {enhanced_quality['quality_score']:.1f}%, Valid: {enhanced_quality['is_valid']}"
                 )
 
-                # Step 4: Check if enhancement helped
+                # If the improved image is now good, use it
                 if enhanced_quality["is_valid"]:
-                    print(f"[Quality Check] ✓ Enhancement successful, image now valid")
+                    print(
+                        f"[Quality Check] ✓ Enhancement succeeded; image is now valid"
+                    )
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -112,12 +116,13 @@ class ImageProcessingService:
                         "message": f'Image enhanced successfully (original: {original_quality:.1f}%, enhanced: {enhanced_quality["quality_score"]:.1f}%)',
                     }
 
-                # If enhancement didn't help enough
                 if (
                     enhanced_quality["quality_score"]
                     >= ImageProcessingService.MINIMUM_QUALITY_SCORE
                 ):
-                    print(f"[Quality Check] ⚠ Enhancement improved but still marginal")
+                    print(
+                        f"[Quality Check] ⚠ Enhancement improved the image, but only slightly"
+                    )
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -133,7 +138,9 @@ class ImageProcessingService:
                         "message": "Image was enhanced but quality remains low. Results may be less accurate.",
                     }
                 else:
-                    print(f"[Quality Check] ✗ Enhancement failed, quality too low")
+                    print(
+                        f"[Quality Check] ✗ Enhancement did not improve the image enough"
+                    )
                     return {
                         "status": "error",
                         "is_valid": False,
@@ -146,10 +153,7 @@ class ImageProcessingService:
                         "message": f"Image quality too low even after enhancement. Please retake the image with better lighting and focus.",
                     }
 
-            # Original quality is between acceptable and minimum
-            print(
-                f"[Quality Check] ✗ Image quality insufficient, no enhancement attempted"
-            )
+            print(f"[Quality Check] ✗ Image quality is too low to process safely")
             return {
                 "status": "error",
                 "is_valid": False,
