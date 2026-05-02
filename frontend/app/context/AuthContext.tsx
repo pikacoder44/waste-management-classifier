@@ -5,6 +5,7 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -53,6 +54,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Centralized logout function (memoized to prevent effect re-runs)
+  const logout = useCallback(async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Error during logout API call:", error);
+    } finally {
+      // Always clear local state regardless of API response
+      localStorage.removeItem("userRole");
+      setRole(null);
+      router.replace("/auth/login"); // Use replace to prevent back-button access
+    }
+  }, [router, setRole]);
+
   // Check token on mount and set up timeout to logout at exact expiry
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -70,28 +91,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const timeUntilExpiry = expiry - Date.now();
 
-    // Declare timer variable upfront
-    let logoutTimer: NodeJS.Timeout;
+    // Declare timer variable upfront, initialized to null
+    let logoutTimer: NodeJS.Timeout | null = null;
 
     if (timeUntilExpiry > 0) {
       // Set timeout to logout exactly when token expires
       logoutTimer = setTimeout(() => {
         console.log("Session expired - logging out");
-        localStorage.removeItem("userRole");
-        setRole(null);
-        if (
-          pathname?.startsWith("/admin") ||
-          pathname?.startsWith("/history")
-        ) {
-          router.push("/auth/login");
-        }
+        logout(); // Reuse centralized logout logic
       }, timeUntilExpiry);
     }
 
     return () => {
       if (logoutTimer) clearTimeout(logoutTimer);
     };
-  }, [router, pathname, role]);
+  }, [router, pathname, role, logout]);
 
   // Save role to localStorage whenever it changes
   const handleSetRole = (newRole: RoleType) => {
@@ -100,26 +114,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("userRole", newRole);
     } else {
       localStorage.removeItem("userRole"); // Remove if setting to null
-    }
-  };
-
-  // Centralized logout function
-  const logout = async () => {
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error("Error during logout API call:", error);
-    } finally {
-      // Always clear local state regardless of API response
-      localStorage.removeItem("userRole");
-      setRole(null);
-      router.push("/auth/login");
     }
   };
 
