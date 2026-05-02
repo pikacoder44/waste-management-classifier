@@ -1,6 +1,6 @@
 import bcrypt
 from datetime import datetime, timedelta
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from jwt import encode, decode
 from typing import Optional, Any
