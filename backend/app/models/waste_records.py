@@ -21,7 +21,7 @@ class WasteRecords(BaseModel):
     )
     disposalRecommendation: Optional[Union[str, Dict[str, Any]]] = Field(
         None,
-        description="Structured disposal recommendation with method, description, benefits, and alternatives",
+        description="Structured disposal recommendation with method, description, and benefits",
     )
 
     class Config:
