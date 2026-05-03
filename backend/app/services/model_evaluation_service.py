@@ -2,7 +2,10 @@ import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix
 from datetime import datetime
 from typing import Dict, Any, cast
-from app.database.collections import model_evaluation_collection
+from bson import ObjectId
+
+from app.database.collections import dataset_collection, model_evaluation_collection
+from app.models.model_evaluation import ModelEvaluation
 import os
 import json
 
@@ -10,7 +13,11 @@ ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 
 
 def evaluate_model(
-    model, test_data, training_status: Dict[str, Any], total_batches: int | None = None
+    model,
+    test_data,
+    training_status: Dict[str, Any],
+    dataset_id: ObjectId,
+    total_batches: int | None = None,
 ) -> Dict[str, Any]:
 
     print("\n" + "=" * 60)
@@ -149,7 +156,7 @@ def evaluate_model(
     print(f"📦 Creating evaluation document...")
     evaluation_doc: Dict[str, Any] = {
         "modelVersion": model_version,
-        # store as a real datetime so MongoDB stores a proper Date type
+        "datasetId": dataset_id,
         "evaluationDate": datetime.now(),
         "accuracy": accuracy,
         "precision": weighted_precision,
@@ -204,15 +211,8 @@ def save_evaluation_to_database(evaluation_doc: Dict[str, Any]) -> str:
 
         print(f"  Document to save: {evaluation_doc}")
 
-        # Extract only the database fields with explicit types
-        db_doc: Dict[str, Any] = {
-            "modelVersion": str(evaluation_doc.get("modelVersion", "")),
-            "evaluationDate": str(evaluation_doc.get("evaluationDate", "")),
-            "accuracy": float(evaluation_doc.get("accuracy", 0.0)),
-            "precision": float(evaluation_doc.get("precision", 0.0)),
-            "recall": float(evaluation_doc.get("recall", 0.0)),
-            "f1_score": float(evaluation_doc.get("f1_score", 0.0)),
-        }
+        model_evaluation = ModelEvaluation(**evaluation_doc)
+        db_doc = model_evaluation.dict(by_alias=True, exclude_none=True)
 
         print(f"  Database document: {db_doc}")
         print(f"  Inserting into collection...")
