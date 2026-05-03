@@ -1,11 +1,9 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
 from bson import ObjectId
 
 
 class ModelEvaluation(BaseModel):
-    id: Optional[ObjectId] = Field(None, alias="_id")
     modelVersion: str = Field(
         ..., description="Version of the model evaluated (e.g., 1.0, 2.0)"
     )
