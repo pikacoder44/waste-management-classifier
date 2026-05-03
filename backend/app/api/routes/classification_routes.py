@@ -3,7 +3,7 @@ from app.ai.model_loader import model
 from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
 from app.ai.imageProcessingService import ImageProcessingService
-from app.models.waste import Waste
+from app.models.waste_records import WasteRecords
 from app.database.collections import waste_collection
 from app.utils.db_helpers import sanitize_doc
 from app.utils.auth_utils import verify_user_from_request
@@ -95,7 +95,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         disposalRecommendation = get_disposal_recommendation(predicted_class_label)
 
         # Create a record of this classification result
-        waste_entry = Waste(
+        waste_record = WasteRecords(
             userId=user_id,
             filePath=str(image_path),
             createdAt=datetime.now(),
@@ -105,7 +105,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             disposalRecommendation=disposalRecommendation,
         )
         # Save the record to database
-        waste_collection.insert_one(waste_entry.dict())
+        waste_collection.insert_one(waste_record.dict())
 
         response = {
             "status": "success",
