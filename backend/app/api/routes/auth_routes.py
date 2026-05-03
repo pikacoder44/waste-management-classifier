@@ -107,12 +107,11 @@ def registerUser(user: User):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), salt)
 
-    # Prepare user data for saving
-    user_dict = {
-        "username": username,
-        "password": hashed_password.decode("utf-8"),
-        "role": "user",
-    }
+    # Build user document using model structure, but with hashed password
+    user_dict = user.dict()
+    user_dict["username"] = username
+    user_dict["password"] = hashed_password.decode("utf-8")
+    user_dict["role"] = "user"  # Always register as regular user
 
     # Save user to database
     try:
