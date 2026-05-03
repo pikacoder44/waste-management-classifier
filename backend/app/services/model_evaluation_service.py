@@ -212,7 +212,7 @@ def save_evaluation_to_database(evaluation_doc: Dict[str, Any]) -> str:
         print(f"  Document to save: {evaluation_doc}")
 
         model_evaluation = ModelEvaluation(**evaluation_doc)
-        db_doc = model_evaluation.dict(by_alias=True, exclude_none=True)
+        db_doc = model_evaluation.dict(exclude_none=True)
 
         print(f"  Database document: {db_doc}")
         print(f"  Inserting into collection...")
