@@ -412,11 +412,11 @@ def get_classification_history(request: Request):
         # Verify admin access
         verify_admin_from_request(request)
 
-        from app.database.collections import waste_collection
+        from app.database.collections import waste_records_collection
 
         classification_history = [
             sanitize_doc(entry)
-            for entry in waste_collection.find().sort("createdAt", -1)
+            for entry in waste_records_collection.find().sort("createdAt", -1)
         ]
 
         return {"status": "success", "history": classification_history}
@@ -433,10 +433,10 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
         # Verify admin access
         verify_admin_from_request(request)
 
-        from app.database.collections import waste_collection
+        from app.database.collections import waste_records_collection
         from bson import ObjectId
 
-        if waste_collection is None:
+        if waste_records_collection is None:
             raise HTTPException(
                 status_code=503, detail="Database connection unavailable"
             )
@@ -450,7 +450,7 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
 
         # Fetch the entry BEFORE deletion to get filePath for cleanup
         try:
-            entry = waste_collection.find_one({"_id": object_id})
+            entry = waste_records_collection.find_one({"_id": object_id})
         except Exception as e:
             print(f"Database error retrieving entry: {e}")
             raise HTTPException(
@@ -464,7 +464,7 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
 
         # Delete the entry from the database (no user ownership check for admin)
         try:
-            result = waste_collection.delete_one({"_id": object_id})
+            result = waste_records_collection.delete_one({"_id": object_id})
         except Exception as e:
             print(f"Database error deleting entry: {e}")
             raise HTTPException(
