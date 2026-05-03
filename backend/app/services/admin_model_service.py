@@ -3,6 +3,7 @@ import os
 import shutil
 from datetime import datetime
 
+from app.database.collections import dataset_collection
 from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
@@ -189,6 +190,18 @@ def run_evaluation_logic():
         BATCH_SIZE = 32
         TRAIN_SPLIT = 0.7
 
+        latest_dataset = dataset_collection.find_one(sort=[("uploadDate", -1)])
+        if not latest_dataset:
+            evaluation_status["status"] = "error"
+            evaluation_status["message"] = (
+                "Dataset not found. Please upload a dataset before evaluation."
+            )
+            evaluation_status["is_evaluating"] = False
+            evaluation_status["progress"] = 0
+            return
+
+        dataset_id = latest_dataset["_id"]
+
         model_path = os.path.join("model", "waste_classifier_model.keras")
         if not os.path.exists(model_path):
             evaluation_status["status"] = "error"
@@ -226,7 +239,7 @@ def run_evaluation_logic():
         evaluation_status["progress"] = 50
 
         evaluation_doc = evaluate_model(
-            model, test_data, evaluation_status, total_batches
+            model, test_data, evaluation_status, dataset_id, total_batches
         )
 
         evaluation_status["message"] = "Saving results to database..."
