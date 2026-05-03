@@ -183,7 +183,7 @@ code/
 ## 💾 Database Collections (MongoDB)
 
 - **users** - User accounts with credentials
-- **waste_images** - Classification results with image metadata
+- **waste_records** - Classification results with image metadata
 - **datasets** - Custom training datasets
 - **model_evaluations** - Model performance metrics & confusion matrices
 
