@@ -4,7 +4,7 @@ from app.ai.preprocess import preprocess_image
 from app.ai.predict import predict_image
 from app.ai.imageProcessingService import ImageProcessingService
 from app.models.waste_records import WasteRecords
-from app.database.collections import waste_collection
+from app.database.collections import waste_records_collection
 from app.utils.db_helpers import sanitize_doc
 from app.utils.auth_utils import verify_user_from_request
 from datetime import datetime
@@ -105,7 +105,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             disposalRecommendation=disposalRecommendation,
         )
         # Save the record to database
-        waste_collection.insert_one(waste_record.dict())
+        waste_records_collection.insert_one(waste_record.dict())
 
         response = {
             "status": "success",
@@ -130,7 +130,9 @@ async def get_classification_history(request: Request):
         user_id = verify_user_from_request(request)
 
         # Get all past classifications for this user
-        history = list(waste_collection.find({"userId": user_id}).sort("createdAt", -1))
+        history = list(
+            waste_records_collection.find({"userId": user_id}).sort("createdAt", -1)
+        )
 
         # Clean up the data before sending to user
         sanitized = [sanitize_doc(entry) for entry in history]
@@ -147,7 +149,7 @@ async def get_classification_history(request: Request):
 @router.delete("/classification/history/{entry_id}")
 async def delete_classification_entry(entry_id: str, request: Request):
     try:
-        if waste_collection is None:
+        if waste_records_collection is None:
             raise HTTPException(
                 status_code=503, detail="Database connection unavailable"
             )
@@ -161,7 +163,9 @@ async def delete_classification_entry(entry_id: str, request: Request):
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
         try:
-            entry = waste_collection.find_one({"_id": object_id, "userId": user_id})
+            entry = waste_records_collection.find_one(
+                {"_id": object_id, "userId": user_id}
+            )
         except Exception as e:
             print(f"Database error retrieving entry: {e}")
             raise HTTPException(
@@ -174,7 +178,9 @@ async def delete_classification_entry(entry_id: str, request: Request):
             )
 
         try:
-            result = waste_collection.delete_one({"_id": object_id, "userId": user_id})
+            result = waste_records_collection.delete_one(
+                {"_id": object_id, "userId": user_id}
+            )
         except Exception as e:
             print(f"Database error deleting entry: {e}")
             raise HTTPException(
