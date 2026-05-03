@@ -99,7 +99,7 @@ code/
 │   │   │   ├── disposal_recommendation.py # Disposal recommendations
 │   │   │   ├── model_evaluation.py        # Evaluation results schema
 │   │   │   ├── user.py                    # User schema
-│   │   │   └── waste.py                   # Waste classification schema
+│   │   │   └── waste_records.py          # Waste classification history schema
 │   │   ├── security/
 │   │   ├── services/
 │   │   │   ├── model_evaluation_service.py # Evaluation logic
