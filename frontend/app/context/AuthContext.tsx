@@ -48,9 +48,13 @@ const getInitialRole = (): RoleType => {
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [role, setRole] = useState<RoleType>(() => getInitialRole());
+  const [role, setRole] = useState<RoleType>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setRole(getInitialRole());
+  }, []);
 
   // Centralized logout function (memoized to prevent effect re-runs)
   const logout = useCallback(async () => {
