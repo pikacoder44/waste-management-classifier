@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   BarChart3,
   Database,
@@ -10,6 +13,118 @@ import {
 } from "lucide-react";
 
 const Page = () => {
+  const [apiHealth, setApiHealth] = useState<{
+    online: boolean;
+    detail: string;
+    checkedAt: string;
+  }>({
+    online: false,
+    detail: "Checking...",
+    checkedAt: "",
+  });
+  const [dbHealth, setDbHealth] = useState<{
+    online: boolean;
+    detail: string;
+  }>({
+    online: false,
+    detail: "Checking...",
+  });
+  const [modelHealth, setModelHealth] = useState<{
+    online: boolean;
+    detail: string;
+  }>({
+    online: false,
+    detail: "Checking...",
+  });
+
+  useEffect(() => {
+    const checkSystemHealth = async () => {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!baseUrl) {
+        setApiHealth({
+          online: false,
+          detail: "API base URL missing",
+          checkedAt: new Date().toLocaleTimeString(),
+        });
+        setDbHealth({ online: false, detail: "Cannot check" });
+        setModelHealth({ online: false, detail: "Cannot check" });
+        return;
+      }
+
+      const checkEndpoint = async (endpoint: string) => {
+        const start = performance.now();
+        try {
+          const response = await fetch(`${baseUrl}${endpoint}`, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+          const elapsed = Math.round(performance.now() - start);
+          return { response, elapsed };
+        } catch {
+          return null;
+        }
+      };
+
+      const [apiResult, dbResult, modelResult] = await Promise.all([
+        checkEndpoint("/admin/model/status"),
+        checkEndpoint("/admin/datasets"),
+        checkEndpoint("/admin/model/status"),
+      ]);
+
+      const checkedAt = new Date().toLocaleTimeString();
+
+      if (!apiResult) {
+        setApiHealth({
+          online: false,
+          detail: "Backend unreachable",
+          checkedAt,
+        });
+        setDbHealth({ online: false, detail: "Backend unreachable" });
+        setModelHealth({ online: false, detail: "Backend unreachable" });
+        return;
+      }
+
+      setApiHealth({
+        online: true,
+        detail: `Response: ${apiResult.elapsed}ms`,
+        checkedAt,
+      });
+
+      if (!dbResult) {
+        setDbHealth({ online: false, detail: "Backend unreachable" });
+      } else if (dbResult.response.ok) {
+        setDbHealth({
+          online: true,
+          detail: `Response: ${dbResult.elapsed}ms`,
+        });
+      } else if (dbResult.response.status === 503) {
+        setDbHealth({ online: false, detail: "Database unavailable" });
+      } else {
+        setDbHealth({
+          online: true,
+          detail: `API reachable (${dbResult.response.status})`,
+        });
+      }
+
+      if (!modelResult) {
+        setModelHealth({ online: false, detail: "Backend unreachable" });
+      } else if (modelResult.response.ok) {
+        setModelHealth({
+          online: true,
+          detail: `Response: ${modelResult.elapsed}ms`,
+        });
+      } else {
+        setModelHealth({
+          online: false,
+          detail: `Status: ${modelResult.response.status}`,
+        });
+      }
+    };
+
+    checkSystemHealth();
+  }, []);
+
   const adminFeatures = [
     {
       id: 1,
@@ -126,16 +241,20 @@ const Page = () => {
                     API Status
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-lg font-semibold text-green-600">
-                      Operational
+                    <div
+                      className={`w-3 h-3 rounded-full ${apiHealth.online ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+                    ></div>
+                    <span
+                      className={`text-lg font-semibold ${apiHealth.online ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {apiHealth.online ? "Operational" : "Offline"}
                     </span>
                   </div>
                 </div>
                 <Zap className="w-8 h-8 text-yellow-500" />
               </div>
               <p className="text-xs text-gray-500 mt-3">
-                Last checked: 2 mins ago
+                Last checked: {apiHealth.checkedAt || "Checking..."}
               </p>
             </div>
 
@@ -146,15 +265,19 @@ const Page = () => {
                     Database
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-lg font-semibold text-green-600">
-                      Connected
+                    <div
+                      className={`w-3 h-3 rounded-full ${dbHealth.online ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+                    ></div>
+                    <span
+                      className={`text-lg font-semibold ${dbHealth.online ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {dbHealth.online ? "Connected" : "Unavailable"}
                     </span>
                   </div>
                 </div>
                 <DatabaseIcon className="w-8 h-8 text-blue-500" />
               </div>
-              <p className="text-xs text-gray-500 mt-3">Response: 12ms</p>
+              <p className="text-xs text-gray-500 mt-3">{dbHealth.detail}</p>
             </div>
 
             <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:480ms]">
@@ -164,15 +287,19 @@ const Page = () => {
                     Model Service
                   </p>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-lg font-semibold text-green-600">
-                      Running
+                    <div
+                      className={`w-3 h-3 rounded-full ${modelHealth.online ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+                    ></div>
+                    <span
+                      className={`text-lg font-semibold ${modelHealth.online ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {modelHealth.online ? "Running" : "Unavailable"}
                     </span>
                   </div>
                 </div>
                 <Cpu className="w-8 h-8 text-purple-500" />
               </div>
-              <p className="text-xs text-gray-500 mt-3">Avg Response: 340ms</p>
+              <p className="text-xs text-gray-500 mt-3">{modelHealth.detail}</p>
             </div>
           </div>
         </div>
