@@ -16,6 +16,8 @@ from app.services.model_evaluation_service import (
 from app.services.split_dataset_services import ensure_split_dataset
 
 # Shared training state
+TRAINING_EPOCHS = 20
+
 training_status = {
     "is_training": False,
     "progress": 0,
@@ -23,7 +25,7 @@ training_status = {
     "message": "No training in progress",
     "started_at": None,
     "epoch": 0,
-    "total_epochs": 0,
+    "total_epochs": TRAINING_EPOCHS,
 }
 
 # Separate evaluation state
@@ -42,7 +44,7 @@ def run_training_logic():
 
     IMG_SIZE = (224, 224)
     BATCH_SIZE = 32
-    EPOCHS = 10
+    EPOCHS = TRAINING_EPOCHS
     TRAIN_SPLIT = 0.7
 
     training_status["is_training"] = True
