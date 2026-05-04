@@ -327,6 +327,30 @@ const Page = () => {
           </div>
         </div>
 
+        {/* Empty State (Before First Report) */}
+        {!data && !loading && !isRunningEval && !error && !evalError && (
+          <div className="mt-6 min-h-[46vh] flex items-center justify-center animate-fade-in-up [animation-delay:140ms]">
+            <div className="w-full max-w-2xl text-center rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm shadow-xl p-8 sm:p-10">
+              <div className="mx-auto mb-4 h-14 w-14 rounded-2xl bg-linear-to-br from-emerald-100 to-blue-100 flex items-center justify-center text-2xl">
+                📈
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                No Evaluation Report Yet
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
+                Start by running a model evaluation, or fetch your latest report
+                if one already exists. Your metrics and confusion matrix will
+                appear here automatically.
+              </p>
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 border border-emerald-100 text-emerald-700 text-sm font-semibold">
+                Tip: Click{" "}
+                <span className="text-slate-900">Run Evaluation</span>
+                to generate a new report.
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Metrics Grid */}
         {data && (
           <div className="space-y-8 mt-10 animate-fade-in-up [animation-delay:150ms]">
