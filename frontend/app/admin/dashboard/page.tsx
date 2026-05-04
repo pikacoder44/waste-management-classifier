@@ -12,6 +12,23 @@ import {
   Cpu,
 } from "lucide-react";
 
+interface AdminClassificationEntry {
+  _id: string;
+  userId: string;
+  predictedLabel: string;
+  confidence: number;
+  createdAt: string;
+}
+
+interface AdminDataset {
+  _id: string;
+  imageCount: number;
+}
+
+interface EvaluationLatest {
+  accuracy: number;
+}
+
 const Page = () => {
   const [apiHealth, setApiHealth] = useState<{
     online: boolean;
@@ -36,6 +53,28 @@ const Page = () => {
     online: false,
     detail: "Checking...",
   });
+  const [recentClassifications, setRecentClassifications] = useState<
+    AdminClassificationEntry[]
+  >([]);
+  const [trainingImagesCount, setTrainingImagesCount] = useState<number>(0);
+  const [modelAccuracy, setModelAccuracy] = useState<number | null>(null);
+
+  const formatTimestamp = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return "Unknown time";
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const getMaskedUser = (userId: string) => {
+    if (!userId) return "User";
+    return `User ${userId.slice(-4)}`;
+  };
 
   useEffect(() => {
     const checkSystemHealth = async () => {
@@ -123,6 +162,57 @@ const Page = () => {
     };
 
     checkSystemHealth();
+  }, []);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!baseUrl) return;
+
+      try {
+        const [historyRes, datasetsRes, evalRes] = await Promise.all([
+          fetch(`${baseUrl}/admin/classification/history`, {
+            credentials: "include",
+            cache: "no-store",
+          }),
+          fetch(`${baseUrl}/admin/datasets`, {
+            credentials: "include",
+            cache: "no-store",
+          }),
+          fetch(`${baseUrl}/admin/model/evaluation/latest`, {
+            credentials: "include",
+            cache: "no-store",
+          }),
+        ]);
+
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          const history: AdminClassificationEntry[] = historyData.history || [];
+          setRecentClassifications(history.slice(0, 4));
+        }
+
+        if (datasetsRes.ok) {
+          const datasetsData = await datasetsRes.json();
+          const datasets: AdminDataset[] = datasetsData.datasets || [];
+          const totalImages = datasets.reduce(
+            (sum, ds) => sum + (Number(ds.imageCount) || 0),
+            0,
+          );
+          setTrainingImagesCount(totalImages);
+        }
+
+        if (evalRes.ok) {
+          const evalData: EvaluationLatest = await evalRes.json();
+          if (typeof evalData.accuracy === "number") {
+            setModelAccuracy(evalData.accuracy);
+          }
+        }
+      } catch {
+        // Keep dashboard usable if backend data endpoints are unavailable.
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const adminFeatures = [
@@ -309,58 +399,42 @@ const Page = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Recent Classifications
           </h2>
-          <div className="space-y-3">
-            {[
-              {
-                waste: "Plastic",
-                confidence: 96,
-                user: "User #234",
-                time: "2 minutes ago",
-              },
-              {
-                waste: "Paper",
-                confidence: 89,
-                user: "User #567",
-                time: "15 minutes ago",
-              },
-              {
-                waste: "Metal",
-                confidence: 92,
-                user: "User #890",
-                time: "28 minutes ago",
-              },
-              {
-                waste: "Glass",
-                confidence: 98,
-                user: "User #123",
-                time: "1 hour ago",
-              },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors animate-fade-in-up"
-                style={{ animationDelay: `${idx * 110}ms` }}
-              >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="text-emerald-600">
-                    <RotateCcw className="w-6 h-6" />
+          {recentClassifications.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              No recent classifications available.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentClassifications.map((item, idx) => (
+                <div
+                  key={item._id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors animate-fade-in-up"
+                  style={{ animationDelay: `${idx * 110}ms` }}
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="text-emerald-600">
+                      <RotateCcw className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 capitalize">
+                        {item.predictedLabel}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {getMaskedUser(item.userId)} ·{" "}
+                        {formatTimestamp(item.createdAt)}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{item.waste}</p>
-                    <p className="text-xs text-gray-500">
-                      {item.user} · {item.time}
+                  <div className="text-right">
+                    <p className="font-bold text-emerald-600">
+                      {(Number(item.confidence || 0) * 100).toFixed(1)}%
                     </p>
+                    <p className="text-xs text-gray-500">confidence</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-emerald-600">
-                    {item.confidence}%
-                  </p>
-                  <p className="text-xs text-gray-500">confidence</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Stats Overview */}
@@ -386,7 +460,9 @@ const Page = () => {
                 <p className="text-gray-600 text-sm font-medium">
                   Training Images
                 </p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">1,240</p>
+                <p className="text-3xl font-bold text-gray-900 mt-2">
+                  {trainingImagesCount.toLocaleString()}
+                </p>
               </div>
               <span className="text-3xl">🖼️</span>
             </div>
@@ -398,7 +474,11 @@ const Page = () => {
                 <p className="text-gray-600 text-sm font-medium">
                   Model Accuracy
                 </p>
-                <p className="text-3xl font-bold text-green-600 mt-2">94.2%</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">
+                  {modelAccuracy !== null
+                    ? `${(modelAccuracy * 100).toFixed(1)}%`
+                    : "N/A"}
+                </p>
               </div>
               <span className="text-3xl">🎯</span>
             </div>
