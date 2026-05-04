@@ -33,10 +33,10 @@ const Page = () => {
             </div>
             <div className="space-y-4">
               <p className="text-slate-700 leading-relaxed">
-                The Smart Waste Classifier uses a deep learning model
-                (MobileNetV2) trained on thousands of waste images to
-                automatically classify items into six categories: cardboard,
-                glass, metal, paper, plastic, and trash.
+                The AI-Based Smart Waste Management and Classification System
+                uses a deep learning model (MobileNetV2) trained on thousands of
+                waste images to automatically classify items into six
+                categories: cardboard, glass, metal, paper, plastic, and trash.
               </p>
               <p className="text-slate-700 leading-relaxed">
                 Upload a photo or use your camera to capture an image, and the
