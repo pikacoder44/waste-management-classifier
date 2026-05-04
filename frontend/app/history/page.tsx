@@ -176,7 +176,7 @@ export default function HistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center animate-page-enter">
         <Loader
           message="Loading history..."
           icon={
@@ -188,10 +188,10 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 py-12 px-4">
+    <main className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 py-12 px-4 animate-page-enter">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
+        <div className="mb-12 animate-fade-in-up">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
@@ -226,7 +226,7 @@ export default function HistoryPage() {
 
         {/* Empty State */}
         {history.length === 0 && !error && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+          <div className="bg-white rounded-2xl shadow-lg p-12 text-center animate-fade-in-up [animation-delay:120ms]">
             <div className="text-6xl mb-4">📋</div>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">
               No History Yet
@@ -250,7 +250,10 @@ export default function HistoryPage() {
             {history.map((item) => (
               <div
                 key={item._id}
-                className={`${getCategoryCardGradient(item.predictedLabel)} rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}
+                className={`${getCategoryCardGradient(item.predictedLabel)} rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-fade-in-up`}
+                style={{
+                  animationDelay: `${Math.min(8, history.indexOf(item)) * 90}ms`,
+                }}
               >
                 {/* Image Preview */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden">
