@@ -278,7 +278,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
           </div>
         </div>
       )}
-      {datasetName && (
+      {!loading && !error && (
         <div className="px-4 py-8 sm:p-8 relative z-10">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
