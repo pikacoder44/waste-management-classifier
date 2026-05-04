@@ -239,10 +239,12 @@ export default function Home() {
   const hasResult = result && submittedFile;
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 pt-8 pb-16">
+    <div className="relative min-h-screen overflow-hidden bg-white text-slate-900 pt-8 pb-16 animate-page-enter">
+      <div className="pointer-events-none absolute -top-32 right-0 h-96 w-96 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute left-0 top-48 h-80 w-80 rounded-full bg-cyan-200/20 blur-3xl animate-soft-float [animation-delay:1300ms]" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-16 text-center space-y-4">
+        <div className="mb-16 text-center space-y-4 animate-fade-in-up">
           <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
             Waste <span className="text-emerald-600">Classifier</span>
           </h1>
@@ -255,7 +257,7 @@ export default function Home() {
         {/* Main Container */}
         <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start justify-center">
           {/* Upload Form - Compact */}
-          <div className="w-full max-w-md mx-auto transition-all duration-500 lg:w-96">
+          <div className="w-full max-w-md mx-auto transition-all duration-500 lg:w-96 animate-fade-in-up [animation-delay:120ms]">
             <form
               className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300"
               onSubmit={(e) => {
@@ -356,7 +358,7 @@ export default function Home() {
 
           {/* Clean & Professional Results Card */}
           {(hasResult || isLoading) && (
-            <div className="w-full animate-slideInFromRight">
+            <div className="w-full animate-fade-in-up [animation-delay:180ms]">
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-20">
