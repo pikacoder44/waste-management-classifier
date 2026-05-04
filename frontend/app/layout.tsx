@@ -10,7 +10,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Waste Classifier | AI-Powered Waste Management",
+  title: "AI-Based Smart Waste Management and Classification System",
   description:
     "Intelligent waste classification system powered by AI. Automatically classify waste items and get eco-friendly disposal recommendations in real-time.",
 };
