@@ -14,6 +14,7 @@ interface TrainingStatus {
 }
 
 export default function RetrainPage() {
+  const DEFAULT_MAX_EPOCHS = 20;
   const [isLoading, setIsLoading] = useState(false);
   const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(
     null,
@@ -171,7 +172,9 @@ export default function RetrainPage() {
                   <div className="text-sm text-gray-600">Split Ratio</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">20</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {trainingStatus?.total_epochs || DEFAULT_MAX_EPOCHS}
+                  </div>
                   <div className="text-sm text-gray-600">Max Epochs</div>
                 </div>
                 <div className="text-center col-span-1 sm:col-span-2 lg:col-span-1">
