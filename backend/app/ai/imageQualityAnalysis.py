@@ -6,11 +6,11 @@ from typing import Dict, Any, Optional
 class ImageQualityAnalyzer:
     """Analyzes image quality and provides detailed metrics."""
 
-    # Analyzer thresholds.
-    MIN_RESOLUTION = 224
-    BLUR_THRESHOLD = 100
-    MIN_BRIGHTNESS = 30
-    MAX_BRIGHTNESS = 225
+    # Analyzer thresholds (lenient for real-world waste classification)
+    MIN_RESOLUTION = 160  # Allow smaller images; CNN can handle 160x160+
+    BLUR_THRESHOLD = 80  # More lenient blur detection
+    MIN_BRIGHTNESS = 20  # Allow darker images (dark waste items)
+    MAX_BRIGHTNESS = 235  # Allow nearly saturated images
 
     @staticmethod
     def analyze(image_bytes: bytes) -> Dict[str, Any]:
@@ -65,21 +65,21 @@ class ImageQualityAnalyzer:
                 issues.append(
                     f"Low resolution: {width}x{height} (min: {ImageQualityAnalyzer.MIN_RESOLUTION}x{ImageQualityAnalyzer.MIN_RESOLUTION})"
                 )
-                quality_score -= 30
+                quality_score -= 15  # Reduced from 30 - modern CNNs handle small images
 
             if laplacian_var < ImageQualityAnalyzer.BLUR_THRESHOLD:
                 issues.append(f"Image is blurry (blur score: {laplacian_var:.2f})")
-                quality_score -= 35
+                quality_score -= 20  # Reduced from 35 - some blur is acceptable
 
             if brightness < ImageQualityAnalyzer.MIN_BRIGHTNESS:
                 issues.append(f"Image is too dark (brightness: {brightness:.2f})")
-                quality_score -= 20
+                quality_score -= 10  # Reduced from 20 - dark waste is common
             elif brightness > ImageQualityAnalyzer.MAX_BRIGHTNESS:
                 issues.append(f"Image is too bright (brightness: {brightness:.2f})")
-                quality_score -= 20
+                quality_score -= 10  # Reduced from 20
 
             quality_score = max(0, min(100, quality_score))
-            is_valid = len(issues) == 0 and quality_score >= 70
+            is_valid = len(issues) == 0 and quality_score >= 60  # Lowered from 70
 
             return {
                 "is_valid": is_valid,
