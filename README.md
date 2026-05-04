@@ -302,6 +302,18 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 ```
 
+### Quality Improvements
+
+**Image Quality Thresholds (Optimized for real-world waste):**
+
+- MIN_RESOLUTION: 160×160px (was 224×224 - allows smaller smartphone photos)
+- BLUR_THRESHOLD: 80 (was 100 - more lenient for casual photos)
+- MIN_BRIGHTNESS: 20 (was 30 - allows darker indoor photos)
+- MAX_BRIGHTNESS: 235 (was 225 - allows bright outdoor lighting)
+- Quality threshold to pass: 60% (was 70% - more realistic for user experience)
+
+This enables images like 275×183px to be processed while still catching genuinely unusable photos.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
