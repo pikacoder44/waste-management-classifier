@@ -129,10 +129,12 @@ export default function RetrainPage() {
   }, [pollingInterval]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 px-4 py-8 sm:p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-20 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
+      <div className="max-w-5xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="mb-12 pb-8 border-b border-gray-200">
+        <div className="mb-12 pb-8 border-b border-gray-200 animate-fade-in-up">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Model Retraining
           </h1>
@@ -143,11 +145,11 @@ export default function RetrainPage() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200 animate-fade-in-up [animation-delay:120ms]">
           {!showAcknowledgement ? (
             // Initial State - Button
             <div className="py-12 sm:py-16 px-4">
-              <div className="text-center mb-12">
+              <div className="text-center mb-12 animate-fade-in-up">
                 <div className="inline-flex p-6 bg-linear-to-br from-emerald-100 to-emerald-50 rounded-full mb-6 shadow-lg">
                   <Zap className="w-16 h-16 text-emerald-600" />
                 </div>
@@ -161,7 +163,7 @@ export default function RetrainPage() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 p-6 bg-gray-50 rounded-xl border border-gray-200 animate-fade-in-up [animation-delay:120ms]">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-emerald-600">
                     70:30
@@ -183,7 +185,7 @@ export default function RetrainPage() {
               <button
                 onClick={handleRetrain}
                 disabled={isLoading}
-                className="relative px-10 py-4 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-3 mx-auto shadow-lg hover:shadow-xl hover:shadow-emerald-500/40 transform hover:scale-105 active:scale-95"
+                className="relative px-10 py-4 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-3 mx-auto shadow-lg hover:shadow-xl hover:shadow-emerald-500/40 transform hover:scale-105 active:scale-95 animate-soft-float"
               >
                 {isLoading ? (
                   <>
@@ -203,7 +205,7 @@ export default function RetrainPage() {
             <div className="space-y-8">
               {/* Acknowledgement Banner */}
               {!showCompletion && (
-                <div className="bg-linear-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-600 rounded-lg p-5 flex items-start gap-4 shadow-sm">
+                <div className="bg-linear-to-r from-emerald-50 to-teal-50 border-l-4 border-emerald-600 rounded-lg p-5 flex items-start gap-4 shadow-sm animate-fade-in-up">
                   <CheckCircle className="w-6 h-6 text-emerald-600 animate-pulse shrink-0 mt-0.5" />
                   <div>
                     <p className="text-emerald-900 font-bold">
@@ -220,7 +222,7 @@ export default function RetrainPage() {
               {/* Status Information */}
               {trainingStatus && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition">
+                  <div className="bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-emerald-200 shadow-sm hover:shadow-md transition animate-fade-in-up">
                     <p className="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-2">
                       Training Status
                     </p>
@@ -229,7 +231,7 @@ export default function RetrainPage() {
                     </p>
                   </div>
                   {trainingStatus.total_epochs > 0 && (
-                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition">
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 shadow-sm hover:shadow-md transition animate-fade-in-up [animation-delay:100ms]">
                       <p className="text-blue-700 text-xs font-bold uppercase tracking-widest mb-2">
                         Epoch Progress
                       </p>
@@ -242,7 +244,7 @@ export default function RetrainPage() {
               )}
 
               {/* Progress Bar */}
-              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200">
+              <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 animate-fade-in-up [animation-delay:180ms]">
                 <div className="flex justify-between items-center mb-4">
                   <label className="text-gray-900 font-bold text-lg">
                     Overall Progress
@@ -261,7 +263,7 @@ export default function RetrainPage() {
 
               {/* Status Message */}
               {trainingStatus && (
-                <div className="bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200 shadow-sm">
+                <div className="bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200 shadow-sm animate-fade-in-up [animation-delay:100ms]">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-emerald-100 rounded-lg shrink-0">
                       <BookOpen className="w-5 h-5 text-emerald-700" />
@@ -280,7 +282,7 @@ export default function RetrainPage() {
 
               {/* Completion Animation */}
               {showCompletion && trainingStatus?.status === "completed" && (
-                <div className="mt-8 bg-linear-to-br from-emerald-50 via-emerald-100 to-teal-50 rounded-2xl p-12 border-2 border-emerald-300 shadow-xl">
+                <div className="mt-8 bg-linear-to-br from-emerald-50 via-emerald-100 to-teal-50 rounded-2xl p-12 border-2 border-emerald-300 shadow-xl animate-fade-in-up">
                   <div className="text-center">
                     {/* Celebration Animation */}
                     <div className="mb-8">
@@ -345,7 +347,7 @@ export default function RetrainPage() {
         </div>
 
         {/* Info Box */}
-        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 sm:p-8 shadow-lg">
+        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 sm:p-8 shadow-lg animate-fade-in-up [animation-delay:200ms]">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
             <div className="p-2 bg-blue-200 rounded-lg">
               <BookOpen className="w-6 h-6 text-blue-700" />

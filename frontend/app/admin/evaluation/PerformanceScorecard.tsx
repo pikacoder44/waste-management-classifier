@@ -8,14 +8,14 @@ export const PerformanceScorecard = ({
   f1Score,
 }: PerformanceScorecardProps) => {
   return (
-    <div className="mt-12">
+    <div className="mt-12 animate-fade-in-up">
       <div className="bg-linear-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 shadow-lg">
         <h3 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
           <span className="text-3xl">🎓</span>
           <span>Model Performance Deep Dive</span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-emerald-200 hover:shadow-lg transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-emerald-200 hover:shadow-lg transition-all animate-fade-in-up [animation-delay:80ms]">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-emerald-700 uppercase">
                 Overall Performance
@@ -39,7 +39,7 @@ export const PerformanceScorecard = ({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-blue-200 hover:shadow-lg transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-blue-200 hover:shadow-lg transition-all animate-fade-in-up [animation-delay:160ms]">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-blue-700 uppercase">
                 Metric Balance
@@ -61,7 +61,7 @@ export const PerformanceScorecard = ({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-orange-200 hover:shadow-lg transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-orange-200 hover:shadow-lg transition-all animate-fade-in-up [animation-delay:240ms]">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-orange-700 uppercase">
                 Strengths
@@ -84,7 +84,7 @@ export const PerformanceScorecard = ({
             </ul>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-pink-200 hover:shadow-lg transition-all">
+          <div className="bg-white rounded-xl p-6 shadow-md border-2 border-pink-200 hover:shadow-lg transition-all animate-fade-in-up [animation-delay:320ms]">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-pink-700 uppercase">
                 Next Phase

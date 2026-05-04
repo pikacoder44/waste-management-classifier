@@ -122,9 +122,11 @@ const Page = () => {
     window.location.reload();
   };
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-12">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-cyan-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
+      <div className="max-w-5xl mx-auto relative z-10">
+        <div className="mb-12 animate-fade-in-up">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <Database className="w-8 h-8 text-emerald-600" />
             <h1 className="text-4xl font-bold text-gray-900">
@@ -137,7 +139,7 @@ const Page = () => {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12 animate-fade-in-up">
             <div className="text-center">
               <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-4" />
               <p className="text-gray-600 font-medium">Loading datasets...</p>
@@ -165,10 +167,11 @@ const Page = () => {
 
         {!loading && !error && datasets.length > 0 && (
           <div className="grid grid-cols-1 gap-6">
-            {datasets.map((dataset: Dataset) => (
+            {datasets.map((dataset: Dataset, index) => (
               <div
                 key={dataset._id}
-                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500 overflow-hidden"
+                className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500 overflow-hidden animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="p-6">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
@@ -241,7 +244,7 @@ const Page = () => {
         )}
 
         {!loading && !error && datasets.length === 0 && (
-          <div className="p-12 bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl text-center border-2 border-dashed border-emerald-300">
+          <div className="p-12 bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl text-center border-2 border-dashed border-emerald-300 animate-fade-in-up [animation-delay:120ms]">
             <Database className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
             <p className="text-gray-700 text-lg font-semibold">
               No datasets available yet.

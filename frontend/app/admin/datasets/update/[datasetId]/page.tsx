@@ -238,10 +238,12 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
       {loading && (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
+        <div className="flex items-center justify-center min-h-screen relative z-10">
+          <div className="text-center animate-fade-in-up">
             <div className="mb-6 flex justify-center">
               <div className="relative w-16 h-16">
                 <Loader2 className="w-16 h-16 text-emerald-600 animate-spin" />
@@ -257,8 +259,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         </div>
       )}
       {error && (
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+        <div className="flex items-center justify-center min-h-screen p-4 relative z-10">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full animate-fade-in-up">
             <div className="flex items-center justify-center mb-4 w-12 h-12 bg-red-100 rounded-full mx-auto">
               <AlertCircle className="w-6 h-6 text-red-600" />
             </div>
@@ -277,10 +279,10 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         </div>
       )}
       {datasetName && (
-        <div className="px-4 py-8 sm:p-8">
+        <div className="px-4 py-8 sm:p-8 relative z-10">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="mb-8">
+            <div className="mb-8 animate-fade-in-up">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
                 <Edit3 className="w-8 h-8 text-emerald-600" />
                 <h1 className="text-4xl font-bold text-gray-900">
@@ -293,7 +295,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
             </div>
 
             {/* Info Card */}
-            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 mb-8">
+            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 mb-8 animate-fade-in-up [animation-delay:100ms]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -339,7 +341,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
             </div>
 
             {/* Images display in cards: */}
-            <div className="mb-8">
+            <div className="mb-8 animate-fade-in-up [animation-delay:180ms]">
               <h3 className="text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2">
                 <span>Images</span>
                 <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-lg font-semibold">
@@ -362,7 +364,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                     return (
                       <div
                         key={`existing-${index}`}
-                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 relative"
+                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 relative animate-fade-in-up"
+                        style={{ animationDelay: `${index * 80}ms` }}
                       >
                         <div className="relative h-56 bg-gray-100 overflow-hidden">
                           <Image
@@ -396,7 +399,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                 {selectedFiles.map((item, index) => (
                   <div
                     key={`new-${index}`}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56"
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 animate-fade-in-up"
+                    style={{ animationDelay: `${index * 80}ms` }}
                   >
                     <div className="relative h-56 bg-gray-100">
                       <Image
@@ -438,7 +442,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                 {/* Add new images card */}
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="group bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-md p-6 w-full max-w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-dashed border-emerald-300 hover:border-emerald-500"
+                  className="group bg-linear-to-br from-emerald-50 to-emerald-100 rounded-xl shadow-md p-6 w-full max-w-56 h-56 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-300 border-2 border-dashed border-emerald-300 hover:border-emerald-500 animate-fade-in-up"
                 >
                   <span className="text-5xl text-emerald-600 font-bold mb-2 transition-transform duration-500 group-hover:rotate-180">
                     +
@@ -462,7 +466,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
 
             {/* Update button - shown when there are changes */}
             {hasChanges && (
-              <div className="mt-8">
+              <div className="mt-8 animate-fade-in-up [animation-delay:180ms]">
                 <div className="bg-white rounded-xl shadow-md p-6">
                   <p className="text-sm text-gray-600 mb-4 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />

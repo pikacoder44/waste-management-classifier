@@ -2,10 +2,12 @@ import { Camera, RefreshCw, Cpu, Leaf, CheckCircle2 } from "lucide-react";
 
 const Page = () => {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans py-12 sm:py-16 lg:py-24">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen overflow-hidden bg-white text-slate-900 font-sans py-12 sm:py-16 lg:py-24 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-32 h-72 w-72 rounded-full bg-cyan-200/30 blur-3xl animate-soft-float [animation-delay:1200ms]" />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center space-y-4 mb-16">
+        <div className="text-center space-y-4 mb-16 animate-fade-in-up">
           <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600">
             Learn More
           </p>
@@ -20,7 +22,7 @@ const Page = () => {
 
         {/* What It Does Card */}
         <div className="mb-8">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in-up [animation-delay:120ms]">
             <div className="mb-6">
               <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
                 Overview
@@ -42,19 +44,19 @@ const Page = () => {
                 to help with proper waste sorting and recycling.
               </p>
               <div className="pt-4 border-t border-slate-200 mt-4 space-y-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 animate-fade-in-up [animation-delay:140ms]">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                   <p className="text-sm text-emerald-600 font-semibold">
                     Real-time classification
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 animate-fade-in-up [animation-delay:220ms]">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                   <p className="text-sm text-emerald-600 font-semibold">
                     High accuracy predictions
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 animate-fade-in-up [animation-delay:300ms]">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                   <p className="text-sm text-emerald-600 font-semibold">
                     Eco-friendly disposal guidance
@@ -67,7 +69,7 @@ const Page = () => {
 
         {/* How It Works Card */}
         <div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in-up [animation-delay:200ms]">
             <div className="mb-8">
               <p className="text-sm font-semibold uppercase tracking-widest text-emerald-600 mb-2">
                 Process
@@ -105,10 +107,13 @@ const Page = () => {
               ].map((item) => (
                 <div
                   key={item.step}
-                  className="flex flex-col sm:flex-row gap-4"
+                  className="flex flex-col sm:flex-row gap-4 animate-fade-in-up"
+                  style={{
+                    animationDelay: `${80 + (Number(item.step) - 1) * 120}ms`,
+                  }}
                 >
                   <div className="shrink-0">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 animate-soft-float">
                       <item.icon className="w-6 h-6" />
                     </div>
                   </div>

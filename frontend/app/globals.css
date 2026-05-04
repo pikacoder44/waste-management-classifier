@@ -78,6 +78,61 @@ body {
   }
 }
 
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes ringSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @layer utilities {
   .animate-slideDown {
     animation: slideDown 0.3s ease-out;
@@ -93,5 +148,25 @@ body {
 
   .animate-dropdownClose {
     animation: dropdownClose 0.22s ease-in forwards;
+  }
+
+  .animate-page-enter {
+    animation: pageEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.55s ease-out both;
+  }
+
+  .animate-soft-float {
+    animation: softFloat 4s ease-in-out infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+
+  .animate-ring-spin {
+    animation: ringSpin 7s linear infinite;
   }
 }

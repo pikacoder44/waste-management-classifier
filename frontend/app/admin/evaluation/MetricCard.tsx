@@ -21,7 +21,7 @@ export const MetricCard = ({
 
   return (
     <div
-      className={`bg-white border-2 ${borderColor} rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1`}
+      className={`bg-white border-2 ${borderColor} rounded-xl p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 animate-fade-in-up`}
     >
       <div className="flex items-start gap-3 mb-4">
         <div

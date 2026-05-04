@@ -150,9 +150,11 @@ export default function AdminUploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+    <div className="relative min-h-screen overflow-hidden bg-gray-50 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float [animation-delay:1000ms]" />
+      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
+        <div className="bg-white rounded-lg shadow-lg p-8 animate-fade-in-up">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">
             Upload New Dataset
           </h1>
@@ -161,7 +163,7 @@ export default function AdminUploadPage() {
           </p>
 
           {/* Dataset Name Input */}
-          <div className="mb-8 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+          <div className="mb-8 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 animate-fade-in-up [animation-delay:100ms]">
             <label htmlFor="datasetName" className="block mb-2">
               <span className="font-semibold text-gray-900">
                 Dataset Name *
@@ -193,9 +195,9 @@ export default function AdminUploadPage() {
           </div>
 
           {/* Upload Area */}
-          <div className="mb-8">
+          <div className="mb-8 animate-fade-in-up [animation-delay:180ms]">
             <label className="block mb-4">
-              <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition">
+              <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition animate-soft-float">
                 <input
                   type="file"
                   multiple
@@ -228,14 +230,14 @@ export default function AdminUploadPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in-up">
               <p className="text-red-700">{error}</p>
             </div>
           )}
 
           {/* Success Message */}
           {response && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg animate-fade-in-up">
               <p className="text-green-700 font-semibold">
                 ✓ Upload completed: {response.successfulUploads} successful,{" "}
                 {response.failedUploads} failed
@@ -254,13 +256,17 @@ export default function AdminUploadPage() {
 
           {/* Images Preview Grid */}
           {images.length > 0 && (
-            <div className="mb-8">
+            <div className="mb-8 animate-fade-in-up [animation-delay:120ms]">
               <h2 className="text-xl font-semibold mb-4 text-gray-900">
                 Selected Images ({images.length})
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {images.map((img, index) => (
-                  <div key={index} className="relative group">
+                  <div
+                    key={index}
+                    className="relative group animate-fade-in-up"
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
                     <div className="bg-gray-100 rounded-lg overflow-hidden">
                       <Image
                         src={img.preview}
@@ -302,7 +308,7 @@ export default function AdminUploadPage() {
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 animate-fade-in-up [animation-delay:220ms]">
             <button
               onClick={handleUpload}
               disabled={images.length === 0 || uploading}

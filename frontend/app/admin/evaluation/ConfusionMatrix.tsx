@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export const ConfusionMatrix = () => {
   return (
-    <div className="mt-12">
+    <div className="mt-12 animate-fade-in-up">
       <div className="bg-white border-2 border-slate-200 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300">
         <div className="mb-8">
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">

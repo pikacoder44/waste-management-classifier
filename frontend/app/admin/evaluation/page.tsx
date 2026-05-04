@@ -197,10 +197,12 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center space-y-4 mb-12">
+        <div className="text-center space-y-4 mb-12 animate-fade-in-up">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-linear-to-r from-slate-900 via-emerald-600 to-slate-900">
             Model Evaluation
           </h1>
@@ -210,7 +212,7 @@ const Page = () => {
           </p>
 
           {/* Fetch and Run Buttons */}
-          <div className="flex flex-col items-center gap-4 mt-10">
+          <div className="flex flex-col items-center gap-4 mt-10 animate-fade-in-up [animation-delay:100ms]">
             <div className="flex flex-col sm:flex-row gap-3 flex-wrap justify-center w-full">
               <button
                 onClick={fetchLatestEvaluation}
@@ -249,7 +251,7 @@ const Page = () => {
 
             {/* Fetch Status */}
             {loading && (
-              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md">
+              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md animate-fade-in-up">
                 <p className="text-xs font-semibold text-slate-700 flex items-center gap-2">
                   <span className="inline-block h-3 w-3 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
                   Loading evaluation report
@@ -259,7 +261,7 @@ const Page = () => {
 
             {/* Evaluation Progress Bar */}
             {isRunningEval && (
-              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md">
+              <div className="w-full max-w-md bg-white rounded-lg p-4 border border-slate-200 shadow-md animate-fade-in-up">
                 <p className="text-xs font-semibold text-slate-700 mb-3">
                   Evaluation in Progress
                 </p>
@@ -277,7 +279,7 @@ const Page = () => {
 
             {/* Fetch Error Message */}
             {error && (
-              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md">
+              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md animate-fade-in-up">
                 <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-2">
                   <span className="text-base">⚠️</span> Error
                 </p>
@@ -293,7 +295,7 @@ const Page = () => {
 
             {/* Evaluation Error Message */}
             {evalError && (
-              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md">
+              <div className="w-full max-w-md bg-red-50 border-2 border-red-200 rounded-lg p-4 shadow-md animate-fade-in-up">
                 <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-2">
                   <span className="text-base">⚠️</span> Evaluation Error
                 </p>
@@ -303,7 +305,7 @@ const Page = () => {
 
             {/* Success Message */}
             {data && !loading && (
-              <div className="w-full max-w-md bg-linear-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg p-4 shadow-md">
+              <div className="w-full max-w-md bg-linear-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg p-4 shadow-md animate-fade-in-up">
                 <p className="text-xs text-emerald-700 flex items-center gap-2">
                   <span className="text-base">✅</span>
                   <span>
@@ -327,7 +329,7 @@ const Page = () => {
 
         {/* Metrics Grid */}
         {data && (
-          <div className="space-y-8 mt-10">
+          <div className="space-y-8 mt-10 animate-fade-in-up [animation-delay:150ms]">
             <div className="relative">
               <div className="absolute inset-0 bg-linear-to-r from-emerald-200 to-blue-200 rounded-xl blur-lg opacity-20" />
               <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

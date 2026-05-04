@@ -230,8 +230,8 @@ const Page = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg text-gray-600">
+      <div className="flex items-center justify-center min-h-screen animate-page-enter">
+        <div className="text-lg text-gray-600 animate-fade-in-up">
           Loading classification history...
         </div>
       </div>
@@ -240,8 +240,8 @@ const Page = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+      <div className="min-h-screen flex items-center justify-center p-4 animate-page-enter">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md animate-fade-in-up">
           <p className="text-red-800 font-semibold">Error</p>
           <p className="text-red-700 text-sm mt-2">{error}</p>
           <button
@@ -256,9 +256,11 @@ const Page = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-12">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 py-10 sm:py-12 px-4 sm:px-6 lg:px-8 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="mb-12 animate-fade-in-up">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <h1 className="text-5xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               Classifications
@@ -275,15 +277,16 @@ const Page = () => {
         </div>
 
         {classificationHistory.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 animate-fade-in-up [animation-delay:120ms]">
             <p className="text-gray-500 text-lg">No classifications found</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classificationHistory.map((entry) => (
+            {classificationHistory.map((entry, index) => (
               <div
                 key={entry._id}
-                className={`${getCategoryCardGradient(entry.predictedLabel)} rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full group`}
+                className={`${getCategoryCardGradient(entry.predictedLabel)} rounded-xl shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full group animate-fade-in-up`}
+                style={{ animationDelay: `${index * 90}ms` }}
               >
                 {/* Image */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden group">

@@ -50,10 +50,12 @@ const Page = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter">
+      <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/30 blur-3xl animate-soft-float" />
+      <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-blue-200/25 blur-3xl animate-soft-float [animation-delay:1200ms]" />
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header Section */}
-        <div className="mb-10 sm:mb-12">
+        <div className="mb-10 sm:mb-12 animate-fade-in-up">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
             Admin Dashboard
           </h1>
@@ -68,9 +70,12 @@ const Page = () => {
             Admin Features
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-            {adminFeatures.map((feature) => (
+            {adminFeatures.map((feature, index) => (
               <Link key={feature.id} href={feature.href}>
-                <div className="group h-full bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer">
+                <div
+                  className="group h-full bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden cursor-pointer animate-fade-in-up"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
                   {/* Top color bar */}
                   <div className={`h-2 bg-linear-to-r ${feature.color}`}></div>
 
@@ -109,12 +114,12 @@ const Page = () => {
         </div>
 
         {/* Quick Actions Section */}
-        <div className="bg-linear-to-br from-white to-gray-50 rounded-lg shadow-md p-8 border border-gray-100">
+        <div className="bg-linear-to-br from-white to-gray-50 rounded-lg shadow-md p-8 border border-gray-100 animate-fade-in-up [animation-delay:220ms]">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             System Health
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:320ms]">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium mb-1">
@@ -134,7 +139,7 @@ const Page = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:400ms]">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium mb-1">
@@ -152,7 +157,7 @@ const Page = () => {
               <p className="text-xs text-gray-500 mt-3">Response: 12ms</p>
             </div>
 
-            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm">
+            <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:480ms]">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium mb-1">
@@ -173,7 +178,7 @@ const Page = () => {
         </div>
 
         {/* Recent Activity Section */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6 sm:p-8 border border-gray-100">
+        <div className="mt-8 bg-white rounded-lg shadow-md p-6 sm:p-8 border border-gray-100 animate-fade-in-up [animation-delay:260ms]">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Recent Classifications
           </h2>
@@ -206,7 +211,8 @@ const Page = () => {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors animate-fade-in-up"
+                style={{ animationDelay: `${idx * 110}ms` }}
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <div className="text-emerald-600">
@@ -231,11 +237,11 @@ const Page = () => {
         </div>
 
         {/* Stats Overview */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 mt-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 mt-6 animate-fade-in-up [animation-delay:280ms]">
           Stats Overview
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500 animate-fade-in-up [animation-delay:360ms]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
@@ -247,7 +253,7 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500 animate-fade-in-up [animation-delay:440ms]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">
@@ -259,7 +265,7 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500 animate-fade-in-up [animation-delay:520ms]">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">

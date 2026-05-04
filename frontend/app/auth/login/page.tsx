@@ -96,11 +96,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-emerald-50 via-white to-emerald-50 px-4 py-8 sm:p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-emerald-50 via-white to-emerald-50 px-4 py-8 sm:p-4 animate-page-enter">
       {/* Form Container */}
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full max-w-md mx-auto animate-fade-in-up">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 animate-fade-in-up [animation-delay:80ms]">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Shield className="w-8 h-8 text-emerald-600" />
             <h1 className="text-4xl font-bold text-gray-900">
@@ -113,7 +113,7 @@ const Login = () => {
         {/* Form */}
         <form
           onSubmit={loginUser}
-          className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6"
+          className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6 animate-fade-in-up [animation-delay:160ms]"
         >
           {/* Error Alert */}
           {error && (
