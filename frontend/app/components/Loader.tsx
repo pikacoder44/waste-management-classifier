@@ -24,11 +24,9 @@ export default function Loader({
             {icon}
           </div>
         </div>
-        
+
         {/* Message */}
-        <p className="text-sm font-medium text-slate-600">
-          {message}
-        </p>
+        <p className="text-sm font-medium text-slate-600">{message}</p>
       </div>
     </div>
   );
