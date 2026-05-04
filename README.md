@@ -17,8 +17,8 @@ A full-stack machine learning web application for waste classification with user
 - **Dataset Management:** Upload, update, and delete custom datasets
 - **Model Retraining:** Retrain model with original and custom datasets
 - **Model Evaluation:** Evaluate model performance with metrics (accuracy, precision, recall, F1-score, confusion matrix)
-- **Training/Evaluation Progress:** Real-time progress tracking with background task processing
-- **Classification Monitoring:** View all user classifications and system activity
+- **Training/Evaluation Progress:** Background task processing with status updates
+- **Classification Monitoring:** View all user classifications
 - **Image Quality Checks:** Automatically validate and enhance low-quality uploads before inference
 
 ## 📊 Waste Categories
@@ -96,17 +96,16 @@ code/
 │   │   ├── models/
 │   │   │   ├── admin_models.py            # Admin request schemas
 │   │   │   ├── dataset.py                 # Dataset schema
-│   │   │   ├── disposal_recommendation.py # Disposal recommendations
 │   │   │   ├── model_evaluation.py        # Evaluation results schema
 │   │   │   ├── user.py                    # User schema
 │   │   │   └── waste_records.py          # Waste classification history schema
-│   │   ├── security/
 │   │   ├── services/
 │   │   │   ├── model_evaluation_service.py # Evaluation logic
 │   │   │   ├── recommendation_service.py  # Disposal recommendations
 │   │   │   └── split_dataset_services.py  # Dataset splitting
 │   │   ├── utils/
-│   │   │   └── helpers.py                 # Utility functions
+│   │   │   ├── auth_utils.py              # Authentication helpers
+│   │   │   └── db_helpers.py              # Database helpers
 │   │   └── main.py                        # FastAPI app entry point
 │   ├── dataset/
 │   │   ├── original/                      # Original training data (6 categories)
@@ -121,21 +120,25 @@ code/
 │   │   ├── about/                         # About page
 │   │   ├── admin/
 │   │   │   ├── classifications/           # View all classifications
+│   │   │   ├── dashboard/                 # Admin dashboard
 │   │   │   ├── datasets/                  # Dataset management
+│   │   │   │   └── update/[datasetId]/     # Update dataset page
 │   │   │   ├── evaluation/                # Model evaluation results
 │   │   │   ├── retrain/                   # Model retraining
 │   │   │   └── upload/                    # Dataset upload
 │   │   ├── auth/
-│   │   │   └── login/                     # Login page
+│   │   │   ├── login/                     # Login page
+│   │   │   └── register/                  # Registration page
 │   │   ├── components/
 │   │   │   ├── Loader.tsx                 # Loading indicator
 │   │   │   └── Navbar.tsx                 # Navigation bar
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx            # Auth state management
 │   │   ├── globals.css                    # Global styles
+│   │   ├── history/                       # User classification history
 │   │   ├── layout.tsx                     # Root layout
 │   │   └── page.tsx                       # Home page (classification)
 │   ├── public/                            # Static assets
-│   ├── utils/
-│   │   └── evaluation_results.json        # Cached evaluation data
 │   ├── package.json                       # Node.js dependencies
 │   ├── tsconfig.json                      # TypeScript config
 │   ├── next.config.ts                     # Next.js config
@@ -219,13 +222,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # 5. Create .env file with required variables
-cat > .env << EOF
-DATABASE_URL=mongodb://localhost:27017
-DATABASE_NAME=waste_classifier
+# Add these values to backend/.env
+MONGO_URL=mongodb://localhost:27017
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-EOF
+ACCESS_TOKEN_EXPIRE_MINUTES=20
 
 # 6. Run backend server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
@@ -257,7 +258,7 @@ npm run dev
 
 ```
 Username: admin
-Password: (configured in database)
+Password: (configured in the database)
 Role: admin
 ```
 
@@ -271,9 +272,9 @@ Role: user (automatic)
 ## 🔐 Security Features
 
 - **JWT Authentication:** Secure token-based authentication
-- **HTTP-Only Cookies:** Prevents XSS attacks
+- **HTTP-Only Cookies:** Helps reduce XSS token exposure
 - **CORS Protection:** Configured for localhost development
-- **CSRF Protection:** X-CSRF-Token support
+- **CSRF Header Support:** X-CSRF-Token header is exposed for client integration
 - **Password Hashing:** bcrypt with salt
 - **Role-Based Access Control:** Admin vs User permissions
 - **Trusted Host Middleware:** Prevents Host header attacks
@@ -282,37 +283,40 @@ Role: user (automatic)
 
 - **Home (`/`)** - Main classification interface
 - **About (`/about`)** - Project information
-- **Evaluation (`/evaluation`)** - Model performance metrics
+- **Evaluation (`/admin/evaluation`)** - Model performance metrics
 - **Login (`/auth/login`)** - Authentication page
-- **Admin Dashboard (`/admin/`)** - Restricted admin access
+- **Register (`/auth/register`)** - New user registration
+- **History (`/history`)** - Classification history
+- **Admin Dashboard (`/admin/dashboard`)** - Restricted admin access
+  - Dashboard - Overview and system health
   - Classifications - View all user classifications
   - Datasets - Manage training datasets
   - Upload - Upload new dataset
   - Retrain - Monitor model retraining
+  - Evaluation - View model evaluation results
 
 ## 🔧 Environment Variables
 
 ### Backend (.env)
 
 ```
-DATABASE_URL=mongodb://localhost:27017
-DATABASE_NAME=waste_classifier
+MONGO_URL=mongodb://localhost:27017
 SECRET_KEY=<your-secret-key>
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
+ACCESS_TOKEN_EXPIRE_MINUTES=20
 ```
 
 ### Quality Improvements
 
-**Image Quality Thresholds (Optimized for real-world waste):**
+**Image Quality Thresholds:**
 
-- MIN_RESOLUTION: 160×160px (was 224×224 - allows smaller smartphone photos)
-- BLUR_THRESHOLD: 80 (was 100 - more lenient for casual photos)
-- MIN_BRIGHTNESS: 20 (was 30 - allows darker indoor photos)
-- MAX_BRIGHTNESS: 235 (was 225 - allows bright outdoor lighting)
-- Quality threshold to pass: 60% (was 70% - more realistic for user experience)
+- MIN_RESOLUTION: 224×224px
+- BLUR_THRESHOLD: 100
+- MIN_BRIGHTNESS: 30
+- MAX_BRIGHTNESS: 225
+- Quality threshold to pass: 70%
 
-This enables images like 275×183px to be processed while still catching genuinely unusable photos.
+Images below these thresholds are rejected unless they can be enhanced successfully.
 
 ## 📄 License
 
