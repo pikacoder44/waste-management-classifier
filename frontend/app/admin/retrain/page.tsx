@@ -21,9 +21,7 @@ export default function RetrainPage() {
     null,
   );
   const [showAcknowledgement, setShowAcknowledgement] = useState(false);
-  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(
-    null,
-  );
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const errorCountRef = useRef(0);
   const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
@@ -46,16 +44,21 @@ export default function RetrainPage() {
         const data: TrainingStatus = await response.json();
         setTrainingStatus(data);
 
+        // If training is active, ensure acknowledgement is shown
+        if (data.is_training) {
+          setShowAcknowledgement(true);
+        }
+
         // Reset error count on successful fetch
         errorCountRef.current = 0;
 
         // Show completion animation when training is done
-        if (data.status === "completed" && data.progress === 100) {
+        if (!data.is_training && data.status === "completed") {
           setShowCompletion(true);
           // Stop polling
-          if (pollingInterval) {
-            clearInterval(pollingInterval);
-            setPollingInterval(null);
+          if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
           }
         }
       } else {
@@ -74,9 +77,9 @@ export default function RetrainPage() {
           "Training monitoring stopped due to connection errors. Check your connection and try again.",
         );
 
-        if (pollingInterval) {
-          clearInterval(pollingInterval);
-          setPollingInterval(null);
+        if (pollingRef.current) {
+          clearInterval(pollingRef.current);
+          pollingRef.current = null;
         }
       }
     }
@@ -85,6 +88,8 @@ export default function RetrainPage() {
   // Start model retraining
   const handleRetrain = async () => {
     setIsLoading(true);
+    // Reset error counter when starting a new retrain
+    errorCountRef.current = 0;
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/retrain`,
@@ -103,12 +108,6 @@ export default function RetrainPage() {
         setTimeout(() => {
           fetchTrainingStatus();
         }, 500);
-
-        // Start polling for status updates every 3 seconds (reduced from 2 seconds)
-        const interval = setInterval(() => {
-          fetchTrainingStatus();
-        }, 3000);
-        setPollingInterval(interval);
       } else {
         const error = await response.json();
         alert(`Error: ${error.detail || "Failed to start training"}`);
@@ -121,14 +120,23 @@ export default function RetrainPage() {
     }
   };
 
-  // Cleanup interval on component unmount
+  // Start polling and check current training status on mount
   useEffect(() => {
+    // Check current training status once when the page mounts
+    fetchTrainingStatus();
+
+    // Start polling for status updates
+    if (!pollingRef.current) {
+      pollingRef.current = setInterval(fetchTrainingStatus, 3000);
+    }
+
     return () => {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
       }
     };
-  }, [pollingInterval]);
+  }, []);
 
   return (
     <ProtectedAdminRoute>
