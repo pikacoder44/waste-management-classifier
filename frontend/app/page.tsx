@@ -81,6 +81,67 @@ export default function Home() {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const parseApiErrorMessage = async (
+    response: Response,
+    fallbackMessage: string,
+  ): Promise<string> => {
+    try {
+      const raw = await response.text();
+
+      if (!raw) {
+        return fallbackMessage;
+      }
+
+      try {
+        const data = JSON.parse(raw) as {
+          detail?: unknown;
+          message?: unknown;
+          errors?: Array<{ error?: string }>;
+        };
+
+        if (typeof data.detail === "string") {
+          return data.detail;
+        }
+
+        if (Array.isArray(data.detail)) {
+          const joined = data.detail
+            .map((entry) =>
+              entry && typeof entry === "object"
+                ? (entry as { msg?: string }).msg
+                : null,
+            )
+            .filter((item): item is string => Boolean(item))
+            .join(", ");
+
+          if (joined) {
+            return joined;
+          }
+        }
+
+        if (typeof data.message === "string") {
+          return data.message;
+        }
+
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          const joined = data.errors
+            .map((entry) => entry.error)
+            .filter((item): item is string => Boolean(item))
+            .join(", ");
+          if (joined) {
+            return joined;
+          }
+        }
+
+        return fallbackMessage;
+      } catch {
+        return raw.trim() || fallbackMessage;
+      }
+    } catch {
+      return fallbackMessage;
+    }
+  };
 
   const startCamera = async () => {
     try {
@@ -146,12 +207,21 @@ export default function Home() {
   useEffect(() => {
     return () => {
       stopCamera();
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
     };
   }, []);
 
   const showError = (message: string) => {
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
     setError(message);
-    setTimeout(() => setError(null), 5000);
+    errorTimeoutRef.current = setTimeout(() => {
+      setError(null);
+      errorTimeoutRef.current = null;
+    }, 5000);
   };
 
   const handleFileSelect = (selectedFile: File | null) => {
@@ -189,7 +259,11 @@ export default function Home() {
         },
       );
       if (response.status == 401) {
-        showError("Unauthorized. Please Login first.");
+        const apiMessage = await parseApiErrorMessage(
+          response,
+          "Unauthorized. Please Login first.",
+        );
+        showError(apiMessage);
         setIsLoading(false);
         return;
       }
@@ -214,22 +288,17 @@ export default function Home() {
           setSubmittedFile(file);
         }
       } else {
-        try {
-          const errorData = await response.json();
-          showError(
-            errorData.detail ||
-              "Something went wrong while uploading. Please try again.",
-          );
-        } catch {
-          showError("Something went wrong while uploading. Please try again.");
-        }
+        const apiMessage = await parseApiErrorMessage(
+          response,
+          "Something went wrong while uploading. Please try again.",
+        );
+        showError(apiMessage);
       }
-    } catch (error) {
+    } catch {
       showError(
         hasBackup
           ? "Could not connect to the server. Showing the last successful result."
           : "Could not connect to the server. Please make sure the backend is running.",
-        error,
       );
     } finally {
       setIsLoading(false);
@@ -557,36 +626,92 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Error Toast */}
+      {/* Error Overlay */}
       {error && (
-        <div className="fixed top-6 left-1/2 z-50 -translate-x-1/2 w-[90%] max-w-md animate-slideDown">
-          <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
-            <svg
-              className="h-5 w-5 text-red-600 shrink-0 mt-0.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <div className="flex-1">
-              <p className="font-semibold text-red-900 text-sm">{error}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-[3px] px-4">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-rose-200/70 bg-white shadow-2xl animate-fade-in-up"
+          >
+            <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-rose-200/40 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-amber-100/50 blur-3xl" />
+
+            <div className="relative border-b border-rose-100/80 bg-linear-to-r from-rose-50 via-white to-amber-50 px-6 py-5">
+              <div className="flex items-start gap-4">
+                <div className="mt-0.5 rounded-2xl bg-rose-100 p-2.5 shadow-sm ring-1 ring-rose-200">
+                  <svg
+                    className="h-5 w-5 text-rose-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-500">
+                    Upload Alert
+                  </p>
+                  <h3 className="mt-1 text-xl font-bold text-slate-900">
+                    We could not analyze this image
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Check the issue below and try again with a clearer photo.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setError(null)}
+                  className="rounded-xl p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-colors"
+                  aria-label="Close error"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setError(null)}
-              className="text-red-600 hover:text-red-700"
-            >
-              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
+
+            <div className="relative px-6 py-5">
+              <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-500">
+                  Error details
+                </p>
+                <p className="mt-2 text-sm font-medium text-rose-900 wrap-break-word">
+                  {error}
+                </p>
+              </div>
+
+              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  onClick={() => setError(null)}
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Dismiss
+                </button>
+                <button
+                  onClick={() => {
+                    setError(null);
+                    upload_image();
+                  }}
+                  disabled={!file || isLoading}
+                  className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-rose-600 to-rose-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-rose-700 hover:to-rose-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
