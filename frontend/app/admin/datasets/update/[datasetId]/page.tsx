@@ -54,6 +54,44 @@ const isSupportedImageFile = (file: File) => {
   );
 };
 
+const getLabelBadgeClasses = (label: string) => {
+  switch (label) {
+    case "cardboard":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "paper":
+      return "bg-sky-100 text-sky-800 border-sky-200";
+    case "metal":
+      return "bg-slate-100 text-slate-800 border-slate-200";
+    case "glass":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "plastic":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "trash":
+      return "bg-rose-100 text-rose-800 border-rose-200";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200";
+  }
+};
+
+const getLabelCardClasses = (label: string) => {
+  switch (label) {
+    case "cardboard":
+      return "border-amber-300 bg-amber-50/80 hover:border-amber-400";
+    case "paper":
+      return "border-sky-300 bg-sky-50/80 hover:border-sky-400";
+    case "metal":
+      return "border-slate-300 bg-slate-50/80 hover:border-slate-400";
+    case "glass":
+      return "border-emerald-300 bg-emerald-50/80 hover:border-emerald-400";
+    case "plastic":
+      return "border-blue-300 bg-blue-50/80 hover:border-blue-400";
+    case "trash":
+      return "border-rose-300 bg-rose-50/80 hover:border-rose-400";
+    default:
+      return "border-gray-200 bg-white hover:border-gray-300";
+  }
+};
+
 const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const { datasetId } = React.use(params);
   const router = useRouter();
@@ -412,15 +450,17 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                       typeof item === "object"
                         ? item.originalFilename
                         : filePath.split("/").pop();
+                    const label =
+                      typeof item === "object" ? item.label : "Unknown";
 
                     const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath}`;
                     return (
                       <div
                         key={`existing-${index}`}
-                        className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 relative animate-fade-in-up"
+                        className={`group rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-56 relative animate-fade-in-up border ${getLabelCardClasses(label)}`}
                         style={{ animationDelay: `${index * 80}ms` }}
                       >
-                        <div className="relative h-56 bg-gray-100 overflow-hidden">
+                        <div className="relative h-56 bg-white/60 overflow-hidden">
                           <Image
                             src={imageUrl}
                             alt={`Dataset Image ${index + 1}`}
@@ -433,6 +473,11 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                           />
                         </div>
                         <div className="p-4">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${getLabelBadgeClasses(label)}`}
+                          >
+                            {label}
+                          </span>
                           <p className="text-xs text-gray-600 truncate mb-3">
                             {originalFilename}
                           </p>
