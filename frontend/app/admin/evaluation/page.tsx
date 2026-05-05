@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MetricCard } from "./MetricCard";
 import { ConfusionMatrix } from "./ConfusionMatrix";
 import { PerformanceScorecard } from "./PerformanceScorecard";
@@ -79,7 +79,7 @@ const Page = () => {
   };
 
   // Poll evaluation status
-  const pollEvaluationStatus = async () => {
+  const pollEvaluationStatus = useCallback(async () => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
@@ -104,8 +104,8 @@ const Page = () => {
       setEvalProgress(status.progress);
       setEvalMessage(status.message);
 
-      // If evaluation is complete, fetch the latest results
-      if (!status.is_evaluating && status.progress === 100) {
+      // If evaluation is complete (use authoritative status field), fetch the latest results
+      if (status.status === "completed") {
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
@@ -116,6 +116,18 @@ const Page = () => {
 
         // Fetch latest evaluation results
         setTimeout(() => fetchLatestEvaluation(), 500);
+        return;
+      }
+
+      // If evaluation fails, stop polling and surface an explicit error
+      if (status.status === "failed") {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+
+        setIsRunningEval(false);
+        setEvalError("Evaluation failed. Check logs.");
       }
     } catch (err) {
       console.error("Error polling evaluation status:", err);
@@ -137,17 +149,51 @@ const Page = () => {
         }
       }
     }
-  };
+  }, []);
 
   // Handle Run Evaluation button click
   const handleRunEvaluation = async () => {
-    setIsRunningEval(true);
+    // Prevent duplicate starts if frontend already thinks it's running
+    if (isRunningEval || pollingIntervalRef.current) return;
+
     setEvalError(null);
     setEvalProgress(0);
     setEvalMessage("Starting evaluation...");
 
     try {
-      // Trigger evaluation
+      // Check backend status first to avoid duplicate jobs (backend-driven)
+      const statusResp = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        },
+      );
+
+      if (statusResp.ok) {
+        const status: EvaluationStatus = await statusResp.json();
+        if (status.is_evaluating) {
+          // Backend already running evaluation — restore polling UI
+          setIsRunningEval(true);
+          setEvalProgress(status.progress);
+          setEvalMessage(status.message || "Resuming evaluation...");
+          errorCountRef.current = 0;
+          // Poll immediately and start interval if not present
+          await pollEvaluationStatus();
+          if (!pollingIntervalRef.current) {
+            pollingIntervalRef.current = setInterval(
+              pollEvaluationStatus,
+              3000,
+            );
+          }
+          return;
+        }
+      }
+
+      // Trigger evaluation if not already running
+      setIsRunningEval(true);
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluate`,
         {
@@ -172,13 +218,12 @@ const Page = () => {
 
       // Start polling for status updates
       console.log("✓ Evaluation started, polling for progress...");
-
-      // Poll immediately, then every 3 seconds (reduced from 1 second)
       await pollEvaluationStatus();
-
-      pollingIntervalRef.current = setInterval(() => {
-        pollEvaluationStatus();
-      }, 3000);
+      if (!pollingIntervalRef.current) {
+        pollingIntervalRef.current = setInterval(() => {
+          pollEvaluationStatus();
+        }, 3000);
+      }
     } catch (err) {
       console.error("Error starting evaluation:", err);
       setEvalError(
@@ -188,18 +233,54 @@ const Page = () => {
     }
   };
 
-  // Cleanup polling interval on unmount
+  // Restore evaluation state on mount and cleanup polling on unmount
   useEffect(() => {
+    const restoreStatus = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
+          { method: "GET", credentials: "include" },
+        );
+
+        if (!res.ok) return;
+
+        const status: EvaluationStatus = await res.json();
+
+        if (status.is_evaluating) {
+          setIsRunningEval(true);
+          setEvalProgress(status.progress);
+          setEvalMessage(status.message || "Resuming evaluation...");
+          errorCountRef.current = 0;
+
+          // Poll immediately and ensure a single interval is set
+          await pollEvaluationStatus();
+          if (!pollingIntervalRef.current) {
+            pollingIntervalRef.current = setInterval(
+              pollEvaluationStatus,
+              3000,
+            );
+          }
+        }
+      } catch (e) {
+        // restore is best-effort; swallow errors
+        console.warn("Failed to restore evaluation status", e);
+      }
+    };
+
+    restoreStatus();
+
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <ProtectedAdminRoute>
-      <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24 animate-page-enter\">
+      <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24 animate-page-enter">
         <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float" />
         <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
