@@ -5,10 +5,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.database.connection import db
-import os
+from pathlib import Path
 from app.api.routes import auth_routes
 from app.api.routes import classification_routes
 from app.api.routes import admin_routes
+
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 app = FastAPI(
     title="Waste Classifier API",
@@ -113,22 +115,22 @@ app.include_router(classification_routes.router)
 app.include_router(admin_routes.router)
 
 
-dataset_path = os.path.join(os.getcwd(), "dataset")
-if os.path.exists(dataset_path):
-    app.mount("/dataset", StaticFiles(directory=dataset_path), name="dataset")
+dataset_path = BACKEND_ROOT / "dataset"
+if dataset_path.exists():
+    app.mount("/dataset", StaticFiles(directory=str(dataset_path)), name="dataset")
 
 
-uploads_path = os.path.join(os.getcwd(), "uploads")
-if not os.path.exists(uploads_path):
-    os.makedirs(uploads_path)
-app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
+uploads_path = BACKEND_ROOT / "uploads"
+if not uploads_path.exists():
+    uploads_path.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
 
 
-evaluation_results_path = os.path.join(os.getcwd(), "evaluation_results")
-if not os.path.exists(evaluation_results_path):
-    os.makedirs(evaluation_results_path)
+evaluation_results_path = BACKEND_ROOT / "evaluation_results"
+if not evaluation_results_path.exists():
+    evaluation_results_path.mkdir(parents=True, exist_ok=True)
 app.mount(
     "/evaluation_results",
-    StaticFiles(directory=evaluation_results_path),
+    StaticFiles(directory=str(evaluation_results_path)),
     name="evaluation_results",
 )

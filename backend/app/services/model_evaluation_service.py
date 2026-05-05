@@ -12,6 +12,7 @@ import os
 import json
 
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 def evaluate_model(
@@ -227,7 +228,7 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
     """
     try:
         # Create backend-owned directory for evaluation artifacts
-        output_dir = Path("evaluation_results")
+        output_dir = BACKEND_ROOT / "evaluation_results"
         output_dir.mkdir(parents=True, exist_ok=True)
 
         output_path = output_dir / "confusionMatrix.png"
@@ -238,8 +239,6 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
         plt.figure(figsize=(10, 8))
 
         # Display confusion matrix as heatmap
-        import matplotlib.patches as mpatches
-
         im = plt.imshow(conf_matrix, interpolation="nearest", cmap="Blues")
 
         # Add colorbar
