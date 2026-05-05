@@ -25,7 +25,12 @@ const Register = () => {
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      setError("Please use a password with at least 8 characters.");
+      return;
+    }
+
+    if (username.trim().length < 3) {
+      setError("Username must be at least 3 characters.");
       return;
     }
 
