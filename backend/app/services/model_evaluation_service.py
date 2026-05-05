@@ -148,16 +148,7 @@ def evaluate_model(
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
 
-    # Save confusion matrix locally (JSON format)
-    print(f"💾 Saving confusion matrix locally...")
-    try:
-        save_confusion_matrix_locally(
-            conf_matrix.tolist(), ALLOWED_LABELS, model_version
-        )
-        print(f"✓ Confusion matrix JSON saved")
-    except Exception as e:
-        print(f"❌ ERROR saving confusion matrix JSON: {e}")
-        raise
+    
 
     try:
         generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
@@ -180,39 +171,6 @@ def evaluate_model(
     print(f"✓ Evaluation document created successfully")
 
     return evaluation_doc
-
-
-def save_confusion_matrix_locally(
-    conf_matrix: list, class_labels: list, model_version: str
-) -> str:
-
-    try:
-        # Create directory if it doesn't exist
-        output_dir = "evaluation_results"
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Generate filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"confusion_matrix_{timestamp}.json"
-        filepath = os.path.join(output_dir, filename)
-
-        # Create confusion matrix document
-        cm_doc: Dict[str, Any] = {
-            "timestamp": datetime.now().isoformat(),
-            "modelVersion": model_version,
-            "classLabels": class_labels,
-            "confusionMatrix": conf_matrix,
-        }
-
-        # Write to file
-        with open(filepath, "w") as f:
-            json.dump(cm_doc, f, indent=2)
-
-        print(f"✓ Confusion matrix saved locally to: {filepath}")
-        return filepath  # Return the filepath string
-    except Exception as e:
-        print(f"✗ Failed to save confusion matrix locally: {e}")
-        raise
 
 
 def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list) -> str:
