@@ -122,3 +122,13 @@ uploads_path = os.path.join(os.getcwd(), "uploads")
 if not os.path.exists(uploads_path):
     os.makedirs(uploads_path)
 app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
+
+
+evaluation_results_path = os.path.join(os.getcwd(), "evaluation_results")
+if not os.path.exists(evaluation_results_path):
+    os.makedirs(evaluation_results_path)
+app.mount(
+    "/evaluation_results",
+    StaticFiles(directory=evaluation_results_path),
+    name="evaluation_results",
+)

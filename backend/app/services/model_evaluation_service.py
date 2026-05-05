@@ -3,6 +3,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 from datetime import datetime
 from typing import Dict, Any, cast
 from bson import ObjectId
+import matplotlib.pyplot as plt
+from pathlib import Path
 
 from app.database.collections import dataset_collection, model_evaluation_collection
 from app.models.model_evaluation import ModelEvaluation
@@ -141,15 +143,24 @@ def evaluate_model(
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
 
-    # Save confusion matrix locally
+    # Save confusion matrix locally (JSON format)
     print(f"💾 Saving confusion matrix locally...")
     try:
         save_confusion_matrix_locally(
             conf_matrix.tolist(), ALLOWED_LABELS, model_version
         )
-        print(f"✓ Confusion matrix saved")
+        print(f"✓ Confusion matrix JSON saved")
     except Exception as e:
-        print(f"❌ ERROR saving confusion matrix: {e}")
+        print(f"❌ ERROR saving confusion matrix JSON: {e}")
+        raise
+
+    # Generate and save confusion matrix image for frontend
+    print(f"🎨 Generating confusion matrix visualization...")
+    try:
+        generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
+        print(f"✓ Confusion matrix PNG generated and saved")
+    except Exception as e:
+        print(f"❌ ERROR generating confusion matrix image: {e}")
         raise
 
     # Return evaluation document - This is what gets stored in DB
@@ -198,6 +209,89 @@ def save_confusion_matrix_locally(
         return filepath  # Return the filepath string
     except Exception as e:
         print(f"✗ Failed to save confusion matrix locally: {e}")
+        raise
+
+
+def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list) -> str:
+    """Generate a matplotlib confusion matrix image and save it to backend directory.
+
+    Automatically overwrites the previous image at the fixed path:
+    backend/evaluation_results/confusionMatrix.png
+
+    Args:
+        conf_matrix: Confusion matrix numpy array
+        class_labels: List of class label names
+
+    Returns:
+        str: Path to the saved image file
+    """
+    try:
+        # Create backend-owned directory for evaluation artifacts
+        output_dir = Path("evaluation_results")
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        output_path = output_dir / "confusionMatrix.png"
+
+        print(f"🎨 Generating confusion matrix visualization...")
+
+        # Create matplotlib figure
+        plt.figure(figsize=(10, 8))
+
+        # Display confusion matrix as heatmap
+        import matplotlib.patches as mpatches
+
+        im = plt.imshow(conf_matrix, interpolation="nearest", cmap="Blues")
+
+        # Add colorbar
+        cbar = plt.colorbar(im, ax=plt.gca())
+        cbar.set_label("Number of Predictions", rotation=270, labelpad=20)
+
+        # Set labels and title
+        plt.title(
+            "Confusion Matrix - Waste Classification Model",
+            fontsize=14,
+            fontweight="bold",
+            pad=20,
+        )
+        plt.xlabel("Predicted Label", fontsize=12)
+        plt.ylabel("True Label", fontsize=12)
+
+        # Set tick labels
+        tick_marks = np.arange(len(class_labels))
+        plt.xticks(tick_marks, class_labels, rotation=45, ha="right")
+        plt.yticks(tick_marks, class_labels, rotation=0)
+
+        # Add text annotations showing the counts
+        threshold = conf_matrix.max() / 2.0
+        for i in range(conf_matrix.shape[0]):
+            for j in range(conf_matrix.shape[1]):
+                count = conf_matrix[i, j]
+                color = "white" if count > threshold else "black"
+                plt.text(
+                    j,
+                    i,
+                    f"{int(count)}",
+                    horizontalalignment="center",
+                    verticalalignment="center",
+                    color=color,
+                    fontsize=11,
+                    fontweight="bold",
+                )
+
+        plt.tight_layout()
+
+        # Save to backend directory (overwrites previous file automatically)
+        plt.savefig(output_path, dpi=100, bbox_inches="tight")
+        plt.close()
+
+        print(f"✓ Confusion matrix image saved to: {output_path}")
+        return str(output_path)
+
+    except Exception as e:
+        print(f"✗ Failed to generate confusion matrix image: {e}")
+        import traceback
+
+        traceback.print_exc()
         raise
 
 

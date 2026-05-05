@@ -482,7 +482,7 @@ const Page = () => {
           )}
 
           {/* Confusion Matrix */}
-          {data && <ConfusionMatrix />}
+          {data && <ConfusionMatrix cacheKey={data.evaluationDate} />}
 
           {/* Performance Scorecard */}
           {data && (
