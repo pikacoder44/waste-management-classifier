@@ -32,6 +32,7 @@ export default function AdminUploadPage() {
   const [datasetName, setDatasetName] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,15 +47,46 @@ export default function AdminUploadPage() {
     "trash",
   ];
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const addFiles = (files: File[]) => {
     const newImages: ImageFile[] = files.map((file) => ({
       file,
       label: "",
       preview: URL.createObjectURL(file),
     }));
+
     setImages((prev) => [...prev, ...newImages]);
     setError(null);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    addFiles(Array.from(e.target.files || []));
+    e.target.value = "";
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files || []).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+
+    if (droppedFiles.length > 0) {
+      addFiles(droppedFiles);
+    }
   };
 
   const handleLabelChange = (index: number, label: string) => {
@@ -153,7 +185,7 @@ export default function AdminUploadPage() {
   return (
     <ProtectedAdminRoute>
       <div className="relative min-h-screen overflow-hidden bg-gray-50 animate-page-enter">
-        <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl animate-soft-float\" />
+        <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-blue-200/25 blur-3xl animate-soft-float" />
         <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float [animation-delay:1000ms]" />
         <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
           <div className="bg-white rounded-lg shadow-lg p-8 animate-fade-in-up">
@@ -198,8 +230,17 @@ export default function AdminUploadPage() {
 
             {/* Upload Area */}
             <div className="mb-8 animate-fade-in-up [animation-delay:180ms]">
-              <label className="block mb-4">
-                <div className="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition animate-soft-float">
+              <div className="block mb-4">
+                <label
+                  className={`block border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition animate-soft-float ${
+                    dragActive
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-blue-300 hover:border-blue-500"
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <input
                     type="file"
                     multiple
@@ -224,10 +265,12 @@ export default function AdminUploadPage() {
                     <p className="text-lg font-semibold text-gray-700">
                       Click to upload images
                     </p>
-                    <p className="text-sm text-gray-500">or drag and drop</p>
+                    <p className="text-sm text-gray-500">
+                      or drag and drop images here
+                    </p>
                   </div>
-                </div>
-              </label>
+                </label>
+              </div>
             </div>
 
             {/* Error Message */}
