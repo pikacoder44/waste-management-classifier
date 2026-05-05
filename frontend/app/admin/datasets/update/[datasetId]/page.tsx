@@ -36,6 +36,24 @@ const ALLOWED_LABELS = [
   "trash",
 ];
 
+const ALLOWED_IMAGE_EXTENSIONS = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "avif",
+]);
+
+const isSupportedImageFile = (file: File) => {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return (
+    file.type.startsWith("image/") ||
+    (extension !== undefined && ALLOWED_IMAGE_EXTENSIONS.has(extension))
+  );
+};
+
 const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const { datasetId } = React.use(params);
   const router = useRouter();
@@ -50,6 +68,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     { file: File; label: string }[]
   >([]);
   const [uploading, setUploading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [originalName, setOriginalName] = useState("");
   const [originalDescription, setOriginalDescription] = useState("");
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
@@ -133,11 +152,28 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    const newFiles: { file: File; label: string }[] = [];
-    for (const file of e.target.files) {
-      newFiles.push({ file, label: "paper" }); // Default label
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(isSupportedImageFile);
+    const rejectedFiles = files.filter((file) => !isSupportedImageFile(file));
+
+    if (rejectedFiles.length > 0) {
+      setActionError(
+        `Only image files are allowed. Ignored: ${rejectedFiles.map((file) => file.name).join(", ")}`,
+      );
+    } else {
+      setActionError(null);
     }
+
+    if (validFiles.length === 0) {
+      e.target.value = "";
+      return;
+    }
+
+    const newFiles: { file: File; label: string }[] = validFiles.map(
+      (file) => ({ file, label: "paper" }),
+    );
     setSelectedFiles([...selectedFiles, ...newFiles]);
+    e.target.value = "";
   };
 
   const handleLabelChange = (index: number, newLabel: string) => {
@@ -164,12 +200,24 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     imagesToDelete.length > 0;
 
   const handleUploadImages = async () => {
+    const invalidFiles = selectedFiles.filter(
+      (item) => !isSupportedImageFile(item.file),
+    );
+
+    if (invalidFiles.length > 0) {
+      setActionError(
+        `Only image files are allowed. Remove: ${invalidFiles.map((item) => item.file.name).join(", ")}`,
+      );
+      return;
+    }
+
     if (selectedFiles.length > 0 && selectedFiles.some((item) => !item.label)) {
-      alert("Please select a label for all images");
+      setActionError("Please select a label for all images");
       return;
     }
 
     setUploading(true);
+    setActionError(null);
     try {
       let imageData: { filename: string; label: string; fileData: string }[] =
         [];
@@ -348,6 +396,11 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                   {filePaths.length + selectedFiles.length}
                 </span>
               </h3>
+              {actionError && (
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                  {actionError}
+                </div>
+              )}
               <div className="flex flex-wrap justify-center gap-6">
                 {/* Existing images */}
                 {Array.isArray(filePaths) &&

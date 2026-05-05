@@ -27,6 +27,24 @@ interface UploadResponse {
   }>;
 }
 
+const ALLOWED_IMAGE_EXTENSIONS = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "avif",
+]);
+
+const isSupportedImageFile = (file: File) => {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return (
+    file.type.startsWith("image/") ||
+    (extension !== undefined && ALLOWED_IMAGE_EXTENSIONS.has(extension))
+  );
+};
+
 export default function AdminUploadPage() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [datasetName, setDatasetName] = useState("");
@@ -48,7 +66,22 @@ export default function AdminUploadPage() {
   ];
 
   const addFiles = (files: File[]) => {
-    const newImages: ImageFile[] = files.map((file) => ({
+    const validFiles = files.filter(isSupportedImageFile);
+    const rejectedFiles = files.filter((file) => !isSupportedImageFile(file));
+
+    if (rejectedFiles.length > 0) {
+      setError(
+        `Only image files are allowed. Ignored: ${rejectedFiles.map((file) => file.name).join(", ")}`,
+      );
+    } else {
+      setError(null);
+    }
+
+    if (validFiles.length === 0) {
+      return;
+    }
+
+    const newImages: ImageFile[] = validFiles.map((file) => ({
       file,
       label: "",
       preview: URL.createObjectURL(file),
@@ -80,8 +113,8 @@ export default function AdminUploadPage() {
     e.stopPropagation();
     setDragActive(false);
 
-    const droppedFiles = Array.from(e.dataTransfer.files || []).filter((file) =>
-      file.type.startsWith("image/"),
+    const droppedFiles = Array.from(e.dataTransfer.files || []).filter(
+      isSupportedImageFile,
     );
 
     if (droppedFiles.length > 0) {
