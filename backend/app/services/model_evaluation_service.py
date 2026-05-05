@@ -3,6 +3,10 @@ from sklearn.metrics import classification_report, confusion_matrix
 from datetime import datetime
 from typing import Dict, Any, cast
 from bson import ObjectId
+import matplotlib
+
+# Use a headless backend so evaluation can render plots safely in background threads.
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
 
