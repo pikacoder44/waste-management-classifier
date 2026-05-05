@@ -159,8 +159,6 @@ def evaluate_model(
         print(f"❌ ERROR saving confusion matrix JSON: {e}")
         raise
 
-    # Generate and save confusion matrix image for frontend
-    print(f"🎨 Generating confusion matrix visualization...")
     try:
         generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
         print(f"✓ Confusion matrix PNG generated and saved")
