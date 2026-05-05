@@ -29,6 +29,19 @@ const Login = () => {
     const cleanedUsername = username.trim().toLowerCase();
     const trimmedPassword = password.trim();
 
+    // Client-side validation for better UX
+    if (cleanedUsername.length < 3) {
+      setError("Username must be at least 3 characters.");
+      setLoading(false);
+      return;
+    }
+
+    if (trimmedPassword.length < 8) {
+      setError("Please use a password with at least 8 characters.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
