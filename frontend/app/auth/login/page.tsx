@@ -65,11 +65,17 @@ const Login = () => {
         const errorData = JSON.parse(text);
         let errorMessage = "Login failed";
 
-        if (typeof errorData.detail === "string") {
+        // Prefer a top-level `error` field when present (standardized)
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (typeof errorData.detail === "string") {
           errorMessage = errorData.detail;
         } else if (Array.isArray(errorData.detail)) {
-          // Handle validation errors
-          errorMessage = errorData.detail.map((err) => err.msg).join(", ");
+          // detail may be array of objects (with msg) or strings
+          errorMessage = errorData.detail
+            .map((err) => (typeof err === "string" ? err : err.msg || ""))
+            .filter(Boolean)
+            .join(", ");
         }
 
         setError(errorMessage);

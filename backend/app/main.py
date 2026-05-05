@@ -65,7 +65,12 @@ async def validation_exception_handler(request, exc: RequestValidationError):
 
         new_errors.append(new_err)
 
-    return JSONResponse(status_code=422, content={"detail": new_errors})
+    # Build a concise error string plus the detailed list for clients
+    messages = [e.get("msg") or e.get("msg", "Invalid input") for e in new_errors]
+    error_text = ", ".join([m for m in messages if m])
+    return JSONResponse(
+        status_code=422, content={"error": error_text, "detail": new_errors}
+    )
 
 
 # Only trust local hosts.

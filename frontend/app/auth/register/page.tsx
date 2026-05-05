@@ -55,11 +55,15 @@ const Register = () => {
         const errorData = JSON.parse(text);
         let errorMessage = "Registration failed";
 
-        if (typeof errorData.detail === "string") {
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (typeof errorData.detail === "string") {
           errorMessage = errorData.detail;
         } else if (Array.isArray(errorData.detail)) {
-          // Handle validation errors
-          errorMessage = errorData.detail.map((err) => err.msg).join(", ");
+          errorMessage = errorData.detail
+            .map((err) => (typeof err === "string" ? err : err.msg || ""))
+            .filter(Boolean)
+            .join(", ");
         }
 
         setError(errorMessage);
