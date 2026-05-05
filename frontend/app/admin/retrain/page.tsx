@@ -26,6 +26,21 @@ export default function RetrainPage() {
   const errorCountRef = useRef(0);
   const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
 
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
+  const startPolling = () => {
+    if (!pollingRef.current) {
+      pollingRef.current = setInterval(() => {
+        fetchTrainingStatus();
+      }, 3000);
+    }
+  };
+
   // Fetch training status from the API
   const fetchTrainingStatus = async () => {
     try {
@@ -44,9 +59,18 @@ export default function RetrainPage() {
         const data: TrainingStatus = await response.json();
         setTrainingStatus(data);
 
-        // If training is active, ensure acknowledgement is shown
+        // Keep page state aligned with backend training lifecycle
+        const shouldShowTrainingPanel =
+          data.is_training || data.status === "completed";
+        setShowAcknowledgement(shouldShowTrainingPanel);
+
         if (data.is_training) {
-          setShowAcknowledgement(true);
+          setShowCompletion(false);
+          if (!pollingRef.current) {
+            startPolling();
+          }
+        } else {
+          stopPolling();
         }
 
         // Reset error count on successful fetch
@@ -55,11 +79,6 @@ export default function RetrainPage() {
         // Show completion animation when training is done
         if (!data.is_training && data.status === "completed") {
           setShowCompletion(true);
-          // Stop polling
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-            pollingRef.current = null;
-          }
         }
       } else {
         throw new Error(`Status fetch failed: ${response.status}`);
@@ -70,16 +89,15 @@ export default function RetrainPage() {
 
       // Stop polling after too many errors
       if (errorCountRef.current >= MAX_ERRORS) {
-        console.error(
-          `Stopping training polling after ${MAX_ERRORS} consecutive errors`,
-        );
-        alert(
-          "Training monitoring stopped due to connection errors. Check your connection and try again.",
-        );
+        const wasTraining = trainingStatus?.is_training;
+        stopPolling();
 
-        if (pollingRef.current) {
-          clearInterval(pollingRef.current);
-          pollingRef.current = null;
+        if (wasTraining) {
+          alert(
+            "Training monitoring stopped due to connection issues while training was in progress.",
+          );
+        } else {
+          console.warn("Backend unreachable. Stopped polling silently.");
         }
       }
     }
@@ -87,6 +105,11 @@ export default function RetrainPage() {
 
   // Start model retraining
   const handleRetrain = async () => {
+    // Guard against duplicate retrain requests while already training
+    if (trainingStatus?.is_training || pollingRef.current) {
+      return;
+    }
+
     setIsLoading(true);
     // Reset error counter when starting a new retrain
     errorCountRef.current = 0;
@@ -104,6 +127,8 @@ export default function RetrainPage() {
 
       if (response.ok) {
         setShowAcknowledgement(true);
+        setShowCompletion(false);
+        startPolling();
         // Fetch initial status
         setTimeout(() => {
           fetchTrainingStatus();
@@ -120,22 +145,16 @@ export default function RetrainPage() {
     }
   };
 
-  // Start polling and check current training status on mount
+  // Check current training status on mount
   useEffect(() => {
     // Check current training status once when the page mounts
     fetchTrainingStatus();
 
-    // Start polling for status updates
-    if (!pollingRef.current) {
-      pollingRef.current = setInterval(fetchTrainingStatus, 3000);
-    }
-
     return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
+      stopPolling();
     };
+    // Intentionally run once on mount to restore current training state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
