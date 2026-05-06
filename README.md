@@ -110,9 +110,17 @@ code/
 │   ├── dataset/
 │   │   ├── original/                      # Original training data (6 categories)
 │   │   └── custom/                        # User-uploaded custom datasets
+│   ├── db_dump/                           # MongoDB database backup (for viva/local setup)
+│   │   ├── prelude.json                   # MongoDB connection metadata
+│   │   └── waste_classifier/              # Collections export
+│   │       ├── datasets.bson              # Custom datasets collection
+│   │       ├── model_evaluations.bson     # Model evaluation results
+│   │       ├── users.bson                 # User accounts
+│   │       └── waste_records.bson         # Classification history
 │   ├── model/
 │   │   └── waste_classifier_model.keras   # Trained model file
 │   ├── evaluation_results/                # Stored confusion matrices and metrics
+│   ├── uploads/                           # User-uploaded images for classification
 │   ├── requirements.txt                   # Python dependencies
 │   └── venv/                              # Virtual environment
 ├── frontend/
@@ -300,13 +308,44 @@ Role: user (automatic)
 ### Backend (.env)
 
 ```
-MONGO_URL=mongodb://localhost:27017
+# MongoDB Configuration
+# Option 1: Atlas Cloud Connection
+# MONGO_URL=mongodb+srv://username:password@clustername.mongodb.net/?appName=ClusterMain
+
+# Option 2: Local MongoDB Connection (for local development)
+MONGO_URL=mongodb://localhost:27017/waste_classifier
+MONGO_DB_NAME=waste_classifier
+
+# Admin Credentials
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD= (your-admin-password-here)
+
+# JWT Configuration
 SECRET_KEY=<your-secret-key>
 ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=20
+ACCESS_TOKEN_EXPIRE_MINUTES=480  # 8 hours
+
+# TensorFlow Configuration
+TF_ENABLE_ONEDNN_OPTS=0
 ```
 
-### Quality Improvements
+### Database Setup for Viva/Local Development
+
+A `db_dump/` folder is included containing MongoDB collections for quick local setup:
+
+```bash
+# Restore database using (requires MongoDB running locally):
+mongorestore --db waste_classifier ./backend/db_dump/waste_classifier
+```
+
+This includes:
+
+- Pre-configured admin user (username: `admin`, password: ` (your-admin-password-here)`)
+- Sample datasets and classifications
+- Pre-calculated model evaluation metrics
+- Full training history
+
+## 🎨 Quality Improvements
 
 **Image Quality Thresholds:**
 
