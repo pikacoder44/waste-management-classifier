@@ -156,42 +156,37 @@ async def delete_classification_entry(entry_id: str, request: Request):
 
         user_id = verify_user_from_request(request)
 
+        # Validate and convert entry_id to ObjectId
         try:
             object_id = ObjectId(entry_id)
         except Exception as e:
             print(f"Invalid ObjectId format: {entry_id} - {e}")
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
+        # Retrieve and delete entry from database
         try:
             entry = waste_records_collection.find_one(
                 {"_id": object_id, "userId": user_id}
             )
-        except Exception as e:
-            print(f"Database error retrieving entry: {e}")
-            raise HTTPException(
-                status_code=503, detail="Database error retrieving entry"
-            )
+            if entry is None:
+                raise HTTPException(
+                    status_code=404, detail="Classification entry not found"
+                )
 
-        if entry is None:
-            raise HTTPException(
-                status_code=404, detail="Classification entry not found"
-            )
-
-        try:
             result = waste_records_collection.delete_one(
                 {"_id": object_id, "userId": user_id}
             )
+            if result.deleted_count == 0:
+                raise HTTPException(
+                    status_code=404, detail="Failed to delete classification entry"
+                )
+        except HTTPException:
+            raise
         except Exception as e:
-            print(f"Database error deleting entry: {e}")
-            raise HTTPException(
-                status_code=503, detail="Failed to delete from database"
-            )
+            print(f"Database error: {e}")
+            raise HTTPException(status_code=503, detail="Database operation failed")
 
-        if result.deleted_count == 0:
-            raise HTTPException(
-                status_code=404, detail="Failed to delete classification entry"
-            )
-
+        # Delete associated image file
         if entry.get("filePath"):
             try:
                 if os.path.exists(entry["filePath"]):
@@ -214,8 +209,8 @@ async def delete_classification_entry(entry_id: str, request: Request):
 
         return {"status": "success", "message": "Classification entry deleted"}
 
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Unexpected error deleting classification entry: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
