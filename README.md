@@ -110,7 +110,7 @@ code/
 │   ├── dataset/
 │   │   ├── original/                      # Original training data (6 categories)
 │   │   └── custom/                        # User-uploaded custom datasets
-│   ├── db_dump/                           # MongoDB database backup (for viva/local setup)
+│   ├── db_dump/                           # MongoDB database backup (for local setup)
 │   │   ├── prelude.json                   # MongoDB connection metadata
 │   │   └── waste_classifier/              # Collections export
 │   │       ├── datasets.bson              # Custom datasets collection
@@ -329,7 +329,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=480  # 8 hours
 TF_ENABLE_ONEDNN_OPTS=0
 ```
 
-### Database Setup for Viva/Local Development
+### Database Setup for Local Development
 
 A `db_dump/` folder is included containing MongoDB collections for quick local setup:
 
