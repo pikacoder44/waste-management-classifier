@@ -3,6 +3,7 @@ from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 import os
 from dotenv import load_dotenv
 
+# Load environment variables first
 load_dotenv()
 
 MONGO_URL = os.getenv("MONGO_URL")
@@ -12,19 +13,15 @@ if not MONGO_URL:
 
 client = None
 db = None
-# Collection handles are provided from collections.py; keep only db here
 
 try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
-
     db = client["waste_classifier"]
-    # collection bindings are handled in app.database.collections
-    # Verify connection by pinging the server after the handles exist.
+    # test connection
     client.admin.command("ping")
-    print("✓ MongoDB connection successful")
-    print("✓ Database and collection initialized successfully")
+    print("MongoDB connection successful")
 except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-    print(f"✗ MongoDB connection failed (Network issue): {e}")
+    print(f"MongoDB connection failed: {e}")
 except Exception as e:
-    print(f"✗ MongoDB connection error: {e}")
+    print(f"Error connecting to MongoDB: {e}")
     raise Exception(f"Database initialization failed: {e}")

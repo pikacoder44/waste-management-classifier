@@ -54,15 +54,11 @@ async def analyze_classification_result(file: UploadFile, request: Request):
 
         # Log if image was improved
         if processing_result["was_enhanced"]:
-            print(
-                f"✓ Image enhanced: Original quality: {processing_result['original_quality']:.1f}% → Enhanced quality: {processing_result['quality_score']:.1f}%"
-            )
+            print(f"Enhanced: {processing_result['quality_score']:.1f}%")
             if processing_result["warnings"]:
                 print(f"  Warnings: {', '.join(processing_result['warnings'])}")
         else:
-            print(
-                f"✓ Image quality acceptable: {processing_result['quality_score']:.1f}%"
-            )
+            print(f"Quality score: {processing_result['quality_score']:.1f}%")
 
         # Create a filename with current date and time
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -191,21 +187,21 @@ async def delete_classification_entry(entry_id: str, request: Request):
             try:
                 if os.path.exists(entry["filePath"]):
                     os.remove(entry["filePath"])
-                    print(f"✓ Image file deleted: {entry['filePath']}")
+                    print(f"Deleted image file: {entry['filePath']}")
                 else:
-                    print(f"⚠ Image file not found: {entry['filePath']}")
+                    print(f"Image file not found: {entry['filePath']}")
             except PermissionError:
-                print(f"✗ Permission denied deleting file: {entry['filePath']}")
+                print(f"Permission denied deleting file: {entry['filePath']}")
                 raise HTTPException(
                     status_code=500, detail="Permission denied deleting image file"
                 )
             except Exception as e:
-                print(f"✗ Error deleting image file at {entry['filePath']}: {e}")
+                print(f"Failed to delete image file: {e}")
                 raise HTTPException(
                     status_code=500, detail="Failed to delete image file"
                 )
         else:
-            print("⚠ No file path found in entry")
+            print("No file path found in entry")
 
         return {"status": "success", "message": "Classification entry deleted"}
 

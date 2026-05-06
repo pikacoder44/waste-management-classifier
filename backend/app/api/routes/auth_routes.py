@@ -24,7 +24,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def get_user_id_from_token(token: str) -> Optional[str]:
+def verify_token_and_get_user(token: str) -> Optional[str]:
     """Extract and validate user_id from JWT token."""
     try:
         payload: dict[str, Any] = decode(token, SECRET_KEY, algorithms=[ALGORITHM])

@@ -176,7 +176,7 @@ def run_evaluation_logic():
     global evaluation_status
 
     print("\n" + "=" * 80)
-    print("🚀 STARTING EVALUATION PROCESS")
+    print("Starting evaluation process")
     print("=" * 80)
 
     evaluation_status["is_evaluating"] = True
@@ -260,7 +260,7 @@ def run_evaluation_logic():
     except Exception as e:
         import traceback
 
-        print(f"\n❌ ERROR during evaluation: {e}")
+        print(f"Error during evaluation: {e}")
         traceback.print_exc()
         evaluation_status["status"] = "error"
         evaluation_status["message"] = f"Evaluation failed: {str(e)}"
@@ -272,4 +272,4 @@ def run_evaluation_logic():
             try:
                 shutil.rmtree(eval_dataset_path)
             except Exception as cleanup_error:
-                print(f"❌ Cleanup failed: {cleanup_error}")
+                print(f"Cleanup failed: {cleanup_error}")

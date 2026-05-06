@@ -7,34 +7,17 @@ from app.ai.imageEnhancement import ImageEnhancer
 
 class ImageProcessingService:
     """
-    Orchestrates image quality checking, enhancement, and re-validation.
-    Implements auto-reprocessing for low-quality images.
+    Handles image quality checking and enhancement.
     """
 
-    # Quality thresholds.
+    # Quality thresholds
     ACCEPTABLE_QUALITY_SCORE = 70
     MINIMUM_QUALITY_SCORE = 50
 
     @staticmethod
     def process_and_validate(image_bytes: bytes) -> Dict[str, Any]:
         """
-        Main pipeline: Check quality -> Enhance if needed -> Re-validate -> Return result.
-
-        Args:
-            image_bytes: Raw image bytes
-
-        Returns:
-            {
-                'status': 'success' | 'warning' | 'error',
-                'is_valid': bool,
-                'quality_score': float,
-                'original_quality': float,
-                'was_enhanced': bool,
-                'issues': List[str],
-                'warnings': List[str],
-                'image_array': Optional[np.ndarray],
-                'message': str
-            }
+        Process and validate image quality. Enhances if needed.
         """
         try:
             # Analyze the image quality
@@ -47,7 +30,7 @@ class ImageProcessingService:
             # If image quality is already good, return it as-is
             if quality_result["is_valid"]:
                 print(
-                    f"[Quality Check] ✓ Image quality is acceptable; no enhancement needed"
+                    f"[Quality Check] Image quality is acceptable; no enhancement needed"
                 )
                 return {
                     "status": "success",
@@ -101,9 +84,7 @@ class ImageProcessingService:
 
                 # If the improved image is now good, use it
                 if enhanced_quality["is_valid"]:
-                    print(
-                        f"[Quality Check] ✓ Enhancement succeeded; image is now valid"
-                    )
+                    print(f"[Quality Check] Enhancement succeeded; image is now valid")
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -121,7 +102,7 @@ class ImageProcessingService:
                     >= ImageProcessingService.MINIMUM_QUALITY_SCORE
                 ):
                     print(
-                        f"[Quality Check] ⚠ Enhancement improved the image, but only slightly"
+                        f"[Quality Check] Enhancement improved the image, but only slightly"
                     )
                     return {
                         "status": "warning",
@@ -139,7 +120,7 @@ class ImageProcessingService:
                     }
                 else:
                     print(
-                        f"[Quality Check] ✗ Enhancement did not improve the image enough"
+                        f"[Quality Check] Enhancement did not improve the image enough"
                     )
                     return {
                         "status": "error",
@@ -153,7 +134,7 @@ class ImageProcessingService:
                         "message": f"Image quality too low even after enhancement. Please retake the image with better lighting and focus.",
                     }
 
-            print(f"[Quality Check] ✗ Image quality is too low to process safely")
+            print(f"[Quality Check] Image quality is too low to process safely")
             return {
                 "status": "error",
                 "is_valid": False,
@@ -167,7 +148,7 @@ class ImageProcessingService:
             }
 
         except Exception as e:
-            print(f"[Quality Check] ✗ Error in image processing service: {e}")
+            print(f"[Quality Check] Error in image processing: {e}")
             return {
                 "status": "error",
                 "is_valid": False,

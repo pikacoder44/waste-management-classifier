@@ -176,7 +176,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                 )
             ]
             print(
-                f"✓ Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
+                f"Removed {len(payload.images_to_delete)} image(s) from database. Remaining: {len(existing_file_paths)}"
             )
 
         new_file_paths = []
@@ -308,9 +308,9 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
                     if delete_stored_file(file_path):
                         deleted_count += 1
             except Exception as file_error:
-                print(f"✗ Error deleting file {file_path}: {file_error}")
+                print(f"Failed to delete file {file_path}: {file_error}")
 
-        print(f"✓ Successfully deleted {deleted_count} image files")
+        print(f"Successfully deleted {deleted_count} image files")
     else:
         print(f"No file paths found in dataset")
 
@@ -481,17 +481,17 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
             try:
                 delete_stored_file(entry["filePath"])
             except PermissionError:
-                print(f"✗ Permission denied deleting file: {entry['filePath']}")
+                print(f"Permission denied deleting file: {entry['filePath']}")
                 raise HTTPException(
                     status_code=500, detail="Permission denied deleting image file"
                 )
             except Exception as e:
-                print(f"✗ Error deleting image file at {entry['filePath']}: {e}")
+                print(f"Error deleting image file: {e}")
                 raise HTTPException(
                     status_code=500, detail="Failed to delete image file"
                 )
         else:
-            print("⚠ No file path found in entry")
+            print("No file path found in entry")
 
         return {"status": "success", "message": "Classification entry deleted"}
 

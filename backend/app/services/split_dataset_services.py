@@ -113,12 +113,10 @@ def ensure_split_dataset(split_type: str, train_split: float = 0.7):
             current_count = get_source_image_count()
             if metadata.get("image_count") == current_count:
                 should_recreate = False
-                print(
-                    f"✓ {split_type.upper()} split is current ({current_count} images)"
-                )
+                print(f"{split_type.upper()} split is current ({current_count} images)")
             else:
                 print(
-                    f"⚠ {split_type.upper()} split outdated - current: {current_count}, cached: {metadata.get('image_count')}"
+                    f"{split_type.upper()} split outdated - current: {current_count}, cached: {metadata.get('image_count')}"
                 )
         except Exception as e:
             print(f"Error reading metadata: {e}, will recreate split")
@@ -142,6 +140,6 @@ def ensure_split_dataset(split_type: str, train_split: float = 0.7):
         }
         with open(metadata_file, "w") as f:
             json.dump(metadata, f)
-        print(f"✓ {split_type.upper()} split created successfully")
+        print(f"{split_type.upper()} split created successfully")
 
     return {"train_dir": train_dir, "test_dir": test_dir, "split_path": split_path}

@@ -81,7 +81,7 @@ def parse_file_paths_json(file_path_str: str) -> list:
     try:
         return json.loads(file_path_str)
     except (ValueError, json.JSONDecodeError):
-        print("⚠ Failed to parse filePath JSON")
+        print("Could not parse filePath JSON")
         return []
 
 
@@ -116,10 +116,10 @@ def delete_stored_file(file_path: str) -> bool:
     os_specific_path = normalize_path_for_filesystem(file_path)
     if os.path.exists(os_specific_path):
         os.remove(os_specific_path)
-        print(f"✓ Deleted file: {os_specific_path}")
+        print(f"Deleted file: {os_specific_path}")
         return True
 
-    print(f"⚠ File not found: {os_specific_path}")
+    print(f"File not found: {os_specific_path}")
     return False
 
 
