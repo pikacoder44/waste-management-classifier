@@ -14,24 +14,7 @@ class ImageQualityAnalyzer:
 
     @staticmethod
     def analyze(image_bytes: bytes) -> Dict[str, Any]:
-        """
-        Analyze image quality and return detailed metrics.
-
-        Args:
-            image_bytes: Raw image bytes
-
-        Returns:
-            Dict with quality status and detailed metrics:
-            {
-                'is_valid': bool,
-                'quality_score': float (0-100),
-                'issues': List[str],
-                'resolution': (width, height),
-                'blur_score': float,
-                'brightness': float,
-                'image_array': Optional[np.ndarray] - decoded image if valid
-            }
-        """
+        
         try:
 
             nparr = np.frombuffer(image_bytes, np.uint8)
