@@ -33,10 +33,8 @@ recommendations = {
 
 
 def get_disposal_recommendation(predicted_label: str) -> dict:
-    """
-    Get structured disposal recommendation based on waste type.
-    Returns a dictionary with disposal method, description, and benefits.
-    """
+    #Get structured disposal recommendation based on waste type.
+    # Returns a dictionary with disposal method, description, and benefits.
     recommendation = recommendations.get(
         predicted_label,
         {
