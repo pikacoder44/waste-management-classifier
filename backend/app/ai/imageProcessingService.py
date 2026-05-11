@@ -163,15 +163,7 @@ class ImageProcessingService:
 
     @staticmethod
     def convert_to_bytes(image_array: np.ndarray) -> bytes:
-        """
-        Convert image array back to bytes for preprocessing.
-
-        Args:
-            image_array: Image as numpy array (BGR)
-
-        Returns:
-            Image bytes (PNG format)
-        """
+     
         try:
             _, buffer = cv2.imencode(".png", image_array)
             return buffer.tobytes()
