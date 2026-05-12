@@ -595,10 +595,10 @@ export default function Home() {
                           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200">
                             <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block mb-1">
-                                ⚡ Processing Time
+                                ⚡ Inference Time
                               </label>
                               <span className="text-lg font-bold text-slate-900">
-                                {inferenceTime?.toFixed(0)}ms
+                                {(inferenceTime! * 1000).toFixed(0)} ms
                               </span>
                             </div>
                             <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
