@@ -70,7 +70,8 @@ interface DisposalRecommendation {
 
 export default function Home() {
   const authContext = useContext(AuthContext);
-  const isLoggedIn = authContext?.role !== null && authContext?.role !== undefined;
+  const isLoggedIn =
+    authContext?.role !== null && authContext?.role !== undefined;
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
@@ -429,8 +430,12 @@ export default function Home() {
             {!isLoggedIn && (
               <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <p className="text-sm text-amber-900 font-medium">
-                  ⚠️ <span className="font-semibold">Note:</span> You must be logged in to classify images. Please{" "}
-                  <a href="/auth/login" className="underline font-semibold hover:text-amber-950 transition-colors">
+                  ⚠️ <span className="font-semibold">Note:</span> You must be
+                  logged in to classify images. Please{" "}
+                  <a
+                    href="/auth/login"
+                    className="underline font-semibold hover:text-amber-950 transition-colors"
+                  >
                     login here
                   </a>
                 </p>
