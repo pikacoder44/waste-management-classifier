@@ -598,7 +598,7 @@ export default function Home() {
                                 ⚡ Inference Time
                               </label>
                               <span className="text-lg font-bold text-slate-900">
-                                {(inferenceTime! * 1000).toFixed(0)} ms
+                                {inferenceTime?.toFixed(1)} sec
                               </span>
                             </div>
                             <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 shadow-sm">
