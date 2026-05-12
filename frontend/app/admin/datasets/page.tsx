@@ -63,8 +63,14 @@ const Page = () => {
 
         // Handle different response formats
         const datasetList = Array.isArray(data) ? data : data.datasets || [];
-        console.log("Datasets to display:", datasetList);
-        setDatasets(datasetList);
+        // Sort by lastUpdated in descending order (newest first)
+        const sortedDatasets = datasetList.sort(
+          (a, b) =>
+            new Date(b.lastUpdated).getTime() -
+            new Date(a.lastUpdated).getTime(),
+        );
+        console.log("Datasets to display:", sortedDatasets);
+        setDatasets(sortedDatasets);
       } catch (error) {
         console.error("Error fetching datasets:", error);
         setError(error instanceof Error ? error.message : "An error occurred");
