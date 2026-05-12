@@ -81,6 +81,7 @@ export default function Home() {
   const [submittedFile, setSubmittedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUnauthorizedError, setIsUnauthorizedError] = useState(false);
   const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -217,13 +218,15 @@ export default function Home() {
     };
   }, []);
 
-  const showError = (message: string) => {
+  const showError = (message: string, isUnauthorized: boolean = false) => {
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
     }
     setError(message);
+    setIsUnauthorizedError(isUnauthorized);
     errorTimeoutRef.current = setTimeout(() => {
       setError(null);
+      setIsUnauthorizedError(false);
       errorTimeoutRef.current = null;
     }, 5000);
   };
@@ -265,6 +268,7 @@ export default function Home() {
       if (response.status == 401) {
         showError(
           "You must be logged in to classify images. Please login to your account.",
+          true,
         );
         setIsLoading(false);
         return;
@@ -701,12 +705,24 @@ export default function Home() {
                 >
                   Close
                 </button>
-                <a
-                  href="/auth/login"
-                  className="inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
-                >
-                  Go to Login
-                </a>
+                {isUnauthorizedError ? (
+                  <a
+                    href="/auth/login"
+                    className="inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
+                  >
+                    Go to Login
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setError(null);
+                      upload_image();
+                    }}
+                    className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                )}
               </div>
             </div>
           </div>
