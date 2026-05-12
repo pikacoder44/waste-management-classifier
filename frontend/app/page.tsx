@@ -259,11 +259,9 @@ export default function Home() {
         },
       );
       if (response.status == 401) {
-        const apiMessage = await parseApiErrorMessage(
-          response,
-          "Unauthorized. Please Login first.",
+        showError(
+          "You must be logged in to classify images. Please login to your account.",
         );
-        showError(apiMessage);
         setIsLoading(false);
         return;
       }
@@ -628,18 +626,15 @@ export default function Home() {
 
       {/* Error Overlay */}
       {error && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 backdrop-blur-[3px] px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
           <div
             role="alert"
             aria-live="assertive"
-            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-rose-200/70 bg-white shadow-2xl animate-fade-in-up"
+            className="relative w-full max-w-md overflow-hidden rounded-2xl border border-rose-200 bg-white shadow-xl animate-fade-in-up"
           >
-            <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-rose-200/40 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-amber-100/50 blur-3xl" />
-
-            <div className="relative border-b border-rose-100/80 bg-linear-to-r from-rose-50 via-white to-amber-50 px-6 py-5">
+            <div className="px-6 py-6">
               <div className="flex items-start gap-4">
-                <div className="mt-0.5 rounded-2xl bg-rose-100 p-2.5 shadow-sm ring-1 ring-rose-200">
+                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100">
                   <svg
                     className="h-5 w-5 text-rose-600"
                     fill="currentColor"
@@ -653,23 +648,20 @@ export default function Home() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-rose-500">
-                    Upload Alert
-                  </p>
-                  <h3 className="mt-1 text-xl font-bold text-slate-900">
-                    We could not analyze this image
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Unable to Classify
                   </h3>
-                  <p className="mt-1 text-sm text-slate-600">
-                    Check the issue below and try again with a clearer photo.
+                  <p className="mt-1 text-sm text-slate-700 leading-relaxed">
+                    {error}
                   </p>
                 </div>
                 <button
                   onClick={() => setError(null)}
-                  className="rounded-xl p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-colors"
+                  className="shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                   aria-label="Close error"
                 >
                   <svg
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -681,35 +673,20 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-            </div>
 
-            <div className="relative px-6 py-5">
-              <div className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-rose-500">
-                  Error details
-                </p>
-                <p className="mt-2 text-sm font-medium text-rose-900 wrap-break-word">
-                  {error}
-                </p>
-              </div>
-
-              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
                 <button
                   onClick={() => setError(null)}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="inline-flex items-center justify-center rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
                 >
-                  Dismiss
+                  Close
                 </button>
-                <button
-                  onClick={() => {
-                    setError(null);
-                    upload_image();
-                  }}
-                  disabled={!file || isLoading}
-                  className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-rose-600 to-rose-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-rose-700 hover:to-rose-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                <a
+                  href="/auth/login"
+                  className="inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
                 >
-                  Try Again
-                </button>
+                  Go to Login
+                </a>
               </div>
             </div>
           </div>
