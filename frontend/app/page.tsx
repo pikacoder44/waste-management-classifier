@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
+import { AuthContext } from "./context/AuthContext";
 import {
   Package,
   BottleWine,
@@ -68,6 +69,8 @@ interface DisposalRecommendation {
 }
 
 export default function Home() {
+  const authContext = useContext(AuthContext);
+  const isLoggedIn = authContext?.role !== null && authContext?.role !== undefined;
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
@@ -421,6 +424,18 @@ export default function Home() {
                 </button>
               </div>
             </form>
+
+            {/* Login Requirement Notice - Only show when not logged in */}
+            {!isLoggedIn && (
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-900 font-medium">
+                  ⚠️ <span className="font-semibold">Note:</span> You must be logged in to classify images. Please{" "}
+                  <a href="/auth/login" className="underline font-semibold hover:text-amber-950 transition-colors">
+                    login here
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Clean & Professional Results Card */}
