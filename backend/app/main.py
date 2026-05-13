@@ -106,7 +106,7 @@ app.add_middleware(
 
 @app.get("/")
 def test_db():
-    """Test database connection."""
+    # Test database connection.
     return {"collections": db.list_collection_names()}
 
 
