@@ -21,12 +21,9 @@ app = FastAPI(
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc: RequestValidationError):
-    """Map Pydantic/FastAPI validation errors to friendlier messages.
+    # Map Pydantic validation errors to friendlier messages.
 
-    This replaces technical messages like "string should have at least 8 characters"
-    with clearer, field-specific phrases that are safe to return to clients.
-    """
-    errors = exc.errors()
+    errors = exc.errors() # get all validation errors
     new_errors = []
     for err in errors:
         new_err = err.copy()
