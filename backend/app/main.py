@@ -97,7 +97,7 @@ app.add_middleware(
         "X-Requested-With",
     ],
     expose_headers=["Content-Length", "X-CSRF-Token"],
-    max_age=3600,
+    max_age=3600, # Browser caches CORS permissions for 1 hour
 )
 
 
