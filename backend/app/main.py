@@ -116,15 +116,14 @@ dataset_path = BACKEND_ROOT / "dataset"
 if dataset_path.exists():
     app.mount(
         "/dataset", StaticFiles(directory=str(dataset_path)), name="dataset"
-    )  # makes dataset folder publicly accessible
-
+    )  # mounts dataset directory as static files
 
 uploads_path = BACKEND_ROOT / "uploads"
 if not uploads_path.exists():
     uploads_path.mkdir(parents=True, exist_ok=True)
 app.mount(
     "/uploads", StaticFiles(directory=str(uploads_path)), name="uploads"
-)  # makes uploads folder publicly accessible
+)  # mounts uploads directory as static files
 
 
 evaluation_results_path = BACKEND_ROOT / "evaluation_results"
