@@ -23,7 +23,7 @@ app = FastAPI(
 async def validation_exception_handler(request, exc: RequestValidationError):
     # Map Pydantic validation errors to friendlier messages.
 
-    errors = exc.errors() # get all validation errors
+    errors = exc.errors()  # get all validation errors
     new_errors = []
     for err in errors:
         new_err = err.copy()
@@ -65,7 +65,7 @@ async def validation_exception_handler(request, exc: RequestValidationError):
         new_errors.append(new_err)
 
     # Build a concise error string plus the detailed list for clients
-    messages = [e.get("msg") or e.get("msg", "Invalid input") for e in new_errors]
+    messages = [e.get("msg", "Invalid input") for e in new_errors]
     error_text = ", ".join([m for m in messages if m])
     return JSONResponse(
         status_code=422, content={"error": error_text, "detail": new_errors}
@@ -97,7 +97,7 @@ app.add_middleware(
         "X-Requested-With",
     ],
     expose_headers=["Content-Length", "X-CSRF-Token"],
-    max_age=3600, # Browser caches CORS permissions for 1 hour
+    max_age=3600,  # Browser caches CORS permissions for 1 hour
 )
 
 
@@ -114,18 +114,23 @@ app.include_router(admin_routes.router)
 
 dataset_path = BACKEND_ROOT / "dataset"
 if dataset_path.exists():
-    app.mount("/dataset", StaticFiles(directory=str(dataset_path)), name="dataset")
+    app.mount(
+        "/dataset", StaticFiles(directory=str(dataset_path)), name="dataset"
+    )  # makes dataset folder publicly accessible
 
 
 uploads_path = BACKEND_ROOT / "uploads"
 if not uploads_path.exists():
     uploads_path.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
+app.mount(
+    "/uploads", StaticFiles(directory=str(uploads_path)), name="uploads"
+)  # makes uploads folder publicly accessible
 
 
 evaluation_results_path = BACKEND_ROOT / "evaluation_results"
 if not evaluation_results_path.exists():
     evaluation_results_path.mkdir(parents=True, exist_ok=True)
+
 app.mount(
     "/evaluation_results",
     StaticFiles(directory=str(evaluation_results_path)),
