@@ -15,7 +15,9 @@ client = None
 db = None
 
 try:
-    client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
+    client = MongoClient(
+        MONGO_URL, serverSelectionTimeoutMS=5000
+    )  # server timeout - 5 seconds
     db = client["waste_classifier"]
     # test connection
     client.admin.command("ping")
