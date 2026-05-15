@@ -10,10 +10,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-from app.database.collections import dataset_collection, model_evaluation_collection
+from app.database.collections import model_evaluation_collection
 from app.models.model_evaluation import ModelEvaluation
-import os
-import json
 
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
