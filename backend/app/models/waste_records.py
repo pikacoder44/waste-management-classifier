@@ -8,12 +8,15 @@ class WasteRecords(BaseModel):
     filePath: str = Field(
         ..., description="Local file path where the uploaded image is stored"
     )
-    createdAt: datetime
+    createdAt: datetime = Field(default_factory=datetime.now)
     predictedLabel: str = Field(
         ..., description="The predicted class label for the waste item"
     )
     confidence: float = Field(
-        ..., description="The confidence score of the prediction (0 to 1)"
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="The confidence score of the prediction (0 to 1)",
     )
     inferenceTime: float = Field(
         ...,
