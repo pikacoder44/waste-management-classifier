@@ -164,18 +164,7 @@ def evaluate_model(
 
 
 def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list) -> str:
-    """Generate a matplotlib confusion matrix image and save it to backend directory.
-
-    Automatically overwrites the previous image at the fixed path:
-    backend/evaluation_results/confusionMatrix.png
-
-    Args:
-        conf_matrix: Confusion matrix numpy array
-        class_labels: List of class label names
-
-    Returns:
-        str: Path to the saved image file
-    """
+    # Generate and save confusion matrix image to backend/evaluation_results
     try:
         # Create backend-owned directory for evaluation artifacts
         output_dir = BACKEND_ROOT / "evaluation_results"

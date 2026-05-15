@@ -39,7 +39,7 @@ evaluation_status = {
 
 
 def run_training_logic():
-    """Merge datasets, train model, and save artifacts while updating status."""
+    # Merge datasets, train model, and save artifacts while updating status
     global training_status
 
     IMG_SIZE = (224, 224)
@@ -172,7 +172,7 @@ def run_training_logic():
 
 
 def run_evaluation_logic():
-    """Run evaluation against the holdout split and persist evaluation results."""
+    # Run evaluation against the holdout split and persist evaluation results
     global evaluation_status
 
     print("\n" + "=" * 80)

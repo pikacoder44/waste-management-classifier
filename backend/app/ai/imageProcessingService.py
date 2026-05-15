@@ -6,9 +6,7 @@ from app.ai.imageEnhancement import ImageEnhancer
 
 
 class ImageProcessingService:
-    """
-    Handles image quality checking and enhancement.
-    """
+    # Handle image quality checking and enhancement
 
     # Quality thresholds
     ACCEPTABLE_QUALITY_SCORE = 70
@@ -16,9 +14,7 @@ class ImageProcessingService:
 
     @staticmethod
     def process_and_validate(image_bytes: bytes) -> Dict[str, Any]:
-        """
-        Process and validate image quality. Enhances if needed.
-        """
+        # Process and validate image quality, and enhance when needed
         try:
             # Analyze the image quality
             quality_result = ImageQualityAnalyzer.analyze(image_bytes)
@@ -163,7 +159,7 @@ class ImageProcessingService:
 
     @staticmethod
     def convert_to_bytes(image_array: np.ndarray) -> bytes:
-     
+
         try:
             _, buffer = cv2.imencode(".png", image_array)
             return buffer.tobytes()

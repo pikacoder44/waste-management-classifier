@@ -4,23 +4,13 @@ from typing import Tuple
 
 
 class ImageEnhancer:
-    """Provides image enhancement techniques for low-quality images."""
+    # Provide image enhancement techniques for low-quality images
 
     @staticmethod
     def enhance_contrast(
         image: np.ndarray, alpha: float = 1.5, beta: float = 0
     ) -> np.ndarray:
-        """
-        Enhance image contrast using brightness/contrast adjustment.
-
-        Args:
-            image: Input image array (BGR)
-            alpha: Contrast factor (1.0 = no change, >1 = more contrast)
-            beta: Brightness offset (-127 to 127)
-
-        Returns:
-            Enhanced image array
-        """
+        # Enhance image contrast using brightness/contrast adjustment
         try:
             enhanced = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
             return enhanced
@@ -113,7 +103,7 @@ class ImageEnhancer:
 
     @staticmethod
     def auto_enhance(image: np.ndarray, issues: list) -> np.ndarray:
-        
+
         if not issues:
             return image
 

@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Create a JWT access token."""
+    # Create a JWT access token
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now() + expires_delta
@@ -25,7 +25,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def get_user_id_from_token(token: str) -> Optional[str]:
-    """Extract and validate user_id from JWT token."""
+    # Extract and validate user_id from JWT token
     try:
         payload: dict[str, Any] = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("user_id")
@@ -36,7 +36,7 @@ def get_user_id_from_token(token: str) -> Optional[str]:
 
 
 def _login_user_helper(username: str, password: str, role: str):
-    """Helper function to handle login logic for both admin and user roles."""
+    # Handle login logic for both admin and user roles
     # Check if username is empty
     if not username or not username.strip():
         raise HTTPException(status_code=400, detail="Username cannot be empty")

@@ -354,7 +354,7 @@ def get_model_status(request: Request):
 
 @router.post("/admin/model/evaluate")
 async def evaluate_model_endpoint(request: Request, background_tasks: BackgroundTasks):
-    """Trigger model evaluation on saved model."""
+    # Trigger model evaluation on saved model
     verify_admin_from_request(request)
 
     if evaluation_status["is_evaluating"]:
@@ -371,7 +371,7 @@ async def evaluate_model_endpoint(request: Request, background_tasks: Background
 
 @router.get("/admin/model/evaluation/status")
 def get_evaluation_status(request: Request):
-    """Get the current evaluation progress."""
+    # Get the current evaluation progress
     verify_admin_from_request(request)
 
     return evaluation_status

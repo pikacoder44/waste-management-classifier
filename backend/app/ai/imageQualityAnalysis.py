@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional
 
 
 class ImageQualityAnalyzer:
-    """Analyzes image quality and provides detailed metrics."""
+    # Analyze image quality and provide detailed metrics
 
     # Analyzer thresholds (stricter quality validation)
     MIN_RESOLUTION = 224  # Minimum acceptable resolution
@@ -14,7 +14,7 @@ class ImageQualityAnalyzer:
 
     @staticmethod
     def analyze(image_bytes: bytes) -> Dict[str, Any]:
-        
+
         try:
 
             nparr = np.frombuffer(image_bytes, np.uint8)

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 
 class ImageUpload(BaseModel):
-    """Model for a single image upload with its label"""
+    # Model for a single image upload with its label
 
     filename: str
     label: str
@@ -11,7 +11,7 @@ class ImageUpload(BaseModel):
 
 
 class BatchUploadRequest(BaseModel):
-    """Model for batch uploading multiple images with a dataset name"""
+    # Model for batch uploading multiple images with a dataset name
 
     datasetName: str
     datasetDescription: Optional[str] = None

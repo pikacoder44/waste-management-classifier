@@ -10,7 +10,7 @@ CUSTOM_DATASET_PATH = "dataset/custom"
 
 
 def get_source_image_count():
-    """Get total count of images from original and custom datasets."""
+    # Get total count of images from original and custom datasets
     total = 0
     for label in ALLOWED_LABELS:
         # Count from original

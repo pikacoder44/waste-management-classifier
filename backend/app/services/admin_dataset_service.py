@@ -12,10 +12,7 @@ CUSTOM_DATASET_PATH = "dataset/custom"
 
 
 def validate_and_process_image(image_data, errors: list):
-    """
-    Validate image payload and return parsed image information.
-    If invalid, error is appended to errors list and None is returned.
-    """
+    # Validate image payload and return parsed image information
     try:
         label = image_data.label
         filename = image_data.filename
@@ -77,7 +74,7 @@ def validate_and_process_image(image_data, errors: list):
 
 
 def parse_file_paths_json(file_path_str: str) -> list:
-    """Parse file paths from JSON string. Returns empty list on failure."""
+    # Parse file paths from JSON string; return empty list on failure
     try:
         return json.loads(file_path_str)
     except (ValueError, json.JSONDecodeError):
@@ -86,19 +83,19 @@ def parse_file_paths_json(file_path_str: str) -> list:
 
 
 def normalize_path_for_storage(file_path: str) -> str:
-    """Normalize file path to use forward slashes for cross-platform storage."""
+    # Normalize file path to use forward slashes for cross-platform storage
     return file_path.replace("\\", "/")
 
 
 def normalize_path_for_filesystem(file_path: str) -> str:
-    """Convert normalized path back to OS-specific format for filesystem operations."""
+    # Convert normalized path back to OS-specific format for filesystem operations
     return file_path.replace("/", os.sep)
 
 
 def save_image_file(
     label: str, file_bytes: bytes, file_ext: str
 ) -> tuple[str, str, str]:
-    """Save an uploaded image under the custom dataset tree and return paths."""
+    # Save an uploaded image under the custom dataset tree and return paths
     label_folder = os.path.join(CUSTOM_DATASET_PATH, label)
     os.makedirs(label_folder, exist_ok=True)
 
@@ -112,7 +109,7 @@ def save_image_file(
 
 
 def delete_stored_file(file_path: str) -> bool:
-    """Delete a stored file path if it exists."""
+    # Delete a stored file path if it exists
     os_specific_path = normalize_path_for_filesystem(file_path)
     if os.path.exists(os_specific_path):
         os.remove(os_specific_path)
@@ -124,7 +121,7 @@ def delete_stored_file(file_path: str) -> bool:
 
 
 def increment_version(current_version: str) -> str:
-    """Increment semantic version string (e.g., '1.0' -> '1.1', '1.9' -> '2.0')."""
+    # Increment semantic version string (for example, '1.0' -> '1.1' and '1.9' -> '2.0')
     try:
         parts = current_version.split(".")
         if len(parts) >= 2:

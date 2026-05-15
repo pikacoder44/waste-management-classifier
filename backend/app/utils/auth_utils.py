@@ -5,7 +5,7 @@ from bson import ObjectId
 
 
 def verify_user_from_request(request: Request) -> str:
-    """Extract and verify JWT token from request headers or cookies."""
+    # Extract and verify JWT token from request headers or cookies
     # Get token from Authorization header or cookies
     auth_header = request.headers.get("Authorization")
     jwt_token = None
@@ -28,7 +28,7 @@ def verify_user_from_request(request: Request) -> str:
 
 
 def verify_admin_from_request(request: Request) -> dict:
-    """Extract token, verify JWT, and check admin role. Returns full user object."""
+    # Extract token, verify JWT, and check admin role; returns full user object
     # Get token from Authorization header or cookies
     auth_header = request.headers.get("Authorization")
     jwt_token = None
