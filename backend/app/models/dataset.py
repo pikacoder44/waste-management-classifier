@@ -18,16 +18,11 @@ class Dataset(BaseModel):
         json_schema_extra = {
             "example": {
                 "name": "Waste Dataset v2",
+                "description": "A comprehensive waste classification dataset",
                 "version": "2.0",
-                "status": "active",
                 "imageCount": 5000,
-                "categories": [
-                    "Organic",
-                    "Plastic",
-                    "Glass",
-                    "Metal",
-                    "Paper",
-                    "Other",
-                ],
+                "filePath": "dataset/custom/",
+                "uploadDate": "2026-05-01T10:30:00",
+                "lastUpdated": "2026-05-01T10:30:00",
             }
         }
