@@ -21,14 +21,3 @@ class ModelEvaluation(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
-        json_schema_extra = {
-            "example": {
-                "modelVersion": "2.0",
-                "datasetId": "66492a1d2f5f7b3a2c9a1111",
-                "evaluationDate": "2026-05-03T12:00:00",
-                "accuracy": 0.94,
-                "precision": 0.93,
-                "recall": 0.92,
-                "f1_score": 0.925,
-            }
-        }
