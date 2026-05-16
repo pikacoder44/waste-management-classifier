@@ -15,7 +15,9 @@ def preprocess_image(image_bytes):
         image.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
 
         # Pad the image to a fixed 224x224 canvas.
-        final_image = Image.new("RGB", (target_size, target_size), (0, 0, 0))
+        final_image = Image.new(
+            "RGB", (target_size, target_size), (0, 0, 0)
+        )  # create a black image and paste the resized image onto it
 
         offset_x = (target_size - image.width) // 2
         offset_y = (target_size - image.height) // 2
