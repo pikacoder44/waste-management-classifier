@@ -19,6 +19,7 @@ def preprocess_image(image_bytes):
             "RGB", (target_size, target_size), (0, 0, 0)
         )  # create a black image and paste the resized image onto it
 
+        # Calculate center position for pasting the image
         offset_x = (target_size - image.width) // 2
         offset_y = (target_size - image.height) // 2
 
