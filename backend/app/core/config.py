@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables FIRST, before reading them
+# Load environment variables
 load_dotenv()
 
 # JWT Configuration
