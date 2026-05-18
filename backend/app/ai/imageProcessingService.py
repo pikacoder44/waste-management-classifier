@@ -72,7 +72,7 @@ class ImageProcessingService:
                 _, buffer = cv2.imencode(".png", enhanced_image)
                 enhanced_bytes = buffer.tobytes()
 
-                # Check the quality of the improved image
+                # Recheck the quality of the improved image
                 enhanced_quality = ImageQualityAnalyzer.analyze(enhanced_bytes)
                 print(
                     f"[Quality Check] Enhanced quality: {enhanced_quality['quality_score']:.1f}%, Valid: {enhanced_quality['is_valid']}"
