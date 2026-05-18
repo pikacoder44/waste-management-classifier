@@ -469,6 +469,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                             fill
                             className="object-cover"
                             priority={false}
+                            unoptimized
                             onError={(e) => {
                               e.currentTarget.src = "/fallback-image.png";
                             }}
