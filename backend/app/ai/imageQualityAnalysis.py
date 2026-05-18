@@ -61,7 +61,7 @@ class ImageQualityAnalyzer:
                 issues.append(f"Image is too bright (brightness: {brightness:.2f})")
                 quality_score -= 20
 
-            quality_score = max(0, min(100, quality_score))
+            quality_score = max(0, min(100, quality_score)) # it keeps the score between 0 and 100
             is_valid = quality_score >= 70  # Use only quality score
 
             return {
