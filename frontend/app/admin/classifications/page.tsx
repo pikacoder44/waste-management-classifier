@@ -129,7 +129,8 @@ const Page = () => {
       setDownloadingId(wasteType);
       // Construct full URL like the Image component does
       const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`;
-      const response = await fetch(fullUrl);
+      const cacheBustedUrl = `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}download=${Date.now()}`;
+      const response = await fetch(cacheBustedUrl, { cache: "no-store" });
       if (!response.ok) {
         throw new Error("Failed to fetch image");
       }
