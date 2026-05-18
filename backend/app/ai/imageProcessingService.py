@@ -23,7 +23,7 @@ class ImageProcessingService:
                 f"[Quality Check] Original quality: {original_quality:.1f}%, Valid: {quality_result['is_valid']}, Issues: {quality_result['issues']}"
             )
 
-            # If image quality is already good, return it as-is
+            # If image quality is already good, return as it is
             if quality_result["is_valid"]:
                 print(
                     f"[Quality Check] Image quality is acceptable; no enhancement needed"
