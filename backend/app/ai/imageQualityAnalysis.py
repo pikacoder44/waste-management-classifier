@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 
 class ImageQualityAnalyzer:
