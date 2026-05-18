@@ -101,6 +101,7 @@ class ImageEnhancer:
         image = ImageEnhancer.denoise(image)
         return image
 
+    # main function
     @staticmethod
     def auto_enhance(image: np.ndarray, issues: list) -> np.ndarray:
 
