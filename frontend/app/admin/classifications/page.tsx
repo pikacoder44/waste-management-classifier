@@ -21,7 +21,14 @@ interface ClassificationEntry {
   predictedLabel: string;
   confidence: number;
   inferenceTime: number;
-  disposalRecommendation: string;
+  disposalRecommendation:
+    | string
+    | {
+        disposal_method?: string;
+        description?: string;
+        benefits?: string;
+        alternatives?: string[];
+      };
 }
 
 const getCategoryIcon = (label: string) => {

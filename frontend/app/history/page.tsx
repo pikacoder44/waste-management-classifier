@@ -24,7 +24,14 @@ interface HistoryItem {
   predictedLabel: string;
   confidence: number;
   inferenceTime: number;
-  disposalRecommendation: string;
+  disposalRecommendation:
+    | string
+    | {
+        disposal_method?: string;
+        description?: string;
+        benefits?: string;
+        alternatives?: string[];
+      };
 }
 
 export default function HistoryPage() {

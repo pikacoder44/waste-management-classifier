@@ -62,7 +62,9 @@ const Page = () => {
         }
 
         // Handle different response formats
-        const datasetList = Array.isArray(data) ? data : data.datasets || [];
+        const datasetList: Dataset[] = Array.isArray(data)
+          ? data
+          : data.datasets || [];
         // Sort by lastUpdated in descending order (newest first)
         const sortedDatasets = datasetList.sort(
           (a, b) =>

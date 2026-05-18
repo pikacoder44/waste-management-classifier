@@ -13,14 +13,14 @@ import {
 const Login = () => {
   const router = useRouter();
   const { setRole } = useAuth();
-  const [role, setRoleState] = useState("user");
+  const [role, setRoleState] = useState<"admin" | "user">("user");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const loginUser = async (e) => {
+  const loginUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -73,7 +73,13 @@ const Login = () => {
         } else if (Array.isArray(errorData.detail)) {
           // detail may be array of objects (with msg) or strings
           errorMessage = errorData.detail
-            .map((err) => (typeof err === "string" ? err : err.msg || ""))
+            .map((err: unknown) =>
+              typeof err === "string"
+                ? err
+                : typeof err === "object" && err !== null && "msg" in err
+                  ? String((err as { msg?: unknown }).msg || "")
+                  : "",
+            )
             .filter(Boolean)
             .join(", ");
         }
@@ -209,7 +215,9 @@ const Login = () => {
               <select
                 id="role"
                 value={role}
-                onChange={(e) => setRoleState(e.target.value)}
+                onChange={(e) =>
+                  setRoleState(e.target.value as "admin" | "user")
+                }
                 disabled={loading}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed appearance-none transition"
               >

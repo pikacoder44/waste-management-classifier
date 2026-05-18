@@ -87,6 +87,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confidenceValue = confidence ?? 0;
 
   const parseApiErrorMessage = async (
     response: Response,
@@ -521,45 +522,45 @@ export default function Home() {
                               </label>
                               <span
                                 className={` font-black px-3 py-1 rounded-lg text-sm ${
-                                  confidence >= 0.8
+                                  confidenceValue >= 0.8
                                     ? "bg-green-100 text-green-700"
-                                    : confidence >= 0.6
+                                    : confidenceValue >= 0.6
                                       ? "bg-yellow-100 text-yellow-700"
                                       : "bg-red-100 text-red-700"
                                 }`}
                               >
-                                {(confidence * 100).toFixed(1)}%
+                                {(confidenceValue * 100).toFixed(1)}%
                               </span>
                             </div>
                             <div className="h-4 w-full rounded-full bg-slate-200 overflow-hidden shadow-inner">
                               <div
                                 className={`h-full transition-all duration-700 rounded-full ${
-                                  confidence >= 0.8
+                                  confidenceValue >= 0.8
                                     ? "bg-linear-to-r from-green-400 to-green-600"
-                                    : confidence >= 0.6
+                                    : confidenceValue >= 0.6
                                       ? "bg-linear-to-r from-yellow-400 to-yellow-600"
                                       : "bg-linear-to-r from-red-400 to-red-600"
                                 }`}
                                 style={{
                                   width: `${Math.min(
                                     100,
-                                    Math.max(0, confidence * 100),
+                                    Math.max(0, confidenceValue * 100),
                                   ).toFixed(1)}%`,
                                 }}
                               />
                             </div>
                             <p
                               className={`text-xs font-semibold mt-2 ${
-                                confidence >= 0.8
+                                confidenceValue >= 0.8
                                   ? "text-green-700"
-                                  : confidence >= 0.6
+                                  : confidenceValue >= 0.6
                                     ? "text-yellow-700"
                                     : "text-red-700"
                               }`}
                             >
-                              {confidence >= 0.8
+                              {confidenceValue >= 0.8
                                 ? "✓ Excellent confidence - Reliable"
-                                : confidence >= 0.6
+                                : confidenceValue >= 0.6
                                   ? "⚠ Good confidence - Review suggested"
                                   : "✕ Low confidence - Please verify"}
                             </p>

@@ -19,12 +19,14 @@ interface FileItem {
   label: string;
   originalFilename: string;
 }
-interface Record {
+interface UpdateDatasetPayload {
   dataset_id: string;
   new_name?: string;
   description?: string;
+  datasetDescription?: string;
   version?: string;
   images?: { filename: string; label: string; fileData: string }[];
+  images_to_delete?: string[];
 }
 
 const ALLOWED_LABELS = [
@@ -116,7 +118,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const apiCall = async (
     endpoint: string,
     method: string,
-    body?: Record<string, Record<string, unknown>>,
+    body?: Record<string, unknown> | UpdateDatasetPayload,
   ) => {
     const fetchOptions: RequestInit = {
       method,
@@ -285,7 +287,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         );
       }
 
-      const updatePayload: Record<string, Record<string, unknown>> = {
+      const updatePayload: UpdateDatasetPayload = {
         dataset_id: datasetId,
         new_name: datasetName,
         datasetDescription: datasetDescription,

@@ -13,7 +13,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const registerUser = async (e) => {
+  const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -61,7 +61,13 @@ const Register = () => {
           errorMessage = errorData.detail;
         } else if (Array.isArray(errorData.detail)) {
           errorMessage = errorData.detail
-            .map((err) => (typeof err === "string" ? err : err.msg || ""))
+            .map((err: unknown) =>
+              typeof err === "string"
+                ? err
+                : typeof err === "object" && err !== null && "msg" in err
+                  ? String((err as { msg?: unknown }).msg || "")
+                  : "",
+            )
             .filter(Boolean)
             .join(", ");
         }

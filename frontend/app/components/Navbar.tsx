@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Poppins } from "next/font/google";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import {
@@ -20,11 +19,6 @@ import {
   X,
 } from "lucide-react";
 
-const poppins = Poppins({
-  weight: ["600", "700"],
-  subsets: ["latin"],
-});
-
 const Navbar = () => {
   const { role, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,9 +27,7 @@ const Navbar = () => {
     setMenuOpen((open) => !open);
   };
   return (
-    <nav
-      className={`bg-white border-b-2 border-emerald-200 shadow-md ${poppins.className}`}
-    >
+    <nav className="bg-white border-b-2 border-emerald-200 shadow-md">
       <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
           {/* Logo & Branding */}
