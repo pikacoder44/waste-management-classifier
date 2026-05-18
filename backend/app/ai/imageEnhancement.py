@@ -4,7 +4,7 @@ from typing import Tuple
 
 
 class ImageEnhancer:
-    # Provide image enhancement techniques for low-quality images
+    # Apply multiple enhancement techniques to improve image quality based on detected issues
 
     @staticmethod
     def enhance_contrast(
