@@ -31,7 +31,7 @@ class_labels = {
 @router.post("/classification/analyze")
 async def analyze_classification_result(file: UploadFile, request: Request):
     try:
-        # Check if the file is an image
+        # Check if the file is an image not other formats
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Invalid image file")
 
