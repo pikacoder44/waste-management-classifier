@@ -45,7 +45,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         user_upload_dir = Path(f"uploads/{user_id}")
         user_upload_dir.mkdir(parents=True, exist_ok=True)
 
-        # Check if image quality is good enough for the model
+        # image quality check and enhancement
         processing_result = ImageProcessingService.process_and_validate(image_bytes)
 
         # If image quality is not good enough, reject it
