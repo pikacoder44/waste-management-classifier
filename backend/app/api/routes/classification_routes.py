@@ -152,7 +152,7 @@ async def delete_classification_entry(entry_id: str, request: Request):
 
         user_id = verify_user_from_request(request)
 
-        # Validate and convert entry_id to ObjectId
+        # Validate and convert entry_id(string) to ObjectId
         try:
             object_id = ObjectId(entry_id)
         except Exception as e:
