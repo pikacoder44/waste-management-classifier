@@ -3,7 +3,7 @@ import numpy as np
 import io
 
 
-def preprocess_image(image_bytes):
+def preprocess_image(image_bytes):  # func does resizing - padding - normalization
     try:
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
@@ -26,7 +26,9 @@ def preprocess_image(image_bytes):
         final_image.paste(image, (offset_x, offset_y))
         image = final_image
 
+        # Convert to numpy array
         image_array = np.array(image).astype("float32")
+        # Normalize pixel values to [0, 1]
         image_array = image_array / 255.0
         image_array = np.expand_dims(image_array, axis=0)
 
