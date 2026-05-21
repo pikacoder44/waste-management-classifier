@@ -370,8 +370,8 @@ async def evaluate_model_endpoint(request: Request, background_tasks: Background
 
 
 @router.get("/admin/model/evaluation/status")
-def get_evaluation_status(request: Request):
-    # Get the current evaluation progress
+def get_evaluation_status(request: Request): # Get the current evaluation progress
+    # First verify that the requester is an admin
     verify_admin_from_request(request)
 
     return evaluation_status
