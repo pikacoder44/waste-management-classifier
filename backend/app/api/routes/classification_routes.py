@@ -80,7 +80,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Resize and normalize image
         preprocessedImage = preprocess_image(final_image_bytes)
 
-        # Run the image through the model and measure how long it takes
+        # start timer to measure model speed
         inference_start = time.time()
         predicted_class_label, confidence = predict_image(
             preprocessedImage, model, class_labels
