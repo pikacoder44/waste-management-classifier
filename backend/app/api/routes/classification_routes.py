@@ -77,7 +77,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         with open(image_path, "wb") as f:
             f.write(final_image_bytes)
 
-        # Resize and prepare the image for the model
+        # Resize and normalize image
         preprocessedImage = preprocess_image(final_image_bytes)
 
         # Run the image through the model and measure how long it takes
