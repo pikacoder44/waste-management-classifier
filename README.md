@@ -1,6 +1,6 @@
 # AI Based Waste Management and Classification System
 
-A full-stack machine learning web application for waste classification with user authentication, admin dashboard, dataset management, and model retraining capabilities. The system uses a **MobileNetV2** transfer learning model trained on the TrashNet dataset to classify waste images into 6 categories.
+A full-stack machine learning web application for waste classification with user authentication, admin dashboard, dataset management, and model retraining capabilities. The system uses a **MobileNetV2** transfer learning model trained on the TrashNet dataset to classify waste images into 6 categories
 
 ## 🎯 Features
 
