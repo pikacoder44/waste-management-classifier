@@ -87,7 +87,7 @@ def run_training_logic():
             target_size=IMG_SIZE,
             batch_size=BATCH_SIZE,
             class_mode="categorical",
-            shuffle=False,
+            shuffle=False, # because we want consistent evaluation results
         )
 
         training_status["message"] = "Building model..."
