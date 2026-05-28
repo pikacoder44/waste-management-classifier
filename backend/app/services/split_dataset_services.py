@@ -99,7 +99,7 @@ def ensure_split_dataset(split_type: str, train_split: float = 0.7):
 
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
-    metadata_file = os.path.join(split_path, ".metadata.json")
+    metadata_file = os.path.join(split_path, ".metadata.json") # hidden file to store metadata about the split (like image count, creation time, etc)
 
     # Check if split exists and is current
     should_recreate = True
