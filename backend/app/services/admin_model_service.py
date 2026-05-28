@@ -96,7 +96,7 @@ def run_training_logic():
         base_model = MobileNetV2(
             weights="imagenet", include_top=False, input_shape=(224, 224, 3)
         )
-        base_model.trainable = False
+        base_model.trainable = False # freeze base layers for transfer learning
 
         model = models.Sequential(
             [
