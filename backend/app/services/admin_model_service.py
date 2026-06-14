@@ -7,6 +7,7 @@ from app.database.collections import dataset_collection
 from tensorflow import keras
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from app.services.model_evaluation_service import (
@@ -66,7 +67,7 @@ def run_training_logic():
         training_status["progress"] = 25
 
         train_datagen = ImageDataGenerator(
-            rescale=1.0 / 255,
+            preprocessing_function=preprocess_input,
             rotation_range=20,
             width_shift_range=0.2,
             height_shift_range=0.2,
@@ -74,7 +75,7 @@ def run_training_logic():
             horizontal_flip=True,
             fill_mode="nearest",
         )
-        test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+        test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 
         train_data = train_datagen.flow_from_directory(
             train_dir,
@@ -87,7 +88,7 @@ def run_training_logic():
             target_size=IMG_SIZE,
             batch_size=BATCH_SIZE,
             class_mode="categorical",
-            shuffle=False, # because we want consistent evaluation results
+            shuffle=False,  # because we want consistent evaluation results
         )
 
         training_status["message"] = "Building model..."
@@ -96,7 +97,7 @@ def run_training_logic():
         base_model = MobileNetV2(
             weights="imagenet", include_top=False, input_shape=(224, 224, 3)
         )
-        base_model.trainable = False # freeze base layers for transfer learning
+        base_model.trainable = False  # freeze base layers for transfer learning
 
         model = models.Sequential(
             [
@@ -223,7 +224,7 @@ def run_evaluation_logic():
         eval_test_dir = split_info["test_dir"]
         eval_dataset_path = split_info["split_path"]
 
-        test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+        test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
         test_data = test_datagen.flow_from_directory(
             eval_test_dir,
             target_size=IMG_SIZE,
