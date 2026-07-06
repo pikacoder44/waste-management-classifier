@@ -14,7 +14,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 app = FastAPI(
     title="Waste Classifier API",
-    description="Secure waste classification system with JWT HTTP-only cookies",
+    description="Secure waste classification system",
     version="1.0.0",
 )
 
