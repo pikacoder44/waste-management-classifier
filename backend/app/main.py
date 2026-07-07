@@ -102,9 +102,8 @@ app.add_middleware(
 
 
 @app.get("/")
-def test_db():
-    # Test database connection.
-    return {"collections": db.list_collection_names()}
+def root():
+    return {"message": "Waste Classifier API is running"}
 
 
 app.include_router(auth_routes.router)
