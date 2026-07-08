@@ -6,7 +6,7 @@ from typing import Dict, Any
 class ImageQualityAnalyzer:
     # Analyze image quality and provide detailed metrics
 
-    # Analyzer thresholds (stricter quality validation)
+    # Analyzer thresholds
     MIN_RESOLUTION = 224  # Minimum acceptable resolution
     BLUR_THRESHOLD = 100  # Stricter blur detection
     MIN_BRIGHTNESS = 30  # Minimum brightness threshold
