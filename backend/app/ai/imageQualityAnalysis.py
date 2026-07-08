@@ -52,7 +52,14 @@ class ImageQualityAnalyzer:
 
             if laplacian_var < ImageQualityAnalyzer.BLUR_THRESHOLD:
                 issues.append(f"Image is blurry (blur score: {laplacian_var:.2f})")
-                quality_score -= 35
+
+                # Use a gradual blur penalty so score reflects partial improvements.
+                # Penalty range: 25 (near threshold) to 35 (very blurry).
+                blur_severity = (
+                    ImageQualityAnalyzer.BLUR_THRESHOLD - laplacian_var
+                ) / ImageQualityAnalyzer.BLUR_THRESHOLD
+                blur_penalty = 25 + (10 * np.clip(blur_severity, 0.0, 1.0))
+                quality_score -= blur_penalty
 
             if brightness < ImageQualityAnalyzer.MIN_BRIGHTNESS:
                 issues.append(f"Image is too dark (brightness: {brightness:.2f})")
@@ -61,7 +68,8 @@ class ImageQualityAnalyzer:
                 issues.append(f"Image is too bright (brightness: {brightness:.2f})")
                 quality_score -= 20
 
-            quality_score = max(0, min(100, quality_score)) # it keeps the score between 0 and 100
+            quality_score = max(0, min(100, quality_score))
+            quality_score = round(float(quality_score), 1)
             is_valid = quality_score >= 70  # Use only quality score
 
             return {
