@@ -20,14 +20,12 @@ class ImageProcessingService:
             quality_result = ImageQualityAnalyzer.analyze(image_bytes)
             original_quality = quality_result["quality_score"]
             print(
-                f"[Quality Check] Original quality: {original_quality:.1f}%, Valid: {quality_result['is_valid']}, Issues: {quality_result['issues']}"
+                f"[Quality Check] Input Quality: {original_quality:.1f}% ({'valid' if quality_result['is_valid'] else 'low'})"
             )
 
             # If image quality is already good, return as it is
             if quality_result["is_valid"]:
-                print(
-                    f"[Quality Check] Image quality is acceptable; no enhancement needed"
-                )
+                print(f"[Quality Check] Result: accepted (no enhancement)")
                 return {
                     "status": "success",
                     "is_valid": True,
@@ -63,7 +61,6 @@ class ImageProcessingService:
                 < ImageProcessingService.ACCEPTABLE_QUALITY_SCORE
             ):
                 # Try to automatically improve the image
-                print(f"[Quality Check] Attempting image enhancement...")
                 enhanced_image = ImageEnhancer.auto_enhance(
                     quality_result["image_array"], quality_result["issues"]
                 )
@@ -75,12 +72,12 @@ class ImageProcessingService:
                 # Recheck the quality of the improved image
                 enhanced_quality = ImageQualityAnalyzer.analyze(enhanced_bytes)
                 print(
-                    f"[Quality Check] Enhanced quality: {enhanced_quality['quality_score']:.1f}%, Valid: {enhanced_quality['is_valid']}"
+                    f"[Quality Check] Enhanced: {original_quality:.1f}% -> {enhanced_quality['quality_score']:.1f}% ({'valid' if enhanced_quality['is_valid'] else 'low'})"
                 )
 
                 # If the improved image is now good, use it
                 if enhanced_quality["is_valid"]:
-                    print(f"[Quality Check] Enhancement succeeded; image is now valid")
+                    print(f"[Quality Check] Result: accepted after enhancement")
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -97,9 +94,7 @@ class ImageProcessingService:
                     enhanced_quality["quality_score"]
                     >= ImageProcessingService.MINIMUM_QUALITY_SCORE
                 ):
-                    print(
-                        f"[Quality Check] Enhancement improved the image, but only slightly"
-                    )
+                    print(f"[Quality Check] Result: marginal quality")
                     return {
                         "status": "warning",
                         "is_valid": True,
@@ -116,7 +111,7 @@ class ImageProcessingService:
                     }
                 else:
                     print(
-                        f"[Quality Check] Enhancement did not improve the image enough"
+                        f"[Quality Check] Result: rejected (too low after enhancement)"
                     )
                     return {
                         "status": "error",
@@ -130,7 +125,7 @@ class ImageProcessingService:
                         "message": f"Image quality too low even after enhancement. Please retake the image with better lighting and focus.",
                     }
 
-            print(f"[Quality Check] Image quality is too low to process safely")
+            print(f"[Quality Check] Result: rejected (too low)")
             return {
                 "status": "error",
                 "is_valid": False,
