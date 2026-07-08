@@ -9,4 +9,4 @@ try:
     model = load_model(MODEL_PATH)
 except Exception as e:
     print(f"Error loading model: {e}")
-    raise Exception(f"Failed to load model: {e}")
+    raise RuntimeError(f"Failed to load model: {e}")
