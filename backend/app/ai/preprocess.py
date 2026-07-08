@@ -33,6 +33,8 @@ def preprocess_image(image_bytes):  # func does resizing - padding - normalizati
         image_array = np.expand_dims(image_array, axis=0)
 
         return image_array
+    except ValueError:
+        raise
     except Exception as e:
         print(f"Error during image preprocessing: {e}")
         raise ValueError("Invalid image data")
