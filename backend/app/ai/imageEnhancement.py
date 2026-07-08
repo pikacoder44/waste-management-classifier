@@ -26,12 +26,20 @@ class ImageEnhancer:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             current_brightness = np.mean(gray)
 
-            # Calculate adjustment needed
+            # Nudge dark images up and bright images down toward the target level.
             adjustment = float(target_brightness - current_brightness)
+            if current_brightness < 90:
+                adjustment *= 1.2
+            elif current_brightness > 160:
+                adjustment *= 0.8
 
-            # Apply signed brightness shift and clamp to valid uint8 range
             enhanced = image.astype(np.float32) + adjustment
             enhanced = np.clip(enhanced, 0, 255).astype(np.uint8)
+
+            final_brightness = np.mean(cv2.cvtColor(enhanced, cv2.COLOR_BGR2GRAY))
+            print(
+                f"[Enhance] Brightness: {current_brightness:.1f} -> {final_brightness:.1f}"
+            )
             return enhanced
         except Exception as e:
             print(f"Error enhancing brightness: {e}")
@@ -114,8 +122,13 @@ class ImageEnhancer:
         # Check for keywords in issues to determine which enhancements to apply
         has_blur = any("blur" in issue.lower() for issue in issues)
         has_resolution = any("resolution" in issue.lower() for issue in issues)
-        has_lighting = any(
-            "dark" in issue.lower() or "bright" in issue.lower() for issue in issues
+        has_dark_lighting = any(
+            "dark" in issue.lower() or "underexposed" in issue.lower()
+            for issue in issues
+        )
+        has_bright_lighting = any(
+            "bright" in issue.lower() or "overexposed" in issue.lower()
+            for issue in issues
         )
 
         # Apply specific enhancements based on issues
@@ -127,7 +140,9 @@ class ImageEnhancer:
         elif has_resolution:
             enhanced = ImageEnhancer.enhance_for_low_resolution(enhanced)
 
-        if has_lighting:
+        if has_dark_lighting:
             enhanced = ImageEnhancer.enhance_for_poor_lighting(enhanced)
+        elif has_bright_lighting:
+            enhanced = ImageEnhancer.enhance_brightness(enhanced)
 
         return enhanced
