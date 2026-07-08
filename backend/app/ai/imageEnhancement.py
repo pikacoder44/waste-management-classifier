@@ -110,14 +110,15 @@ class ImageEnhancer:
 
         enhanced = image.copy()
 
-        # Apply specific enhancements based on issues
+        
         # Check for keywords in issues to determine which enhancements to apply
         has_blur = any("blur" in issue.lower() for issue in issues)
         has_resolution = any("resolution" in issue.lower() for issue in issues)
         has_lighting = any(
             "dark" in issue.lower() or "bright" in issue.lower() for issue in issues
         )
-
+        
+        # Apply specific enhancements based on issues
         if has_blur and has_resolution:
             enhanced = ImageEnhancer.enhance_for_low_resolution(enhanced)
         elif has_blur:
