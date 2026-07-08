@@ -52,13 +52,9 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         if not processing_result["is_valid"]:
             raise HTTPException(status_code=400, detail=processing_result["message"])
 
-        # Log if image was improved
-        if processing_result["was_enhanced"]:
-            print(f"Enhanced: {processing_result['quality_score']:.1f}%")
-            if processing_result["warnings"]:
-                print(f"  Warnings: {', '.join(processing_result['warnings'])}")
-        else:
-            print(f"Quality score: {processing_result['quality_score']:.1f}%")
+        # Log if Image is improved and warnings if any
+        if processing_result["was_enhanced"] and processing_result["warnings"]:
+            print(f"[Classification] Note: {', '.join(processing_result['warnings'])}")
 
         # Create a filename with current date and time
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
