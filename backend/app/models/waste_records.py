@@ -26,5 +26,3 @@ class WasteRecords(BaseModel):
         None,
         description="Structured disposal recommendation with method, description, and benefits",
     )
-
-    pass
