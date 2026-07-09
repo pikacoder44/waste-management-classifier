@@ -20,11 +20,11 @@ class BatchUploadRequest(BaseModel):
 
 class UpdateDatasetRequest(BaseModel):
     dataset_id: str
-    new_name: Optional[str] = None  # Optional if user only wants to add images
-    datasetDescription: Optional[str] = None  # Allow updating description
-    version: Optional[str] = None  # Optional version update
-    images: Optional[List[ImageUpload]] = None  # Optional if user only wants to rename
-    images_to_delete: Optional[List[str]] = None  # List of image file paths to delete
+    new_name: Optional[str] = None  
+    datasetDescription: Optional[str] = None  
+    version: Optional[str] = None  
+    images: Optional[List[ImageUpload]] = None  
+    images_to_delete: Optional[List[str]] = None 
 
 
 class DeleteDatasetRequest(BaseModel):
