@@ -13,8 +13,6 @@ class Dataset(BaseModel):
     lastUpdated: datetime = Field(default_factory=datetime.now)
 
     class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True
         json_schema_extra = {
             "example": {
                 "name": "Waste Dataset v2",
