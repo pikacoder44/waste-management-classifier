@@ -27,10 +27,4 @@ class WasteRecords(BaseModel):
         description="Structured disposal recommendation with method, description, and benefits",
     )
 
-    class Config:
-        populate_by_name = (
-            True  # Allow using field names instead of aliases when creating instances
-        )
-        arbitrary_types_allowed = (
-            True  # Allow arbitrary types (like ObjectId) without validation errors
-        )
+    pass
