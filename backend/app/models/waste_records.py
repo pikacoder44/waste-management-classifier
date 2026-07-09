@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class WasteRecords(BaseModel):
-    userId: str  # foreign key to User model
+    userId: str  # logical foreign key to User model
     filePath: str = Field(
         ..., description="Local file path where the uploaded image is stored"
     )
