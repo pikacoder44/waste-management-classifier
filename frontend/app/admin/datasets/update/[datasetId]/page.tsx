@@ -168,7 +168,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         setDatasetDescription(dataset.description);
         setDatasetVersion(dataset.version);
         setOriginalName(dataset.name);
-        setOriginalDescription(dataset.datasetDescription || "");
+        // dataset.description is the correct field returned by the API
+        setOriginalDescription(dataset.description || "");
         setFilePaths(parseFilePaths(dataset.filePath || ""));
 
         const formattedDate = new Date(dataset.uploadDate).toLocaleDateString(
@@ -232,10 +233,15 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     setFilePaths(filePaths.filter((item) => item.filePath !== filePath));
   };
 
+  // Validation: dataset name must be non-empty
+  const nameIsValid = datasetName.trim().length > 0;
+
   // Check if any changes have been made
+  const nameChanged = datasetName.trim() !== originalName.trim();
+  const descriptionChanged = datasetDescription !== originalDescription;
   const hasChanges =
-    datasetName !== originalName ||
-    datasetDescription !== originalDescription ||
+    nameChanged ||
+    descriptionChanged ||
     selectedFiles.length > 0 ||
     imagesToDelete.length > 0;
 
@@ -576,7 +582,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={handleUploadImages}
-                      disabled={uploading}
+                      disabled={uploading || !nameIsValid}
                       className="flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-emerald-500/50"
                     >
                       <Save className="w-5 h-5" />
@@ -594,6 +600,11 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                       Cancel
                     </button>
                   </div>
+                  {!nameIsValid && (
+                    <p className="mt-3 text-sm text-red-600">
+                      Dataset name cannot be empty.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
