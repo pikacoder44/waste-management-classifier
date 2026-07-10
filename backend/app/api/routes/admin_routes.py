@@ -58,6 +58,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
             label = validated["label"]
             filename = validated["filename"]
 
+            # Save the image file to the custom dataset directory
             try:
                 _, new_filename, normalized_file_path = save_image_file(
                     label, file_bytes, file_ext
