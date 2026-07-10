@@ -91,7 +91,7 @@ def normalize_path_for_filesystem(file_path: str) -> str:
     # Convert normalized path back to OS-specific format for filesystem operations
     return file_path.replace("/", os.sep)
 
-
+# Saves image file to the custom dataset directory
 def save_image_file(
     label: str, file_bytes: bytes, file_ext: str
 ) -> tuple[str, str, str]:
