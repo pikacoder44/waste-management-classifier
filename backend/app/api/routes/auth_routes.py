@@ -108,7 +108,7 @@ def registerUser(user: User):
     hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), salt)
 
     # Build user document using model structure, but with hashed password
-    user_dict = user.dict()
+    user_dict = user.model_dump()
     user_dict["username"] = username
     user_dict["password"] = hashed_password.decode("utf-8")
     user_dict["role"] = "user"  # Always register as regular user

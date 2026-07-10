@@ -97,7 +97,7 @@ async def analyze_classification_result(file: UploadFile, request: Request):
             disposalRecommendation=disposalRecommendation,
         )
         # Save the record to database
-        waste_records_collection.insert_one(waste_record.dict())
+        waste_records_collection.insert_one(waste_record.model_dump())
 
         response = {
             "status": "success",

@@ -111,7 +111,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 uploadDate=datetime.now(),
                 lastUpdated=datetime.now(),
             )
-            dataset_collection.insert_one(uploadedDataset.dict())
+            dataset_collection.insert_one(uploadedDataset.model_dump())
 
         response = {
             "status": "completed",
