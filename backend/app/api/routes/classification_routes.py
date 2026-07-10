@@ -178,7 +178,7 @@ async def delete_classification_entry(entry_id: str, request: Request):
             print(f"Database error: {e}")
             raise HTTPException(status_code=503, detail="Database operation failed")
 
-        # Delete associated image file
+        # Delete associated image file from disk
         if entry.get("filePath"):
             try:
                 if os.path.exists(entry["filePath"]):
