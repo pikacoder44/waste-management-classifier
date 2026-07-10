@@ -44,9 +44,9 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 status_code=400, detail="At least one image must be provided"
             )
 
-        uploaded_results = []
+        uploaded_results = [] # to displat back to the user
         errors = []
-        all_file_paths = []
+        all_file_paths = [] # for database storage
 
         for image_data in payload.images:
             validated = validate_and_process_image(image_data, errors)
