@@ -74,7 +74,7 @@ def validate_and_process_image(image_data, errors: list):
 
 
 def parse_file_paths_json(file_path_str: str) -> list:
-    # Parse file paths from JSON string; return empty list on failure
+    # Parse file paths from string to real Python list; return empty list on failure
     try:
         return json.loads(file_path_str)
     except (ValueError, json.JSONDecodeError):
