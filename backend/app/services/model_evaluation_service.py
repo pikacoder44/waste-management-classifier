@@ -131,7 +131,7 @@ def evaluate_model(
     if training_status:
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
-        
+
     # Generate and save confusion matrix image
     try:
         generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
@@ -158,7 +158,7 @@ def evaluate_model(
 def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list) -> str:
     # Generate and save confusion matrix image to backend/evaluation_results
     try:
-        # Create backend-owned directory for evaluation artifacts
+        # Create backend directory
         output_dir = BACKEND_ROOT / "evaluation_results"
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -166,13 +166,13 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
 
         print(f"-- Generating confusion matrix visualization...")
 
-        # Create matplotlib figure
+        # Create a blank graph
         plt.figure(figsize=(10, 8))
 
-        # Display confusion matrix as heatmap
+        # Display confusion matrix as an image
         im = plt.imshow(conf_matrix, interpolation="nearest", cmap="Blues")
 
-        # Add colorbar
+        # Add color scale bar to the side of the confusion matrix
         cbar = plt.colorbar(im, ax=plt.gca())
         cbar.set_label("Number of Predictions", rotation=270, labelpad=20)
 
@@ -196,6 +196,7 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
         for i in range(conf_matrix.shape[0]):
             for j in range(conf_matrix.shape[1]):
                 count = conf_matrix[i, j]
+                # Use white text for dark blue bg and black text for light blue bg
                 color = "white" if count > threshold else "black"
                 plt.text(
                     j,
