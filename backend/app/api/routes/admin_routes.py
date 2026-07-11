@@ -8,6 +8,7 @@ from app.models.admin_models import (
     UpdateDatasetRequest,
 )
 from app.database.collections import dataset_collection
+from app.database.collections import model_evaluation_collection
 from app.services.admin_dataset_service import (
     validate_and_process_image,
     parse_file_paths_json,
@@ -391,7 +392,7 @@ def get_evaluation_status(request: Request): # Get the current evaluation progre
 def get_latest_evaluation(request: Request):
     try:
         verify_admin_from_request(request)
-        from app.database.collections import model_evaluation_collection
+        
 
         latest_evaluation = model_evaluation_collection.find_one(
             sort=[("evaluationDate", -1)]
