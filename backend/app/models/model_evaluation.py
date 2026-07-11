@@ -7,8 +7,8 @@ class ModelEvaluation(BaseModel):
     modelVersion: str = Field(
         ..., description="Version of the model evaluated (e.g., 1.0, 2.0)"
     )
-    datasetId: ObjectId = Field(
-        ..., description="Reference to the dataset used for evaluation"
+    datasetId: ObjectId | None = Field(
+        default=None, description="Reference to the dataset used for evaluation"
     )
     evaluationDate: datetime = Field(default_factory=datetime.now)
     accuracy: float = Field(..., ge=0.0, le=1.0, description="Overall accuracy score")
