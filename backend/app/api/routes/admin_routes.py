@@ -157,15 +157,20 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         if requestedDataset.get("filePath"):
             existing_file_paths = parse_file_paths_json(requestedDataset["filePath"])
 
+        # This will only run if there are images to delete
         if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
+
+            # Normalize the paths to delete
             paths_to_delete_normalized = set(payload.images_to_delete)
 
+            # Physically delete the files from storage
             for file_path in paths_to_delete_normalized:
                 try:
                     delete_stored_file(file_path)
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
 
+            # Remove the deleted file paths from the existing_file_paths list
             existing_file_paths = [
                 item
                 for item in existing_file_paths
@@ -184,11 +189,12 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         new_file_paths = []
         upload_errors = []
 
+        # If there are new images to upload, validate and save them
         if payload.images is not None and len(payload.images) > 0:
             for image_data in payload.images:
                 validated = validate_and_process_image(image_data, upload_errors)
                 if validated is None:
-                    continue
+                    continue  #skip
 
                 file_bytes = validated["file_bytes"]
                 file_ext = validated["file_ext"]
