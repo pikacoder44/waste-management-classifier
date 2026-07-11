@@ -228,11 +228,13 @@ def run_evaluation_logic():
             shuffle=False,
         )
 
+        # Calculate total batches for progress tracking
         actual_samples = test_data.samples
         total_batches = (actual_samples + BATCH_SIZE - 1) // BATCH_SIZE
 
         test_data.reset()
 
+        # Updating status
         evaluation_status["message"] = "Evaluating model..."
         evaluation_status["progress"] = 50
 
@@ -240,6 +242,7 @@ def run_evaluation_logic():
             model, test_data, evaluation_status, dataset_id, total_batches
         )
 
+        # Updating status
         evaluation_status["message"] = "Saving results to database..."
         evaluation_status["progress"] = 95
 
@@ -247,7 +250,8 @@ def run_evaluation_logic():
 
         if os.path.exists(eval_dataset_path):
             shutil.rmtree(eval_dataset_path)
-
+            
+        # Updating status
         evaluation_status["status"] = "completed"
         evaluation_status["message"] = "Evaluation completed successfully!"
         evaluation_status["progress"] = 100
