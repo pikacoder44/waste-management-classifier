@@ -48,6 +48,7 @@ def run_training_logic():
     EPOCHS = TRAINING_EPOCHS
     TRAIN_SPLIT = 0.7
 
+    # Updating status to indicate training has started
     training_status["is_training"] = True
     training_status["status"] = "preparing_data"
     training_status["message"] = "Preparing dataset..."
@@ -63,6 +64,7 @@ def run_training_logic():
         test_dir = split_info["test_dir"]
         combined_dataset_path = split_info["split_path"]
 
+        # Updating status
         training_status["message"] = "Loading data into memory..."
         training_status["progress"] = 25
 
@@ -91,6 +93,7 @@ def run_training_logic():
             shuffle=False,  # because we want consistent evaluation results
         )
 
+        # Updating status
         training_status["message"] = "Building model..."
         training_status["progress"] = 40
 
@@ -117,6 +120,7 @@ def run_training_logic():
             metrics=["accuracy"],
         )
 
+        # Updating status
         training_status["status"] = "training"
         training_status["message"] = "Training model..."
         training_status["total_epochs"] = EPOCHS
@@ -127,8 +131,10 @@ def run_training_logic():
             monitor="val_loss", patience=5, restore_best_weights=True
         )
 
+        # Custom callback to update training status after each epoch
         class StatusCallback(keras.callbacks.Callback):
             def on_epoch_end(self, epoch, logs=None):
+                # After every epoch, update the training status
                 training_status["epoch"] = epoch + 1
                 progress = 50 + (epoch + 1) / EPOCHS * 40
                 training_status["progress"] = int(progress)
@@ -146,13 +152,16 @@ def run_training_logic():
             verbose=1,
         )
 
+        # Updating status
         training_status["message"] = "Saving model..."
         training_status["progress"] = 95
 
+        # Saving the model in a directory named 'model'
         model_path = os.path.join("model", "waste_classifier_model.keras")
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
         model.save(model_path)
 
+        # Updating status
         training_status["status"] = "completed"
         training_status["message"] = (
             "Training completed successfully! Run evaluation to see metrics."
