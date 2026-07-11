@@ -232,13 +232,14 @@ def save_evaluation_to_database(evaluation_doc: Dict[str, Any]) -> str:
         if not evaluation_doc or not isinstance(evaluation_doc, dict):
             print(f"Invalid evaluation document: {evaluation_doc}")
             raise ValueError("Invalid evaluation document provided")
-
+        # Create a ModelEvaluation instance and insert into the database
         model_evaluation = ModelEvaluation(**evaluation_doc)
         db_doc = model_evaluation.model_dump()
 
         print("\tInserting into collection...")
-
         result = model_evaluation_collection.insert_one(db_doc)
+
+        # Extract the ObjectId of the inserted document
         evaluation_id = str(result.inserted_id)
         print(f"Evaluation saved to database successfully")
     except Exception as e:
