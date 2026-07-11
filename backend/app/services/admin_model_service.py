@@ -16,7 +16,6 @@ from app.services.model_evaluation_service import (
 )
 from app.services.split_dataset_services import ensure_split_dataset
 
-# Shared training state
 TRAINING_EPOCHS = 20
 
 training_status = {
@@ -29,7 +28,6 @@ training_status = {
     "total_epochs": TRAINING_EPOCHS,
 }
 
-# Separate evaluation state
 evaluation_status = {
     "is_evaluating": False,
     "progress": 0,
@@ -185,10 +183,7 @@ def run_evaluation_logic():
     # Run evaluation against the holdout split and persist evaluation results
     global evaluation_status
 
-    print("\n" + "=" * 80)
-    print("Starting evaluation process")
-    print("=" * 80)
-
+    # Initializing evaluation status
     evaluation_status["is_evaluating"] = True
     evaluation_status["status"] = "running"
     evaluation_status["message"] = "Loading model..."
@@ -202,17 +197,9 @@ def run_evaluation_logic():
         BATCH_SIZE = 32
         TRAIN_SPLIT = 0.7
 
+         # Fetch the latest dataset ID from the database
         latest_dataset = dataset_collection.find_one(sort=[("uploadDate", -1)])
-        if not latest_dataset:
-            evaluation_status["status"] = "error"
-            evaluation_status["message"] = (
-                "Dataset not found. Please upload a dataset before evaluation."
-            )
-            evaluation_status["is_evaluating"] = False
-            evaluation_status["progress"] = 0
-            return
-
-        dataset_id = latest_dataset["_id"]
+        dataset_id = latest_dataset["_id"] if latest_dataset else None
 
         model_path = os.path.join("model", "waste_classifier_model.keras")
         if not os.path.exists(model_path):
@@ -225,7 +212,6 @@ def run_evaluation_logic():
             return
 
         model = keras.models.load_model(model_path)
-
         evaluation_status["message"] = "Checking evaluation dataset..."
         evaluation_status["progress"] = 30
 
