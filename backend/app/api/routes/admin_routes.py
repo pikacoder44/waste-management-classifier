@@ -152,6 +152,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         if payload.datasetDescription is not None:
             update_fields["description"] = payload.datasetDescription.strip()
 
+        # Will store the existing file paths and update them based on deletions and new uploads
         existing_file_paths = []
         if requestedDataset.get("filePath"):
             existing_file_paths = parse_file_paths_json(requestedDataset["filePath"])
