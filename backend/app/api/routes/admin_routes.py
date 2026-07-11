@@ -393,7 +393,6 @@ def get_latest_evaluation(request: Request):
     try:
         verify_admin_from_request(request)
         
-
         latest_evaluation = model_evaluation_collection.find_one(
             sort=[("evaluationDate", -1)]
         )
@@ -459,7 +458,7 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
             print(f"Invalid ObjectId format: {entry_id} - {e}")
             raise HTTPException(status_code=400, detail="Invalid entry ID format")
 
-        # Fetch the entry BEFORE deletion to get filePath for cleanup
+        # Fetch the entry before deletion to get filePath for cleanup
         try:
             entry = waste_records_collection.find_one({"_id": object_id})
         except Exception as e:
