@@ -203,6 +203,7 @@ def run_evaluation_logic():
 
         model_path = os.path.join("model", "waste_classifier_model.keras")
         if not os.path.exists(model_path):
+            # If the model does not exist, update the evaluation status and return before further processing
             evaluation_status["status"] = "error"
             evaluation_status["message"] = (
                 "Model not found. Please train the model first."
@@ -212,6 +213,8 @@ def run_evaluation_logic():
             return
 
         model = keras.models.load_model(model_path)
+
+        # Updating status
         evaluation_status["message"] = "Checking evaluation dataset..."
         evaluation_status["progress"] = 30
 
@@ -238,6 +241,7 @@ def run_evaluation_logic():
         evaluation_status["message"] = "Evaluating model..."
         evaluation_status["progress"] = 50
 
+        # call the evaluate_model function and get the evaluation document
         evaluation_doc = evaluate_model(
             model, test_data, evaluation_status, dataset_id, total_batches
         )
