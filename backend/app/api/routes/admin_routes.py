@@ -24,6 +24,7 @@ from app.services.admin_model_service import (
 from app.utils.db_helpers import sanitize_doc
 from datetime import datetime
 import json
+import traceback
 from bson import ObjectId
 
 router = APIRouter()
@@ -220,10 +221,12 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             update_fields["filePath"] = json.dumps(all_file_paths)
             update_fields["imageCount"] = len(all_file_paths)
             update_fields["lastUpdated"] = datetime.now()
+            # if version is not provided, increment the current version
             if payload.version is None:
                 current_version = requestedDataset.get("version", "1.0")
                 update_fields["version"] = increment_version(current_version)
 
+        # If there are images to delete but no new uploads
         elif payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
             update_fields["filePath"] = json.dumps(existing_file_paths)
             update_fields["imageCount"] = len(existing_file_paths)
@@ -231,6 +234,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             current_version = requestedDataset.get("version", "1.0")
             update_fields["version"] = increment_version(current_version)
 
+        # If there are no new uploads and no deletions, we only update the name, description, or version if provided
         if update_fields:
             dataset_collection.update_one({"_id": objectId}, {"$set": update_fields})
 
@@ -248,8 +252,6 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         raise
     except Exception as e:
         print(f"Error updating dataset: {e}")
-        import traceback
-
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
