@@ -30,8 +30,8 @@ def evaluate_model(
         training_status["message"] = "Generating predictions..."
         training_status["progress"] = 92
 
-    y_true = []
-    y_pred = []
+    y_true = [] # Actual labels
+    y_pred = [] # Predicted labels
     batch_count = 0
     total_samples = 0
 
@@ -82,16 +82,19 @@ def evaluate_model(
 
     print("-- Computing classification metrics...")
 
+    # Validate that we have predictions and labels
     if not y_true or not y_pred:
         raise ValueError(
             f"No predictions or labels collected. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
         )
-
+    
+    # Validate that the lengths of predictions and labels match
     if len(y_true) != len(y_pred):
         raise ValueError(
             f"Mismatch in predictions and labels length. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
         )
-
+    
+    # Generate classification report and confusion matrix
     try:
         class_report = cast(
             Dict[str, Any],
@@ -110,14 +113,15 @@ def evaluate_model(
         raise
 
     print("-- Extracting metrics...")
+    # Calculate weighted metrics from classification report
     weighted_metrics = class_report.get("weighted avg", {})
     weighted_precision = weighted_metrics.get("precision", 0.0)
     weighted_recall = weighted_metrics.get("recall", 0.0)
     weighted_f1 = weighted_metrics.get("f1-score", 0.0)
     accuracy = float(class_report.get("accuracy", 0.0))
-
     model_version = datetime.now().isoformat()
-    
+
+    # Print metrics for logging
     print(f"\tModel version: {model_version}")
     print(f"\tOverall Accuracy: {accuracy:.4f}")
     print(f"\tPrecision (weighted): {weighted_precision:.4f}")
@@ -127,7 +131,8 @@ def evaluate_model(
     if training_status:
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
-
+        
+    # Generate and save confusion matrix image
     try:
         generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
         print("\tConfusion matrix PNG saved")
