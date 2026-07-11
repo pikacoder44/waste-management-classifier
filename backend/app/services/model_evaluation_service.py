@@ -21,10 +21,9 @@ def evaluate_model(
     model,
     test_data,
     training_status: Dict[str, Any],
-    dataset_id: ObjectId,
+    dataset_id: ObjectId | None,
     total_batches: int | None = None,
 ) -> Dict[str, Any]:
-
     print("\nStarting model evaluation...")
 
     if training_status:
@@ -37,9 +36,7 @@ def evaluate_model(
     total_samples = 0
 
     try:
-        # Loop over test data batches
         for batch_num, (images, labels) in enumerate(test_data):
-            # Break if we've processed all batches
             if total_batches and batch_num >= total_batches:
                 print(
                     f"  Reached expected {total_batches} batches, stopping prediction loop"
@@ -49,29 +46,24 @@ def evaluate_model(
             batch_count += 1
             total_samples += images.shape[0]
 
-            # Calculate progress based on batch number if total_batches provided
             if total_batches and training_status:
-                progress = int(92 + (batch_num / total_batches) * 5)  # 92% to 97%
-                progress = min(progress, 97)  # Cap at 97% during predictions
+                progress = int(92 + (batch_num / total_batches) * 5)
+                progress = min(progress, 97)
                 training_status["progress"] = progress
 
             print(
                 f"  Batch {batch_num+1}/{total_batches if total_batches else '?'}: Processing {images.shape[0]} images (total: {total_samples} samples)..."
             )
 
-            try:
-                predictions = model.predict(images, verbose=0)
-                if predictions is None or len(predictions) == 0:
-                    raise ValueError(
-                        f"Model returned empty predictions for batch {batch_num+1}"
-                    )
+            predictions = model.predict(images, verbose=0)
+            if predictions is None or len(predictions) == 0:
+                raise ValueError(
+                    f"Model returned empty predictions for batch {batch_num+1}"
+                )
 
-                y_pred.extend([np.argmax(p) for p in predictions])
-                y_true.extend([np.argmax(l) for l in labels])
-                print(f"  Batch {batch_num+1}: Complete")
-            except Exception as batch_error:
-                print(f"Error in batch {batch_num+1}: {batch_error}")
-                raise
+            y_pred.extend([np.argmax(p) for p in predictions])
+            y_true.extend([np.argmax(l) for l in labels])
+            print(f"  Batch {batch_num+1}: Complete")
 
     except Exception as loop_error:
         print(f"Error in prediction loop: {loop_error}")
@@ -84,13 +76,11 @@ def evaluate_model(
         f"Prediction loop complete: {batch_count} batches, {total_samples} total samples"
     )
 
-    # Update status - computing metrics
     if training_status:
         training_status["message"] = "Evaluating: Computing metrics..."
         training_status["progress"] = 94
 
-    # Calculate metrics with explicit type annotation
-    print(f"📈 Computing classification metrics...")
+    print("-- Computing classification metrics...")
 
     if not y_true or not y_pred:
         raise ValueError(
@@ -109,9 +99,9 @@ def evaluate_model(
                 y_true, y_pred, target_names=ALLOWED_LABELS, output_dict=True
             ),
         )
-        print(f"Classification report computed")
+        print("\t Classification report computed")
         conf_matrix = confusion_matrix(y_true, y_pred)
-        print(f"Confusion matrix computed")
+        print("\t Confusion matrix computed")
     except Exception as e:
         print(f"Error computing metrics: {e}")
         import traceback
@@ -119,8 +109,7 @@ def evaluate_model(
         traceback.print_exc()
         raise
 
-    # Extract weighted averages
-    print(f"📋 Extracting metrics...")
+    print("-- Extracting metrics...")
     weighted_metrics = class_report.get("weighted avg", {})
     weighted_precision = weighted_metrics.get("precision", 0.0)
     weighted_recall = weighted_metrics.get("recall", 0.0)
@@ -128,27 +117,25 @@ def evaluate_model(
     accuracy = float(class_report.get("accuracy", 0.0))
 
     model_version = datetime.now().isoformat()
-    print(f"Model version: {model_version}")
+    
+    print(f"\tModel version: {model_version}")
+    print(f"\tOverall Accuracy: {accuracy:.4f}")
+    print(f"\tPrecision (weighted): {weighted_precision:.4f}")
+    print(f"\tRecall (weighted): {weighted_recall:.4f}")
+    print(f"\tF1-Score (weighted): {weighted_f1:.4f}")
 
-    print(f"Overall Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
-    print(f"Precision (weighted): {weighted_precision:.4f}")
-    print(f"Recall (weighted): {weighted_recall:.4f}")
-    print(f"F1-Score (weighted): {weighted_f1:.4f}")
-
-    # Update status - saving confusion matrix
     if training_status:
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
 
     try:
         generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
-        print(f"Confusion matrix PNG saved")
+        print("\tConfusion matrix PNG saved")
     except Exception as e:
-        print(f"Error generating confusion matrix image: {e}")
+        print(f"\tError generating confusion matrix image: {e}")
         raise
 
-    # Return evaluation document - This is what gets stored in DB
-    print(f"📦 Creating evaluation document...")
+    print("-- Creating evaluation document...")
     evaluation_doc: Dict[str, Any] = {
         "modelVersion": model_version,
         "datasetId": dataset_id,
@@ -158,7 +145,7 @@ def evaluate_model(
         "recall": weighted_recall,
         "f1_score": weighted_f1,
     }
-    print(f"Evaluation document created")
+    print("\tEvaluation document created")
 
     return evaluation_doc
 
@@ -172,7 +159,7 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
 
         output_path = output_dir / "confusionMatrix.png"
 
-        print(f"🎨 Generating confusion matrix visualization...")
+        print(f"-- Generating confusion matrix visualization...")
 
         # Create matplotlib figure
         plt.figure(figsize=(10, 8))
@@ -221,8 +208,6 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
         # Save to backend directory (overwrites previous file automatically)
         plt.savefig(output_path, dpi=100, bbox_inches="tight")
         plt.close()
-
-        print(f"Confusion matrix image saved to: {output_path}")
         return str(output_path)
 
     except Exception as e:
@@ -242,17 +227,14 @@ def save_evaluation_to_database(evaluation_doc: Dict[str, Any]) -> str:
             print(f"Invalid evaluation document: {evaluation_doc}")
             raise ValueError("Invalid evaluation document provided")
 
-        print(f"  Document to save: {evaluation_doc}")
-
         model_evaluation = ModelEvaluation(**evaluation_doc)
-        db_doc = model_evaluation.model_dump(exclude_none=True)
+        db_doc = model_evaluation.model_dump()
 
-        print(f"  Database document: {db_doc}")
-        print(f"  Inserting into collection...")
+        print("\tInserting into collection...")
 
         result = model_evaluation_collection.insert_one(db_doc)
         evaluation_id = str(result.inserted_id)
-        print(f"Evaluation saved to database (ID: {evaluation_id})")
+        print(f"Evaluation saved to database successfully")
     except Exception as e:
         print(f"Failed to save evaluation results to database: {e}")
         import traceback
