@@ -48,7 +48,7 @@ def create_split_dataset(split_path: str, train_split: float = 0.7):
         os.makedirs(os.path.join(train_dir, label), exist_ok=True)
         os.makedirs(os.path.join(test_dir, label), exist_ok=True)
 
-    # Merge images from both datasets
+    # Merge images from both datasets - Holds images path
     all_images = {label: [] for label in ALLOWED_LABELS}
 
     # Collect from original
@@ -71,16 +71,16 @@ def create_split_dataset(split_path: str, train_split: float = 0.7):
 
     # Split and copy
     for label in ALLOWED_LABELS:
-        images = all_images[label]
+        images = all_images[label] # gather all images for each label
         random.shuffle(images)
         split_index = int(len(images) * train_split)
 
-        # Copy train images
+        # Copy train images to train directory
         for img_path in images[:split_index]:
             dest_path = os.path.join(train_dir, label, os.path.basename(img_path))
             shutil.copy2(img_path, dest_path)
 
-        # Copy test images
+        # Copy test images to test directory
         for img_path in images[split_index:]:
             dest_path = os.path.join(test_dir, label, os.path.basename(img_path))
             shutil.copy2(img_path, dest_path)
