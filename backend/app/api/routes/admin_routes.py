@@ -35,6 +35,8 @@ router = APIRouter()
 
 @router.post("/admin/dataset/upload")
 async def upload_dataset(request: Request, payload: BatchUploadRequest):
+    saved_file_paths = []
+
     try:
         verify_admin_from_request(request)
 
@@ -46,9 +48,27 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 status_code=400, detail="At least one image must be provided"
             )
 
-        uploaded_results = [] # to displat back to the user
+        dataset_name = payload.datasetName.strip()
+        dataset_description = (
+            payload.datasetDescription.strip()
+            if payload.datasetDescription is not None
+            else None
+        )
+
+        existing_dataset = list(
+            dataset_collection.find({"name": dataset_name})
+            .sort("uploadDate", -1)
+            .limit(1)
+        )
+        if existing_dataset:
+            raise HTTPException(
+                status_code=400,
+                detail=f"A dataset with the name '{dataset_name}' already exists. Please choose a different name.",
+            )
+
+        uploaded_results = []  # to display back to the user
         errors = []
-        all_file_paths = [] # for database storage
+        all_file_paths = []  # for database storage
 
         for image_data in payload.images:
             validated = validate_and_process_image(image_data, errors)
@@ -73,6 +93,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                         "originalFilename": filename,
                     }
                 )
+                saved_file_paths.append(normalized_file_path)
 
                 uploaded_results.append(
                     {
@@ -87,24 +108,6 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 errors.append({"file": filename, "error": str(e)})
 
         if uploaded_results:
-            dataset_name = payload.datasetName.strip()
-            dataset_description = (
-                payload.datasetDescription.strip()
-                if payload.datasetDescription is not None
-                else None
-            )
-
-            existing_dataset = list(
-                dataset_collection.find({"name": dataset_name})
-                .sort("uploadDate", -1)
-                .limit(1)
-            )
-            if existing_dataset:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"A dataset with the name '{dataset_name}' already exists. Please choose a different name.",
-                )
-
             uploadedDataset = Dataset(
                 name=dataset_name,
                 description=dataset_description,
@@ -117,7 +120,11 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
             dataset_collection.insert_one(uploadedDataset.model_dump())
 
         response = {
-            "status": "completed",
+            "status": (
+                "completed"
+                if uploaded_results and not errors
+                else "partial" if uploaded_results else "failed"
+            ),
             "totalFiles": len(payload.images),
             "successfulUploads": len(uploaded_results),
             "failedUploads": len(errors),
@@ -132,6 +139,12 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
     except HTTPException:
         raise
     except Exception as e:
+        for file_path in saved_file_paths:
+            try:
+                delete_stored_file(file_path)
+            except Exception as cleanup_error:
+                print(f"Rollback cleanup failed for {file_path}: {cleanup_error}")
+
         print(f"Error uploading dataset: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
@@ -196,7 +209,7 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
             for image_data in payload.images:
                 validated = validate_and_process_image(image_data, upload_errors)
                 if validated is None:
-                    continue  #skip
+                    continue  # skip
 
                 file_bytes = validated["file_bytes"]
                 file_ext = validated["file_ext"]
@@ -381,7 +394,7 @@ async def evaluate_model_endpoint(request: Request, background_tasks: Background
 
 
 @router.get("/admin/model/evaluation/status")
-def get_evaluation_status(request: Request): # Get the current evaluation progress
+def get_evaluation_status(request: Request):  # Get the current evaluation progress
     # First verify that the requester is an admin
     verify_admin_from_request(request)
 
@@ -392,7 +405,7 @@ def get_evaluation_status(request: Request): # Get the current evaluation progre
 def get_latest_evaluation(request: Request):
     try:
         verify_admin_from_request(request)
-        
+
         latest_evaluation = model_evaluation_collection.find_one(
             sort=[("evaluationDate", -1)]
         )
