@@ -21,7 +21,7 @@ import {
 
 const Navbar = () => {
   const { role, logout } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // Only for mobile menu toggle
 
   const toggleMenu = () => {
     setMenuOpen((open) => !open);
@@ -30,6 +30,7 @@ const Navbar = () => {
     <nav className="bg-white border-b-2 border-emerald-200 shadow-md">
       <div className="container mx-auto px-6 py-5">
         <div className="flex items-center justify-between">
+
           {/* Logo & Branding */}
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative">
@@ -179,6 +180,7 @@ const Navbar = () => {
         {/* Mobile Dropdown Menu */}
         <div
           className="md:hidden overflow-hidden border-t border-slate-200 bg-white"
+          // slide animation:
           style={{
             maxHeight: menuOpen ? 520 : 0,
             opacity: menuOpen ? 1 : 0,
