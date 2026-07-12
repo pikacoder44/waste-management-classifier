@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setRole(getInitialRole());
   }, []);
 
-  // Centralized logout function (memoized to prevent effect re-runs)
+  // Centralized logout function
   const logout = useCallback(async () => {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`, {
