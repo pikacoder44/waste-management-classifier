@@ -10,7 +10,7 @@ from PIL import Image
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
 CUSTOM_DATASET_PATH = "dataset/custom"
 
-
+# Only used for dataset upload and update, not for model training
 def validate_and_process_image(image_data, errors: list):
     # Validate image payload and return parsed image information
     try:
@@ -18,10 +18,12 @@ def validate_and_process_image(image_data, errors: list):
         filename = image_data.filename
         file_content = image_data.fileData
 
+        # Check for empty filename or missing extension
         if not filename or "." not in filename:
             errors.append({"file": filename, "error": "Invalid file name"})
             return None
-
+        
+        # Check file extension
         file_ext = filename.rsplit(".", 1)[-1].lower()
         valid_extensions = ["jpg", "jpeg", "png", "gif", "webp"]
         if file_ext not in valid_extensions:
@@ -32,7 +34,7 @@ def validate_and_process_image(image_data, errors: list):
                 }
             )
             return None
-
+        # Check for valid label
         if label not in ALLOWED_LABELS:
             errors.append(
                 {
@@ -42,14 +44,14 @@ def validate_and_process_image(image_data, errors: list):
             )
             return None
 
-        try:
+        try: # Decode base64 content
             file_bytes = base64.b64decode(file_content)
         except Exception:
             errors.append(
                 {"file": filename, "error": "Invalid base64 encoded file data"}
             )
             return None
-
+        # Check file size limit - 5MB
         if len(file_bytes) > 5 * 1024 * 1024:
             errors.append({"file": filename, "error": "File size exceeds 5MB limit"})
             return None
