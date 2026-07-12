@@ -57,8 +57,8 @@ def validate_and_process_image(image_data, errors: list):
             return None
 
         try:
-            image = Image.open(io.BytesIO(file_bytes))
-            image.verify()
+            with Image.open(io.BytesIO(file_bytes)) as image:
+                image.load()
         except Exception:
             errors.append({"file": filename, "error": "Invalid image data"})
             return None
@@ -91,7 +91,8 @@ def normalize_path_for_storage(file_path: str) -> str:
 
 def normalize_path_for_filesystem(file_path: str) -> str:
     # Convert normalized path back to OS-specific format for filesystem operations
-    return file_path.replace("/", os.sep)
+    mixed_path = file_path.replace("/", os.sep).replace("\\", os.sep)
+    return os.path.normpath(mixed_path)
 
 # Saves image file to the custom dataset directory
 def save_image_file(
@@ -125,7 +126,8 @@ def delete_stored_file(file_path: str) -> bool:
 def increment_version(current_version: str) -> str:
     # Increment semantic version string
     try:
-        parts = current_version.split(".")
+        version = current_version.strip()
+        parts = version.split(".")
         if len(parts) >= 2:
             major = int(parts[0])
             minor = int(parts[1])
