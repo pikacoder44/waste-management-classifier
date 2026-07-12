@@ -84,11 +84,13 @@ export default function Home() {
   const [isUnauthorizedError, setIsUnauthorizedError] = useState(false);
   const [isCameraOverlayOpen, setIsCameraOverlayOpen] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
+  // DOM references for video and canvas elements
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const confidenceValue = confidence ?? 0;
 
+  // Converts backend API error responses into readable messages for the user
   const parseApiErrorMessage = async (
     response: Response,
     fallbackMessage: string,
@@ -106,11 +108,11 @@ export default function Home() {
           message?: unknown;
           errors?: Array<{ error?: string }>;
         };
-
+        // Check for structured error messages in the response
         if (typeof data.detail === "string") {
           return data.detail;
         }
-
+        // If 'detail' is an array, join the messages
         if (Array.isArray(data.detail)) {
           const joined = data.detail
             .map((entry) =>
@@ -125,11 +127,11 @@ export default function Home() {
             return joined;
           }
         }
-
+        // Check for 'message' field in the response
         if (typeof data.message === "string") {
           return data.message;
         }
-
+        // If 'message' is an array, join the messages
         if (Array.isArray(data.errors) && data.errors.length > 0) {
           const joined = data.errors
             .map((entry) => entry.error)
@@ -151,7 +153,7 @@ export default function Home() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true }); // Request camera access
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
@@ -165,8 +167,8 @@ export default function Home() {
 
   const stopCamera = () => {
     if (videoRef.current && videoRef.current.srcObject instanceof MediaStream) {
-      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop()); // Stop all tracks
+      videoRef.current.srcObject = null; // Disconnect the stream
     }
     setIsCameraOn(false);
   };
@@ -181,6 +183,7 @@ export default function Home() {
     setIsCameraOverlayOpen(false);
   };
 
+  // Live Camera -> Copy Frame to Canvas -> Convert to Blob -> Create File -> Store inside file state
   const captureFromCamera = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -193,9 +196,9 @@ export default function Home() {
     canvas.width = width;
     canvas.height = height;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d"); // Get the 2D rendering context of the canvas
     if (!ctx) return;
-    ctx.drawImage(video, 0, 0, width, height);
+    ctx.drawImage(video, 0, 0, width, height); // Draw the current video frame onto the canvas
 
     canvas.toBlob((blob) => {
       if (!blob) return;
@@ -210,7 +213,7 @@ export default function Home() {
     }, "image/jpeg");
   };
 
-  useEffect(() => {
+  useEffect(() => { // Runs when page closes
     return () => {
       stopCamera();
       if (errorTimeoutRef.current) {
@@ -219,12 +222,14 @@ export default function Home() {
     };
   }, []);
 
+  // Error handling with auto-dismiss after 5 seconds - for a pop-up error message
   const showError = (message: string, isUnauthorized: boolean = false) => {
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
     }
     setError(message);
     setIsUnauthorizedError(isUnauthorized);
+    // Set timer for 5 seconds to modal to show up
     errorTimeoutRef.current = setTimeout(() => {
       setError(null);
       setIsUnauthorizedError(false);
@@ -232,6 +237,7 @@ export default function Home() {
     }, 5000);
   };
 
+  // Handle file selection and validation
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) {
       setFile(null);
@@ -248,12 +254,16 @@ export default function Home() {
     setFile(selectedFile);
   };
 
+  // Upload image to backend for classification
   const upload_image = async () => {
-    if (!file) return;
+    if (!file) return; // No file selected, exit early
 
     setIsLoading(true);
+
+    // Backup check in case of server connection issues, to show last successful result
     const hasBackup = Boolean(result && submittedFile);
 
+    // Prepare form data for the POST request
     const formData = new FormData();
     formData.append("file", file);
 
@@ -286,8 +296,7 @@ export default function Home() {
           setResult(data.label);
           setConfidence(data.confidence);
           setInferenceTime(data.inferenceTime);
-
-          // Handle disposal recommendation - now structured
+          // Set disposal recommendation if available
           if (data.disposalRecommendation) {
             setDisposalRecommendation(data.disposalRecommendation);
           }
