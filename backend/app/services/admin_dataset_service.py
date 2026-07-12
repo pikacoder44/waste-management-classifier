@@ -123,7 +123,7 @@ def delete_stored_file(file_path: str) -> bool:
 
 
 def increment_version(current_version: str) -> str:
-    # Increment semantic version string (for example, '1.0' -> '1.1' and '1.9' -> '2.0')
+    # Increment semantic version string
     try:
         parts = current_version.split(".")
         if len(parts) >= 2:
