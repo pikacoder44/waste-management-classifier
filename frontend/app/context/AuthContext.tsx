@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router, setRole]);
 
-  // Check token on mount and set up timeout to logout at exact expiry
+  // Check token on mount and automatically logout when it expires
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -92,26 +92,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       return;
     }
-
+    // Calculate time until token expiry
     const timeUntilExpiry = expiry - Date.now();
 
-    // Declare timer variable upfront, initialized to null
+    // Declare timer variable before the if block
     let logoutTimer: NodeJS.Timeout | null = null;
 
     if (timeUntilExpiry > 0) {
       // Set timeout to logout exactly when token expires
       logoutTimer = setTimeout(() => {
         console.log("Session expired - logging out");
-        logout(); // Reuse centralized logout logic
+        logout();
       }, timeUntilExpiry);
     }
 
     return () => {
+      // Cleanup function to clear the timer
       if (logoutTimer) clearTimeout(logoutTimer);
     };
   }, [router, pathname, role, logout]);
 
-  // Save role to localStorage whenever it changes
+  // Save role to localStorage whenever it changes to both React state and localStorage
   const handleSetRole = (newRole: RoleType) => {
     setRole(newRole);
     if (newRole) {
@@ -128,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
