@@ -1,46 +1,45 @@
 recommendations = {
     "cardboard": {
         "disposal_method": "Compost",
-        "description": "As an organic material, cardboard should be composted. Remove any plastic tape or non-paper materials before composting. Ensure it is uncoated and chemical-free.",
-        "benefits": "Cardboard composting reduces landfill waste and returns nutrients to soil. It breaks down naturally and enriches compost for gardens and landscaping.",
+        "description": "Cardboard can go in the compost if it is clean and free from plastic tape, labels, or heavy coatings. Tear it into smaller pieces so it breaks down more easily.",
+        "benefits": "Composting cardboard helps reduce waste sent to landfill and adds useful carbon material to the compost.",
     },
     "paper": {
         "disposal_method": "Compost",
-        "description": "As an organic material, paper waste should be composted. Separate glossy or plastic-coated papers for recycling or special disposal instead.",
-        "benefits": "Paper composting reduces landfill space and returns organic matter to soil. One ton of paper returns valuable carbon to composting systems.",
+        "description": "Plain paper can be composted when it is clean and free from plastic coating, glitter, or heavy ink. Shredding it first can help it decompose faster.",
+        "benefits": "Composting paper reduces landfill waste and helps create a better balance of dry material in the compost.",
     },
     "metal": {
         "disposal_method": "Recycle Bin",
-        "description": "Place metal items in the recycling bin. Rinse metal containers to remove food residue for better recycling efficiency.",
-        "benefits": "Metal recycling reduces energy consumption by 95% compared to producing new metal. Aluminum cans can be recycled infinitely without quality loss.",
+        "description": "Put metal items in the recycling bin. If the container held food or drink, rinse it out first so it is easier to process.",
+        "benefits": "Recycling metal saves resources and reduces the need to produce new material from scratch.",
     },
     "glass": {
         "disposal_method": "Recycle Bin",
-        "description": "Place glass items in the recycling bin. Rinse containers and keep glass separate from other recyclables when possible.",
-        "benefits": "Glass recycling saves 30% energy compared to making new glass. Glass can be recycled indefinitely without losing purity or quality.",
+        "description": "Place glass bottles and jars in the recycling bin. Rinse them first and follow your local sorting rules if glass needs to be separated.",
+        "benefits": "Recycling glass helps save raw materials and keeps usable glass out of landfill.",
     },
     "plastic": {
         "disposal_method": "Recycle Bin",
-        "description": "Place plastic waste in the recycling bin. Check the recycling number (1-7) and follow local recycling guidelines for accepted types.",
-        "benefits": "Plastic recycling reduces ocean pollution and landfill waste. Recycled plastic is converted into new products, fiber, and fuel.",
+        "description": "Put recyclable plastic in the recycling bin. Check the plastic number and follow local recycling rules, since not every type is accepted everywhere.",
+        "benefits": "Recycling plastic helps reduce landfill waste and lowers the amount of plastic that ends up polluting the environment.",
     },
     "trash": {
         "disposal_method": "Special Disposal",
-        "description": "Dispose of this waste in the general trash bin or through special collection services. Do not place in recycling or compost.",
-        "benefits": "Proper disposal prevents contamination of recycling streams and protects environmental quality. Some waste may be processed for waste-to-energy.",
+        "description": "This waste should go to special disposal or a designated collection point. It should not be mixed with recycling or compost.",
+        "benefits": "Using the right disposal method keeps other waste streams clean and helps reduce contamination.",
     },
 }
 
 
 def get_disposal_recommendation(predicted_label: str) -> dict:
-    #Get structured disposal recommendation based on waste type.
-    # Returns a dictionary with disposal method, description, and benefits.
+    # Get structured disposal recommendation based on waste type.
     recommendation = recommendations.get(
         predicted_label,
         {
             "disposal_method": "Unknown",
-            "description": "No specific recommendation available for this category.",
-            "benefits": "Please consult local waste disposal guidelines.",
+            "description": "No specific disposal recommendation is available for this item.",
+            "benefits": "Please check your local waste disposal guidelines.",
         },
     )
     return recommendation
