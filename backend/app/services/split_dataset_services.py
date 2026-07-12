@@ -71,7 +71,7 @@ def create_split_dataset(split_path: str, train_split: float = 0.7):
 
     # Split and copy
     for label in ALLOWED_LABELS:
-        images = all_images[label] # gather all images for each label
+        images = all_images[label]  # gather all images for each label
         random.shuffle(images)
         split_index = int(len(images) * train_split)
 
@@ -99,13 +99,19 @@ def ensure_split_dataset(split_type: str, train_split: float = 0.7):
 
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
-    metadata_file = os.path.join(split_path, ".metadata.json") # hidden file to store metadata about the split
+    metadata_file = os.path.join(
+        split_path, ".metadata.json"
+    )  # hidden file to store metadata about the split
 
     # Check if split exists and is current
     should_recreate = True
 
-    # Check if metadata file exists and read it
-    if os.path.exists(metadata_file):
+    # Only trust the split if the metadata and split directories still exist
+    if (
+        os.path.exists(metadata_file)
+        and os.path.isdir(train_dir)
+        and os.path.isdir(test_dir)
+    ):
         try:
             with open(metadata_file, "r") as f:
                 metadata = json.load(f)
