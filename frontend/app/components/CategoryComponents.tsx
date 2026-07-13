@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   Package,
   BottleWine,
@@ -34,25 +34,37 @@ interface ColorScheme {
 
 const getCategoryColor = (label: string): ColorScheme => {
   const themes: Record<string, { bg: string; text: string; badge: string }> = {
-    cardboard: { bg: "bg-amber-50", text: "text-amber-900", badge: "bg-amber-200" },
+    cardboard: {
+      bg: "bg-amber-50",
+      text: "text-amber-900",
+      badge: "bg-amber-200",
+    },
     glass: { bg: "bg-blue-50", text: "text-blue-900", badge: "bg-blue-200" },
     metal: { bg: "bg-gray-50", text: "text-gray-900", badge: "bg-gray-300" },
-    paper: { bg: "bg-yellow-50", text: "text-yellow-900", badge: "bg-yellow-200" },
-    plastic: { bg: "bg-purple-50", text: "text-purple-900", badge: "bg-purple-200" },
+    paper: {
+      bg: "bg-yellow-50",
+      text: "text-yellow-900",
+      badge: "bg-yellow-200",
+    },
+    plastic: {
+      bg: "bg-purple-50",
+      text: "text-purple-900",
+      badge: "bg-purple-200",
+    },
     trash: { bg: "bg-red-50", text: "text-red-900", badge: "bg-red-200" },
   };
 
-  const activeTheme = themes[label.toLowerCase()] || { 
-    bg: "bg-gray-50", 
-    text: "text-gray-900", 
-    badge: "bg-gray-300" 
+  const activeTheme = themes[label.toLowerCase()] || {
+    bg: "bg-gray-50",
+    text: "text-gray-900",
+    badge: "bg-gray-300",
   };
 
   const combinedString = `${activeTheme.bg} ${activeTheme.text} ${activeTheme.badge}`;
 
   return {
     ...activeTheme,
-    split: (separator, limit) => combinedString.split(separator || ' ', limit)
+    split: (separator, limit) => combinedString.split(separator || " ", limit),
   };
 };
 
@@ -87,22 +99,20 @@ const getCategoryHeaderGradient = (label: string): string => {
 
 const getCategoryCardGradient = (label: string): string => {
   const gradients: Record<string, string> = {
-    cardboard: "from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/10",
-    glass: "from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10",
-    metal: "from-gray-50 to-gray-100/50 dark:from-gray-950/20 dark:to-gray-900/10",
-    paper: "from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/10",
-    plastic: "from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/10",
-    trash: "from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/10",
+    cardboard: "bg-linear-to-br from-amber-100 via-amber-50 to-white",
+    glass: "bg-linear-to-br from-blue-100 via-blue-50 to-white",
+    metal: "bg-linear-to-br from-gray-200 via-gray-100 to-white",
+    paper: "bg-linear-to-br from-yellow-100 via-yellow-50 to-white",
+    plastic: "bg-linear-to-br from-purple-100 via-purple-50 to-white",
+    trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
   };
-  return (
-    gradients[label.toLowerCase()] || "from-gray-50 to-gray-100/50"
-  );
+  return gradients[label.toLowerCase()] || "from-gray-50 to-gray-100/50";
 };
 
-export { 
-  getCategoryIcon, 
-  getCategoryColor, 
-  getConfidenceBarColor, 
+export {
+  getCategoryIcon,
+  getCategoryColor,
+  getConfidenceBarColor,
   getCategoryHeaderGradient,
-  getCategoryCardGradient
+  getCategoryCardGradient,
 };
