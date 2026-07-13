@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
+ 
 import {
   Loader2,
   AlertCircle,
@@ -122,7 +122,6 @@ const Page = () => {
     window.location.reload();
   };
   return (
-    <ProtectedAdminRoute>
       <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter\">
         <div className="pointer-events-none absolute -top-24 left-0 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl animate-soft-float\" />
         <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-cyan-200/20 blur-3xl animate-soft-float [animation-delay:1000ms]" />
@@ -273,7 +272,6 @@ const Page = () => {
           </button>
         </div>
       </div>
-    </ProtectedAdminRoute>
   );
 };
 
