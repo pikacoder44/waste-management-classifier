@@ -2,16 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
-
-import {
-  Package,
-  BottleWine,
-  Hammer,
-  FileText,
-  Recycle,
-  Trash2,
-  HelpCircle,
-} from "lucide-react";
+import { getCategoryIcon, getCategoryColor } from "@/app/components/CategoryComponents";
 
 interface ClassificationEntry {
   _id: string;
@@ -30,36 +21,6 @@ interface ClassificationEntry {
         alternatives?: string[];
       };
 }
-
-const getCategoryIcon = (label: string) => {
-  const icons: Record<string, React.ReactNode> = {
-    cardboard: <Package className="w-12 h-12 text-amber-700" />,
-    glass: <BottleWine className="w-12 h-12 text-blue-700" />,
-    metal: <Hammer className="w-12 h-12 text-gray-700" />,
-    paper: <FileText className="w-12 h-12 text-yellow-700" />,
-    plastic: <Recycle className="w-12 h-12 text-purple-700" />,
-    trash: <Trash2 className="w-12 h-12 text-red-700" />,
-  };
-  return (
-    icons[label.toLowerCase()] || (
-      <HelpCircle className="w-12 h-12 text-gray-700" />
-    )
-  );
-};
-
-const getCategoryColor = (label: string): string => {
-  const colors: Record<string, string> = {
-    cardboard: "bg-amber-200 text-amber-900 border-amber-300",
-    glass: "bg-blue-200 text-blue-900 border-blue-300",
-    metal: "bg-gray-300 text-gray-900 border-gray-400",
-    paper: "bg-yellow-200 text-yellow-900 border-yellow-300",
-    plastic: "bg-purple-200 text-purple-900 border-purple-300",
-    trash: "bg-red-200 text-red-900 border-red-300",
-  };
-  return (
-    colors[label.toLowerCase()] || "bg-gray-300 text-gray-900 border-gray-400"
-  );
-};
 
 const getConfidenceBarColor = (label: string): string => {
   const colors: Record<string, string> = {

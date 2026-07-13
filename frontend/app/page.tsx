@@ -3,63 +3,8 @@ import { useEffect, useRef, useState, useContext } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
 import { AuthContext } from "./context/AuthContext";
-import {
-  Package,
-  BottleWine,
-  Hammer,
-  FileText,
-  Recycle,
-  Trash2,
-  HelpCircle,
-} from "lucide-react";
-
-const getCategoryIcon = (category: string) => {
-  const icons: Record<string, React.ReactNode> = {
-    cardboard: <Package className="w-16 h-16 text-amber-600" />,
-    glass: <BottleWine className="w-16 h-16 text-blue-600" />,
-    metal: <Hammer className="w-16 h-16 text-gray-600" />,
-    paper: <FileText className="w-16 h-16 text-yellow-600" />,
-    plastic: <Recycle className="w-16 h-16 text-purple-600" />,
-    trash: <Trash2 className="w-16 h-16 text-red-600" />,
-  };
-  return (
-    icons[category.toLowerCase()] || (
-      <HelpCircle className="w-16 h-16 text-gray-600" />
-    )
-  );
-};
-
-const getCategoryColor = (
-  category: string,
-): { bg: string; text: string; badge: string } => {
-  const colors: Record<string, { bg: string; text: string; badge: string }> = {
-    cardboard: {
-      bg: "bg-amber-50",
-      text: "text-amber-700",
-      badge: "bg-amber-100",
-    },
-    glass: { bg: "bg-blue-50", text: "text-blue-700", badge: "bg-blue-100" },
-    metal: { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" },
-    paper: {
-      bg: "bg-yellow-50",
-      text: "text-yellow-700",
-      badge: "bg-yellow-100",
-    },
-    plastic: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      badge: "bg-purple-100",
-    },
-    trash: { bg: "bg-red-50", text: "text-red-700", badge: "bg-red-100" },
-  };
-  return (
-    colors[category.toLowerCase()] || {
-      bg: "bg-gray-50",
-      text: "text-gray-700",
-      badge: "bg-gray-100",
-    }
-  );
-};
+import { getCategoryIcon, getCategoryColor } from "@/app/components/CategoryComponents";
+import { HelpCircle } from "lucide-react";
 
 interface DisposalRecommendation {
   disposal_method: string;

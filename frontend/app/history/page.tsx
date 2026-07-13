@@ -5,16 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "../components/Loader";
+import { Clock } from "lucide-react";
 import {
-  Clock,
-  Package,
-  BottleWine,
-  Hammer,
-  FileText,
-  Recycle,
-  Trash2,
-  HelpCircle,
-} from "lucide-react";
+  getCategoryIcon,
+  getCategoryColor,
+} from "@/app/components/CategoryComponents";
 
 interface HistoryItem {
   _id: string;
@@ -40,10 +35,6 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
-
-  const handleRetry = () => {
-    window.location.reload();
-  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -113,20 +104,6 @@ export default function HistoryPage() {
     }
   };
 
-  const getCategoryColor = (label: string) => {
-    const colors: Record<string, string> = {
-      plastic: "bg-purple-200 text-purple-900 border-purple-300",
-      glass: "bg-blue-200 text-blue-900 border-blue-300",
-      metal: "bg-gray-300 text-gray-900 border-gray-400",
-      paper: "bg-yellow-200 text-yellow-900 border-yellow-300",
-      cardboard: "bg-amber-200 text-amber-900 border-amber-300",
-      trash: "bg-red-200 text-red-900 border-red-300",
-    };
-    return (
-      colors[label.toLowerCase()] || "bg-gray-300 text-gray-900 border-gray-400"
-    );
-  };
-
   const getCategoryHeaderGradient = (label: string) => {
     const gradients: Record<string, string> = {
       plastic: "bg-linear-to-r from-purple-500 to-purple-700",
@@ -152,22 +129,6 @@ export default function HistoryPage() {
       trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
     };
     return gradients[label.toLowerCase()] || "bg-gray-50";
-  };
-
-  const getCategoryIcon = (label: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      cardboard: <Package className="w-8 h-8 text-amber-700" />,
-      glass: <BottleWine className="w-8 h-8 text-blue-700" />,
-      metal: <Hammer className="w-8 h-8 text-gray-700" />,
-      paper: <FileText className="w-8 h-8 text-yellow-700" />,
-      plastic: <Recycle className="w-8 h-8 text-purple-700" />,
-      trash: <Trash2 className="w-8 h-8 text-red-700" />,
-    };
-    return (
-      icons[label.toLowerCase()] || (
-        <HelpCircle className="w-8 h-8 text-gray-700" />
-      )
-    );
   };
 
   const formatDate = (dateString: string) => {
