@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
-import { getCategoryIcon, getCategoryColor, getCategoryHeaderGradient, getConfidenceBarColor } from "@/app/components/CategoryComponents";
+import { getCategoryIcon, getCategoryColor, getCategoryHeaderGradient, getConfidenceBarColor, getCategoryCardGradient } from "@/app/components/CategoryComponents";
 
 interface ClassificationEntry {
   _id: string;
@@ -21,19 +21,6 @@ interface ClassificationEntry {
         alternatives?: string[];
       };
 }
-
-
-const getCategoryCardGradient = (label: string): string => {
-  const gradients: Record<string, string> = {
-    cardboard: "bg-linear-to-br from-amber-100 via-amber-50 to-white",
-    glass: "bg-linear-to-br from-blue-100 via-blue-50 to-white",
-    metal: "bg-linear-to-br from-gray-200 via-gray-100 to-white",
-    paper: "bg-linear-to-br from-yellow-100 via-yellow-50 to-white",
-    plastic: "bg-linear-to-br from-purple-100 via-purple-50 to-white",
-    trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
-  };
-  return gradients[label.toLowerCase()] || "bg-gray-50";
-};
 
 const Page = () => {
   const [classificationHistory, setClassificationHistory] = useState<
