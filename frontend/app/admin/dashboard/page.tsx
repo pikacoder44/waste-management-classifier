@@ -240,7 +240,7 @@ const Page = () => {
       title: "Upload Dataset",
       description: "Upload new waste images for training",
       icon: Upload,
-      href: "/admin/upload",
+      href: "/admin/datasets/upload",
       color: "from-purple-500 to-purple-600",
       textColor: "text-purple-600",
     },

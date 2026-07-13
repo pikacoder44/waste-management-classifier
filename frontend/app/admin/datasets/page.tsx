@@ -255,7 +255,7 @@ const Page = () => {
                 Upload training images to get started.
               </p>
               <button
-                onClick={() => router.push("/admin/upload")}
+                onClick={() => router.push("/admin/datasets/upload")}
                 className="mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-semibold mx-auto"
               >
                 <Plus className="w-5 h-5" />
@@ -264,7 +264,7 @@ const Page = () => {
             </div>
           )}
           <button
-            onClick={() => router.push("/admin/upload")}
+            onClick={() => router.push("/admin/datasets/upload")}
             className="mt-8 flex items-center justify-center gap-2 w-full px-6 py-3 bg-linear-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-semibold"
           >
             <Plus className="w-5 h-5" />
