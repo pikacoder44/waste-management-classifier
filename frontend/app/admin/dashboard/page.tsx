@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
 import {
   BarChart3,
-  Database,
   Upload,
   RotateCcw,
   Zap,
@@ -230,7 +229,7 @@ const Page = () => {
       id: 2,
       title: "Existing Datasets",
       description: "Manage and organize training datasets",
-      icon: Database,
+      icon: DatabaseIcon,
       href: "/admin/datasets",
       color: "from-green-500 to-green-600",
       textColor: "text-green-600",
