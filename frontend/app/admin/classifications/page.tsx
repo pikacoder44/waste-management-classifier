@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
 import { getCategoryIcon, getCategoryColor, getCategoryHeaderGradient, getConfidenceBarColor, getCategoryCardGradient } from "@/app/components/CategoryComponents";
-
+import { formatDate } from "@/app/utils/dateUtils";
 interface ClassificationEntry {
   _id: string;
   userId: string;
@@ -30,19 +30,6 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
-  // Format date safely after hydration
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   const handleDownloadImage = async (filePath: string, wasteType: string) => {
     try {

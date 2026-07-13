@@ -12,6 +12,7 @@ import {
   getCategoryCardGradient,
   getCategoryHeaderGradient,
 } from "@/app/components/CategoryComponents";
+import { formatDate } from "@/app/utils/dateUtils";
 
 interface HistoryItem {
   _id: string;
@@ -104,17 +105,6 @@ export default function HistoryPage() {
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   if (isLoading) {
