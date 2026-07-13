@@ -59,6 +59,7 @@ const Page = () => {
   const [trainingImagesCount, setTrainingImagesCount] = useState<number>(0);
   const [modelAccuracy, setModelAccuracy] = useState<number | null>(null);
 
+    // Convert timestamp to a more readable format
   const formatTimestamp = (dateStr: string) => {
     const date = new Date(dateStr);
     if (Number.isNaN(date.getTime())) return "Unknown time";
@@ -69,11 +70,6 @@ const Page = () => {
       minute: "2-digit",
       hour12: true,
     });
-  };
-
-  const getMaskedUser = (userId: string) => {
-    if (!userId) return "User";
-    return `User ${userId.slice(-4)}`;
   };
 
   useEffect(() => {
@@ -425,8 +421,8 @@ const Page = () => {
                           {item.predictedLabel}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {getMaskedUser(item.userId)} ·{" "}
-                          {formatTimestamp(item.createdAt)}
+                          User ID: {item.userId} --{" "}
+                          Date: {formatTimestamp(item.createdAt)}
                         </p>
                       </div>
                     </div>
