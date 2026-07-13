@@ -12,7 +12,7 @@ import {
   getCategoryCardGradient,
   getCategoryHeaderGradient,
 } from "@/app/components/CategoryComponents";
-import { formatDate } from "@/app/utils/dateUtils";
+import formatDate  from "@/app/utils/formatDate";
 
 interface HistoryItem {
   _id: string;

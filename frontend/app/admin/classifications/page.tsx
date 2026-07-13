@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
 import { getCategoryIcon, getCategoryColor, getCategoryHeaderGradient, getConfidenceBarColor, getCategoryCardGradient } from "@/app/components/CategoryComponents";
-import { formatDate } from "@/app/utils/dateUtils";
+import formatDate  from "@/app/utils/formatDate";
 interface ClassificationEntry {
   _id: string;
   userId: string;
