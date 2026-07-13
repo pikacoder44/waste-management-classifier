@@ -25,7 +25,6 @@ const getCategoryIcon = (label: string) => {
   );
 };
 
-// This structure supports BOTH object properties (.text) AND the .split() method
 interface ColorScheme {
   bg: string;
   text: string;
@@ -34,7 +33,6 @@ interface ColorScheme {
 }
 
 const getCategoryColor = (label: string): ColorScheme => {
-  // Define raw style values
   const themes: Record<string, { bg: string; text: string; badge: string }> = {
     cardboard: { bg: "bg-amber-50", text: "text-amber-900", badge: "bg-amber-200" },
     glass: { bg: "bg-blue-50", text: "text-blue-900", badge: "bg-blue-200" },
@@ -50,7 +48,6 @@ const getCategoryColor = (label: string): ColorScheme => {
     badge: "bg-gray-300" 
   };
 
-  // Combine them into a single string so .split(' ') still functions safely
   const combinedString = `${activeTheme.bg} ${activeTheme.text} ${activeTheme.badge}`;
 
   return {
@@ -59,4 +56,53 @@ const getCategoryColor = (label: string): ColorScheme => {
   };
 };
 
-export { getCategoryIcon, getCategoryColor };
+const getConfidenceBarColor = (label: string): string => {
+  const colors: Record<string, string> = {
+    cardboard: "bg-linear-to-r from-amber-400 via-amber-500 to-amber-600",
+    glass: "bg-linear-to-r from-blue-400 via-blue-500 to-blue-600",
+    metal: "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600",
+    paper: "bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600",
+    plastic: "bg-linear-to-r from-purple-400 via-purple-500 to-purple-600",
+    trash: "bg-linear-to-r from-red-400 via-red-500 to-red-600",
+  };
+  return (
+    colors[label.toLowerCase()] ||
+    "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600"
+  );
+};
+
+const getCategoryHeaderGradient = (label: string): string => {
+  const gradients: Record<string, string> = {
+    cardboard: "bg-linear-to-r from-amber-500 to-amber-700",
+    glass: "bg-linear-to-r from-blue-500 to-blue-700",
+    metal: "bg-linear-to-r from-gray-500 to-gray-700",
+    paper: "bg-linear-to-r from-yellow-500 to-yellow-700",
+    plastic: "bg-linear-to-r from-purple-500 to-purple-700",
+    trash: "bg-linear-to-r from-red-500 to-red-700",
+  };
+  return (
+    gradients[label.toLowerCase()] || "bg-linear-to-r from-gray-500 to-gray-700"
+  );
+};
+
+const getCategoryCardGradient = (label: string): string => {
+  const gradients: Record<string, string> = {
+    cardboard: "from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/10",
+    glass: "from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10",
+    metal: "from-gray-50 to-gray-100/50 dark:from-gray-950/20 dark:to-gray-900/10",
+    paper: "from-yellow-50 to-yellow-100/50 dark:from-yellow-950/20 dark:to-yellow-900/10",
+    plastic: "from-purple-50 to-purple-100/50 dark:from-purple-950/20 dark:to-purple-900/10",
+    trash: "from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/10",
+  };
+  return (
+    gradients[label.toLowerCase()] || "from-gray-50 to-gray-100/50"
+  );
+};
+
+export { 
+  getCategoryIcon, 
+  getCategoryColor, 
+  getConfidenceBarColor, 
+  getCategoryHeaderGradient,
+  getCategoryCardGradient
+};
