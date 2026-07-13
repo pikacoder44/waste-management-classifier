@@ -9,6 +9,8 @@ import { Clock } from "lucide-react";
 import {
   getCategoryIcon,
   getCategoryColor,
+  getCategoryCardGradient,
+  getCategoryHeaderGradient,
 } from "@/app/components/CategoryComponents";
 
 interface HistoryItem {
@@ -102,33 +104,6 @@ export default function HistoryPage() {
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const getCategoryHeaderGradient = (label: string) => {
-    const gradients: Record<string, string> = {
-      plastic: "bg-linear-to-r from-purple-500 to-purple-700",
-      glass: "bg-linear-to-r from-blue-500 to-blue-700",
-      metal: "bg-linear-to-r from-gray-500 to-gray-700",
-      paper: "bg-linear-to-r from-yellow-500 to-yellow-700",
-      cardboard: "bg-linear-to-r from-amber-500 to-amber-700",
-      trash: "bg-linear-to-r from-red-500 to-red-700",
-    };
-    return (
-      gradients[label.toLowerCase()] ||
-      "bg-linear-to-r from-gray-500 to-gray-700"
-    );
-  };
-
-  const getCategoryCardGradient = (label: string) => {
-    const gradients: Record<string, string> = {
-      cardboard: "bg-linear-to-br from-amber-100 via-amber-50 to-white",
-      glass: "bg-linear-to-br from-blue-100 via-blue-50 to-white",
-      metal: "bg-linear-to-br from-gray-200 via-gray-100 to-white",
-      paper: "bg-linear-to-br from-yellow-100 via-yellow-50 to-white",
-      plastic: "bg-linear-to-br from-purple-100 via-purple-50 to-white",
-      trash: "bg-linear-to-br from-red-100 via-red-50 to-white",
-    };
-    return gradients[label.toLowerCase()] || "bg-gray-50";
   };
 
   const formatDate = (dateString: string) => {

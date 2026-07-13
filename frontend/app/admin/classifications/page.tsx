@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ProtectedAdminRoute } from "@/app/components/ProtectedAdminRoute";
-import { getCategoryIcon, getCategoryColor } from "@/app/components/CategoryComponents";
+import { getCategoryIcon, getCategoryColor, getCategoryHeaderGradient, getConfidenceBarColor } from "@/app/components/CategoryComponents";
 
 interface ClassificationEntry {
   _id: string;
@@ -22,34 +22,6 @@ interface ClassificationEntry {
       };
 }
 
-const getConfidenceBarColor = (label: string): string => {
-  const colors: Record<string, string> = {
-    cardboard: "bg-linear-to-r from-amber-400 via-amber-500 to-amber-600",
-    glass: "bg-linear-to-r from-blue-400 via-blue-500 to-blue-600",
-    metal: "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600",
-    paper: "bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-600",
-    plastic: "bg-linear-to-r from-purple-400 via-purple-500 to-purple-600",
-    trash: "bg-linear-to-r from-red-400 via-red-500 to-red-600",
-  };
-  return (
-    colors[label.toLowerCase()] ||
-    "bg-linear-to-r from-gray-400 via-gray-500 to-gray-600"
-  );
-};
-
-const getCategoryHeaderGradient = (label: string): string => {
-  const gradients: Record<string, string> = {
-    cardboard: "bg-linear-to-r from-amber-500 to-amber-700",
-    glass: "bg-linear-to-r from-blue-500 to-blue-700",
-    metal: "bg-linear-to-r from-gray-500 to-gray-700",
-    paper: "bg-linear-to-r from-yellow-500 to-yellow-700",
-    plastic: "bg-linear-to-r from-purple-500 to-purple-700",
-    trash: "bg-linear-to-r from-red-500 to-red-700",
-  };
-  return (
-    gradients[label.toLowerCase()] || "bg-linear-to-r from-gray-500 to-gray-700"
-  );
-};
 
 const getCategoryCardGradient = (label: string): string => {
   const gradients: Record<string, string> = {
