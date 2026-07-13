@@ -106,7 +106,7 @@ const Page = () => {
       };
 
       const [apiResult, dbResult, modelResult] = await Promise.all([
-        checkEndpoint("/admin/model/status"),
+        checkEndpoint("/"),
         checkEndpoint("/admin/datasets"),
         checkEndpoint("/admin/model/status"),
       ]);
