@@ -21,7 +21,7 @@ const Login = () => {
   const [success, setSuccess] = useState("");
 
   const loginUser = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent refresh on form submission
     setError("");
     setSuccess("");
     setLoading(true);
@@ -62,26 +62,29 @@ const Login = () => {
       console.log("Response text:", text);
 
       if (!response.ok) {
-        const errorData = JSON.parse(text);
         let errorMessage = "Login failed";
-
-        // Prefer a top-level `error` field when present (standardized)
-        if (errorData.error) {
-          errorMessage = errorData.error;
-        } else if (typeof errorData.detail === "string") {
-          errorMessage = errorData.detail;
-        } else if (Array.isArray(errorData.detail)) {
-          // detail may be array of objects (with msg) or strings
-          errorMessage = errorData.detail
-            .map((err: unknown) =>
-              typeof err === "string"
-                ? err
-                : typeof err === "object" && err !== null && "msg" in err
-                  ? String((err as { msg?: unknown }).msg || "")
-                  : "",
-            )
-            .filter(Boolean)
-            .join(", ");
+        try {
+          const errorData = JSON.parse(text);
+          // Handle different error response formats
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          } else if (typeof errorData.detail === "string") {
+            errorMessage = errorData.detail;
+          } else if (Array.isArray(errorData.detail)) {
+            // detail may be array of <objects></objects> or strings
+            errorMessage = errorData.detail
+              .map((err: unknown) =>
+                typeof err === "string"
+                  ? err
+                  : typeof err === "object" && err !== null && "msg" in err
+                    ? String((err as { msg?: unknown }).msg || "")
+                    : "",
+              )
+              .filter(Boolean)
+              .join(", ");
+          }
+        } catch (e) {
+          console.error("Error parsing error response:", e);
         }
 
         setError(errorMessage);
@@ -89,18 +92,20 @@ const Login = () => {
         return;
       }
 
-      if (response.ok) {
-        setRole(role);
-        // Store token expiry from response
-        const data = JSON.parse(text);
-        if (data.expiresAt) {
-          localStorage.setItem("tokenExpiry", data.expiresAt.toString());
-        }
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Error parsing success response:", e);
+        setError("Unexpected response from server.");
+        setLoading(false);
+        return;
       }
-
-      const data = JSON.parse(text);
-      console.log("Success:", data);
-
+      // Store token expiry from response
+      if (data.expiresAt) {
+        localStorage.setItem("tokenExpiry", data.expiresAt.toString());
+      }
+      setRole(role);
       setSuccess(data.message || "Login successful! Redirecting...");
 
       // Redirect based on role
