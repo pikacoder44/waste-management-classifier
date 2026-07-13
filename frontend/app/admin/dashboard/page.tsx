@@ -309,11 +309,11 @@ const Page = () => {
                       </p>
 
                       {/* Button */}
-                      <button
-                        className={`w-full bg-linear-to-r ${feature.color} text-white font-semibold py-2 px-4 rounded-lg group-hover:opacity-90 transition-opacity duration-200`}
+                      <span
+                        className={`block text-center w-full bg-linear-to-r ${feature.color} text-white font-semibold py-2 px-4 rounded-lg group-hover:cursor-pointer hover:scale-105 group-hover:opacity-90 transition-all duration-200`}
                       >
                         Access →
-                      </button>
+                      </span>
                     </div>
                   </div>
                 </Link>
