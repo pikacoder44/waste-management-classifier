@@ -43,11 +43,11 @@ const Page = () => {
       }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${wasteType}-${Date.now()}.jpg`;
-      document.body.appendChild(link);
-      link.click();
+      const link = document.createElement("a"); // Create a temp anchor tag
+      link.href = url; // Set the href of anchor tag to the blob URL
+      link.download = `${wasteType}-${Date.now()}.jpg`; // Set filename for download
+      document.body.appendChild(link); // set anchor tag in the body
+      link.click(); // trigger the download
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
@@ -63,7 +63,6 @@ const Page = () => {
     try {
       setDeletingId(entryId);
 
-      // Use /admin/classification/history endpoint which doesn't check user ownership
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/classification/history/${entryId}`,
         {
