@@ -72,6 +72,7 @@ const Page = () => {
     });
   };
 
+  // Check System health once page loads
   useEffect(() => {
     const checkSystemHealth = async () => {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -87,12 +88,13 @@ const Page = () => {
       }
 
       const checkEndpoint = async (endpoint: string) => {
+        // Measure response time
         const start = performance.now();
         try {
           const response = await fetch(`${baseUrl}${endpoint}`, {
             method: "GET",
             credentials: "include",
-            cache: "no-store",
+            cache: "no-store", // Always request fresh data
           });
           const elapsed = Math.round(performance.now() - start);
           return { response, elapsed };
@@ -101,7 +103,7 @@ const Page = () => {
         }
       };
 
-      const [apiResult, dbResult, modelResult] = await Promise.all([
+      const [apiResult, dbResult, modelResult] = await Promise.all([ // all three starts together
         checkEndpoint("/"),
         checkEndpoint("/admin/datasets"),
         checkEndpoint("/admin/model/status"),
@@ -160,6 +162,7 @@ const Page = () => {
     checkSystemHealth();
   }, []);
 
+  // Fetch actual dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
       const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -167,6 +170,7 @@ const Page = () => {
 
       try {
         const [historyRes, datasetsRes, evalRes] = await Promise.all([
+          // three requests are sent in parallel to reduce wait time
           fetch(`${baseUrl}/admin/classification/history`, {
             credentials: "include",
             cache: "no-store",
@@ -184,7 +188,7 @@ const Page = () => {
         if (historyRes.ok) {
           const historyData = await historyRes.json();
           const history: AdminClassificationEntry[] = historyData.history || [];
-          setRecentClassifications(history.slice(0, 4));
+          setRecentClassifications(history.slice(0, 4)); // Only take the 4 most recent entries
         }
 
         if (datasetsRes.ok) {
@@ -194,17 +198,17 @@ const Page = () => {
             (sum, ds) => sum + (Number(ds.imageCount) || 0),
             0,
           );
-          setTrainingImagesCount(totalImages);
+          setTrainingImagesCount(totalImages); // Sum up the image counts from all datasets
         }
 
         if (evalRes.ok) {
           const evalData: EvaluationLatest = await evalRes.json();
           if (typeof evalData.accuracy === "number") {
-            setModelAccuracy(evalData.accuracy);
+            setModelAccuracy(evalData.accuracy); // Set the model accuracy if available
           }
         }
-      } catch {
-        // Keep dashboard usable if backend data endpoints are unavailable.
+      } catch (error) {
+        console.error("Dashboard data fetching failed:", error);
       }
     };
 
