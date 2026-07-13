@@ -76,9 +76,6 @@ const Register = () => {
         setLoading(false);
         return;
       }
-      if (response.status === 409) {
-        setSuccess("User already exists. Please choose a different username.");
-      }
 
       const data = JSON.parse(text);
       console.log("Success:", data);
