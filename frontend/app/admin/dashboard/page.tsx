@@ -327,6 +327,7 @@ const Page = () => {
               System Health
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* API Health Section */}
               <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:320ms]">
                 <div className="flex items-start justify-between">
                   <div>
@@ -351,6 +352,7 @@ const Page = () => {
                 </p>
               </div>
 
+              {/* Database Health Section */}
               <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:400ms]">
                 <div className="flex items-start justify-between">
                   <div>
@@ -372,7 +374,7 @@ const Page = () => {
                 </div>
                 <p className="text-xs text-gray-500 mt-3">{dbHealth.detail}</p>
               </div>
-
+              {/* Model Health Section */}
               <div className="bg-white rounded-lg p-6 border border-gray-100 shadow-sm animate-fade-in-up [animation-delay:480ms]">
                 <div className="flex items-start justify-between">
                   <div>
@@ -399,7 +401,7 @@ const Page = () => {
             </div>
           </div>
 
-          {/* Recent Activity Section */}
+          {/* Recent Classifications Section */}
           <div className="mt-8 bg-white rounded-lg shadow-md p-6 sm:p-8 border border-gray-100 animate-fade-in-up [animation-delay:260ms]">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               Recent Classifications
@@ -447,6 +449,7 @@ const Page = () => {
             Stats Overview
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+            {/* Waste Categories Count */}
             <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500 animate-fade-in-up [animation-delay:360ms]">
               <div className="flex items-center justify-between">
                 <div>
@@ -458,7 +461,7 @@ const Page = () => {
                 <span className="text-3xl">🗑️</span>
               </div>
             </div>
-
+            {/* Training Images Count */}
             <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500 animate-fade-in-up [animation-delay:440ms]">
               <div className="flex items-center justify-between">
                 <div>
@@ -472,7 +475,7 @@ const Page = () => {
                 <span className="text-3xl">🖼️</span>
               </div>
             </div>
-
+            {/* Model Accuracy Display */}
             <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500 animate-fade-in-up [animation-delay:520ms]">
               <div className="flex items-center justify-between">
                 <div>
