@@ -217,9 +217,13 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   const handleLabelChange = (index: number, newLabel: string) => {
-    const updated = [...selectedFiles];
-    updated[index].label = newLabel;
-    setSelectedFiles(updated);
+    setSelectedFiles(prev =>
+    prev.map((item, i) =>
+        i === index
+            ? { ...item, label: newLabel }
+            : item
+    )
+);
   };
 
   const handleRemoveFile = (index: number) => {
