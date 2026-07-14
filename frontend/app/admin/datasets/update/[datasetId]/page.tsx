@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import isSupportedImageFile from "@/app/utils/SupportedImageCheck";
+import formatDate from "@/app/utils/formatDate";
 import {
   Loader2,
   AlertCircle,
@@ -37,6 +38,7 @@ const ALLOWED_LABELS = [
   "trash",
 ];
 
+// Styling Functions
 const getLabelBadgeClasses = (label: string) => {
   switch (label) {
     case "cardboard":
@@ -76,24 +78,24 @@ const getLabelCardClasses = (label: string) => {
 };
 
 const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
-  const { datasetId } = React.use(params);
+  const { datasetId } = React.use(params); // un-wrap the promise to get datasetId
   const router = useRouter();
   const [datasetName, setDatasetName] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
   const [datasetVersion, setDatasetVersion] = useState("");
+  const [uploadDate, setUploadDate] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [uploadDate, setUploadDate] = useState("");
-  const [filePaths, setFilePaths] = useState<FileItem[]>([]);
+  const [filePaths, setFilePaths] = useState<FileItem[]>([]); // Existing images from backend
   const [selectedFiles, setSelectedFiles] = useState<
     { file: File; label: string }[]
-  >([]);
+  >([]); // New images selected by the user
   const [uploading, setUploading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [originalName, setOriginalName] = useState("");
   const [originalDescription, setOriginalDescription] = useState("");
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null); // hide ugly file input and use a custom card instead
 
   // Utility function for API calls
   const apiCall = async (
@@ -129,10 +131,10 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   const parseFilePaths = (filePathStr: string | FileItem[]): FileItem[] => {
     try {
       if (typeof filePathStr === "string") {
-        const jsonStr = filePathStr.replace(/'/g, '"').replace(/\\\\/g, "/");
+        const jsonStr = filePathStr.replace(/'/g, '"').replace(/\\\\/g, "/"); // swap single quotes with double quotes and fix backslashes from \\ to /
         return JSON.parse(jsonStr);
       }
-      return filePathStr || [];
+      return filePathStr || []; // in case it's already an array
     } catch {
       console.warn("Could not parse filePaths");
       return [];
@@ -143,8 +145,9 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     const fetchDatasetDetails = async () => {
       try {
         const data = await apiCall(`/admin/dataset/${datasetId}`, "GET");
+        
         const dataset = data.dataset;
-
+        // Populate state with fetched dataset details:
         setDatasetName(dataset.name);
         setDatasetDescription(dataset.description);
         setDatasetVersion(dataset.version);
@@ -152,10 +155,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         setOriginalDescription(dataset.description || "");
         setFilePaths(parseFilePaths(dataset.filePath || ""));
 
-        const formattedDate = new Date(dataset.uploadDate).toLocaleDateString(
-          "en-GB",
-          { year: "numeric", month: "long", day: "numeric" },
-        );
+        const formattedDate = formatDate(dataset.uploadDate);
         setUploadDate(formattedDate);
       } catch (error) {
         console.error("Error fetching dataset details:", error);

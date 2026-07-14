@@ -5,6 +5,7 @@ import Loader from "./components/Loader";
 import { AuthContext } from "./context/AuthContext";
 import { getCategoryIcon, getCategoryColor } from "@/app/components/CategoryComponents";
 import { HelpCircle } from "lucide-react";
+import formatDate from "@/app/utils/formatDate";
 
 interface DisposalRecommendation {
   disposal_method: string;
@@ -583,12 +584,7 @@ export default function Home() {
                                 🕐 Timestamp
                               </label>
                               <span className="text-xs font-bold text-slate-900">
-                                {new Date().toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {formatDate(new Date())}
                               </span>
                             </div>
                           </div>
