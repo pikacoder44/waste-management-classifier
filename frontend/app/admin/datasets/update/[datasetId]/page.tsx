@@ -230,16 +230,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     imagesToDelete.length > 0;
 
   const handleUploadImages = async () => {
-    const invalidFiles = selectedFiles.filter(
-      (item) => !isSupportedImageFile(item.file),
-    );
-
-    if (invalidFiles.length > 0) {
-      setActionError(
-        `Only image files are allowed. Remove: ${invalidFiles.map((item) => item.file.name).join(", ")}`,
-      );
-      return;
-    }
 
     if (selectedFiles.length > 0 && selectedFiles.some((item) => !item.label)) {
       setActionError("Please select a label for all images");
