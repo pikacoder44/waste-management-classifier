@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
+import isSupportedImageFile from "@/app/utils/SupportedImageCheck";
 interface ImageFile {
   file: File;
   label: string;
@@ -27,23 +27,6 @@ interface UploadResponse {
   }>;
 }
 
-const ALLOWED_IMAGE_EXTENSIONS = new Set([
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "webp",
-  "bmp",
-  "avif",
-]);
-
-const isSupportedImageFile = (file: File) => {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-  return (
-    file.type.startsWith("image/") ||
-    (extension !== undefined && ALLOWED_IMAGE_EXTENSIONS.has(extension))
-  );
-};
 
 export default function AdminUploadPage() {
   const [images, setImages] = useState<ImageFile[]>([]);

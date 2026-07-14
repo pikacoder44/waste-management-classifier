@@ -3,6 +3,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import isSupportedImageFile from "@/app/utils/SupportedImageCheck";
 import {
   Loader2,
   AlertCircle,
@@ -35,24 +36,6 @@ const ALLOWED_LABELS = [
   "plastic",
   "trash",
 ];
-
-const ALLOWED_IMAGE_EXTENSIONS = new Set([
-  "jpg",
-  "jpeg",
-  "png",
-  "gif",
-  "webp",
-  "bmp",
-  "avif",
-]);
-
-const isSupportedImageFile = (file: File) => {
-  const extension = file.name.split(".").pop()?.toLowerCase();
-  return (
-    file.type.startsWith("image/") ||
-    (extension !== undefined && ALLOWED_IMAGE_EXTENSIONS.has(extension))
-  );
-};
 
 const getLabelBadgeClasses = (label: string) => {
   switch (label) {
