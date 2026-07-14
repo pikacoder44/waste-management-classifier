@@ -171,11 +171,12 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   }, [datasetId]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (!e.target.files) return; // No files selected
 
-    const files = Array.from(e.target.files);
-    const validFiles = files.filter(isSupportedImageFile);
-    const rejectedFiles = files.filter((file) => !isSupportedImageFile(file));
+    // Filter out unsupported files and show an error message for them
+    const files = Array.from(e.target.files); // Convert FileList to Array
+    const validFiles = files.filter(isSupportedImageFile); // Only keep supported image files
+    const rejectedFiles = files.filter((file) => !isSupportedImageFile(file)); // Files that are not supported
 
     if (rejectedFiles.length > 0) {
       setActionError(
@@ -185,6 +186,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
       setActionError(null);
     }
 
+      // If no valid files, reset the input and return
     if (validFiles.length === 0) {
       e.target.value = "";
       return;
@@ -194,9 +196,10 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
       (file) => ({ file, label: "paper" }),
     );
     setSelectedFiles((prev) => [...prev, ...newFiles]);
-    e.target.value = "";
+    e.target.value = ""; // Reset the input so the same file can be selected again if needed
   };
 
+  // Handle label change for a selected file
   const handleLabelChange = (index: number, newLabel: string) => {
     setSelectedFiles((prev) =>
       prev.map((item, i) =>
@@ -210,8 +213,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   const handleDeleteExistingImage = (filePath: string) => {
-    setImagesToDelete((prev) => [...prev, filePath]);
-    setFilePaths((prev) => prev.filter((item) => item.filePath !== filePath));
+    setImagesToDelete((prev) => [...prev, filePath]); // Add to imagesToDelete list
+    setFilePaths((prev) => prev.filter((item) => item.filePath !== filePath)); // Remove from displayed images
   };
 
   // Validation: dataset name must be non-empty
