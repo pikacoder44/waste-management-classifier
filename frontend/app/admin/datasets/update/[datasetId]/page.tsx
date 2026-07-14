@@ -145,7 +145,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     const fetchDatasetDetails = async () => {
       try {
         const data = await apiCall(`/admin/dataset/${datasetId}`, "GET");
-        
+
         const dataset = data.dataset;
         // Populate state with fetched dataset details:
         setDatasetName(dataset.name);
@@ -186,7 +186,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
       setActionError(null);
     }
 
-      // If no valid files, reset the input and return
+    // If no valid files, reset the input and return
     if (validFiles.length === 0) {
       e.target.value = "";
       return;
@@ -230,7 +230,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     imagesToDelete.length > 0;
 
   const handleUploadImages = async () => {
-
+    // Validate that all selected files have a label
     if (selectedFiles.length > 0 && selectedFiles.some((item) => !item.label)) {
       setActionError("Please select a label for all images");
       return;
@@ -238,6 +238,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
 
     setUploading(true);
     setActionError(null);
+    // Prepare the payload for the update API call
     try {
       let imageData: { filename: string; label: string; fileData: string }[] =
         [];
@@ -278,12 +279,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         updatePayload.images_to_delete = imagesToDelete;
       }
 
-      // Only increment version and add images if images exist
+      // Add new images if any
       if (imageData.length > 0) {
-        const newVersion = ((parseFloat(datasetVersion) || 1.0) + 0.1).toFixed(
-          1,
-        );
-        updatePayload.version = newVersion;
         updatePayload.images = imageData;
       }
 
