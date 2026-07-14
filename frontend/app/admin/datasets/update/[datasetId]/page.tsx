@@ -227,7 +227,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   const handleDeleteExistingImage = (filePath: string) => {
-    console.log(`Marking image for deletion: ${filePath}`);
     setImagesToDelete((prev) => [...prev, filePath]);
     setFilePaths((prev) => prev.filter((item) => item.filePath !== filePath));
   };
@@ -300,10 +299,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
 
       // Add images to delete if any
       if (imagesToDelete.length > 0) {
-        console.log(
-          `Sending ${imagesToDelete.length} images to delete:`,
-          imagesToDelete,
-        );
         updatePayload.images_to_delete = imagesToDelete;
       }
 
@@ -316,7 +311,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         updatePayload.images = imageData;
       }
 
-      console.log("Sending update payload:", updatePayload);
       await apiCall("/admin/dataset/update", "PUT", updatePayload);
 
       alert("Dataset updated successfully!");
