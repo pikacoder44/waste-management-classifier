@@ -43,9 +43,6 @@ const Page = () => {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/latest`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -84,9 +81,6 @@ const Page = () => {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
@@ -165,7 +159,6 @@ const Page = () => {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
           credentials: "include",
         },
       );

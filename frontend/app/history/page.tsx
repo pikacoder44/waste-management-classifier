@@ -49,9 +49,6 @@ export default function HistoryPage() {
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
           },
         );

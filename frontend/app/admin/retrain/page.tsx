@@ -48,9 +48,6 @@ export default function RetrainPage() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/status`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
           credentials: "include",
         },
       );
