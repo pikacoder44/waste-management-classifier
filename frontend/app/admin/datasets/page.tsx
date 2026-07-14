@@ -28,44 +28,44 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-
+  const router = useRouter();
   // Fetch datasets after component mount
-  useEffect(() => {
-    const fetchDatasets = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/datasets`,
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch datasets: ${response.status}`);
-        }
-        const data = await response.json();
-
-        // Handle different response formats
-        const datasetList: Dataset[] = Array.isArray(data)
-          ? data
-          : data.datasets || [];
-
-        // Sort by lastUpdated in descending order (newest first)
-        const sortedDatasets = datasetList.sort(
-          (a, b) =>
-            new Date(b.lastUpdated).getTime() -
-            new Date(a.lastUpdated).getTime(),
-        );
-        setDatasets(sortedDatasets);
-      } catch (error) {
-        console.error("Error fetching datasets:", error);
-        setError(error instanceof Error ? error.message : "An error occurred");
-      } finally {
-        setLoading(false);
+  const fetchDatasets = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/datasets`,
+        {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || "Failed to fetch datasets");
       }
-    };
+      const data = await response.json();
 
+      // Handle different response formats
+      const datasetList: Dataset[] = Array.isArray(data)
+        ? data
+        : data.datasets || [];
+
+      // Sort by lastUpdated in descending order (newest first)
+      const sortedDatasets = datasetList.sort(
+        (a, b) =>
+          new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime(),
+      );
+      setDatasets(sortedDatasets);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchDatasets();
   }, []);
 
@@ -80,6 +80,7 @@ const Page = () => {
     }
 
     setDeleting(datasetId);
+    setError(null); // Clear previous errors
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/dataset/delete`,
@@ -109,12 +110,6 @@ const Page = () => {
     } finally {
       setDeleting(null);
     }
-  };
-  const router = useRouter();
-
-  // Reload the page to retry fetching datasets
-  const handleRetry = () => {
-    window.location.reload();
   };
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter\">
@@ -152,7 +147,7 @@ const Page = () => {
               </p>
               <p className="text-red-700 mt-1">{error}</p>
               <button
-                onClick={handleRetry}
+                onClick={fetchDatasets}
                 className="mt-3 inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
               >
                 Retry
@@ -163,7 +158,7 @@ const Page = () => {
         {/* Datasets List */}
         {!loading && !error && datasets.length > 0 && (
           <div className="grid grid-cols-1 gap-6">
-            {datasets.map((dataset: Dataset, index) => (
+            {datasets.map((dataset, index) => (
               <div
                 key={dataset._id}
                 className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-emerald-500 overflow-hidden animate-fade-in-up"
