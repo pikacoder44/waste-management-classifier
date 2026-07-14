@@ -29,6 +29,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
+  // Fetch datasets after component mount
   useEffect(() => {
     const fetchDatasets = async () => {
       try {
@@ -36,21 +37,14 @@ const Page = () => {
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/datasets`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
             credentials: "include",
             cache: "no-store",
           },
         );
-
-        console.log("Response status:", response.status);
-        const data = await response.json();
-        console.log("Response data:", data);
-
         if (!response.ok) {
           throw new Error(`Failed to fetch datasets: ${response.status}`);
         }
+        const data = await response.json();
 
         // Handle different response formats
         const datasetList: Dataset[] = Array.isArray(data)
@@ -62,7 +56,6 @@ const Page = () => {
             new Date(b.lastUpdated).getTime() -
             new Date(a.lastUpdated).getTime(),
         );
-        console.log("Datasets to display:", sortedDatasets);
         setDatasets(sortedDatasets);
       } catch (error) {
         console.error("Error fetching datasets:", error);
