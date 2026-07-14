@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -125,7 +126,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     };
 
     // Only add body for POST, PUT, PATCH requests
-    if (body && ["POST", "PUT", "PATCH"].includes(method)) {
+    if (body) {
       fetchOptions.body = JSON.stringify(body);
     }
 
@@ -143,7 +144,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
   };
 
   // Utility function to parse filePaths string
-  const parseFilePaths = (filePathStr: string): FileItem[] => {
+  const parseFilePaths = (filePathStr: string | FileItem[]): FileItem[] => {
     try {
       if (typeof filePathStr === "string") {
         const jsonStr = filePathStr.replace(/'/g, '"').replace(/\\\\/g, "/");
@@ -211,7 +212,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     const newFiles: { file: File; label: string }[] = validFiles.map(
       (file) => ({ file, label: "paper" }),
     );
-    setSelectedFiles([...selectedFiles, ...newFiles]);
+    setSelectedFiles(prev => [...prev, ...newFiles]);
     e.target.value = "";
   };
 
@@ -227,8 +228,8 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
 
   const handleDeleteExistingImage = (filePath: string) => {
     console.log(`Marking image for deletion: ${filePath}`);
-    setImagesToDelete([...imagesToDelete, filePath]);
-    setFilePaths(filePaths.filter((item) => item.filePath !== filePath));
+    setImagesToDelete(prev => [...prev, filePath]);
+    setFilePaths(prev => prev.filter((item) => item.filePath !== filePath));
   };
 
   // Validation: dataset name must be non-empty
