@@ -21,7 +21,6 @@ interface FileItem {
 interface UpdateDatasetPayload {
   dataset_id: string;
   new_name?: string;
-  description?: string;
   datasetDescription?: string;
   version?: string;
   images?: { filename: string; label: string; fileData: string }[];
@@ -167,7 +166,6 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
         setDatasetDescription(dataset.description);
         setDatasetVersion(dataset.version);
         setOriginalName(dataset.name);
-        // dataset.description is the correct field returned by the API
         setOriginalDescription(dataset.description || "");
         setFilePaths(parseFilePaths(dataset.filePath || ""));
 
@@ -212,28 +210,26 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
     const newFiles: { file: File; label: string }[] = validFiles.map(
       (file) => ({ file, label: "paper" }),
     );
-    setSelectedFiles(prev => [...prev, ...newFiles]);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
     e.target.value = "";
   };
 
   const handleLabelChange = (index: number, newLabel: string) => {
-    setSelectedFiles(prev =>
-    prev.map((item, i) =>
-        i === index
-            ? { ...item, label: newLabel }
-            : item
-    )
-);
+    setSelectedFiles((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, label: newLabel } : item,
+      ),
+    );
   };
 
   const handleRemoveFile = (index: number) => {
-    setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteExistingImage = (filePath: string) => {
     console.log(`Marking image for deletion: ${filePath}`);
-    setImagesToDelete(prev => [...prev, filePath]);
-    setFilePaths(prev => prev.filter((item) => item.filePath !== filePath));
+    setImagesToDelete((prev) => [...prev, filePath]);
+    setFilePaths((prev) => prev.filter((item) => item.filePath !== filePath));
   };
 
   // Validation: dataset name must be non-empty
