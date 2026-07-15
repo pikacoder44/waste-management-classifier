@@ -27,7 +27,6 @@ interface UploadResponse {
   }>;
 }
 
-
 export default function AdminUploadPage() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [datasetName, setDatasetName] = useState("");
@@ -96,10 +95,10 @@ export default function AdminUploadPage() {
     e.stopPropagation();
     setDragActive(false);
 
-    const droppedFiles = Array.from(e.dataTransfer.files || []).filter(
-      isSupportedImageFile,
-    );
+    // Convert FileList to Array and add files
+    const droppedFiles = Array.from(e.dataTransfer.files || []);
 
+    // Pass the dropped files to the addFiles function to handle validation and state update
     if (droppedFiles.length > 0) {
       addFiles(droppedFiles);
     }
