@@ -7,7 +7,7 @@ import isSupportedImageFile from "@/app/utils/SupportedImageCheck";
 interface ImageFile {
   file: File;
   label: string;
-  preview: string;
+  preview: string; // URL for previewing the image
 }
 
 interface UploadResponse {
@@ -33,7 +33,7 @@ export default function AdminUploadPage() {
   const [datasetName, setDatasetName] = useState("");
   const [datasetDescription, setDatasetDescription] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
+  const [dragActive, setDragActive] = useState(false); // Changes drag area color
   const [response, setResponse] = useState<UploadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,18 +70,18 @@ export default function AdminUploadPage() {
       preview: URL.createObjectURL(file),
     }));
 
-    setImages((prev) => [...prev, ...newImages]);
+    setImages((prev) => [...prev, ...newImages]); // Appends new images
     setError(null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    addFiles(Array.from(e.target.files || []));
+    addFiles(Array.from(e.target.files || [])); // Convert FileList to Array and then add files
     e.target.value = "";
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); // Prevents default behavior to allow drop
     setDragActive(true);
   };
 
@@ -114,7 +114,7 @@ export default function AdminUploadPage() {
   const handleRemoveImage = (index: number) => {
     setImages((prev) => {
       const newImages = prev.filter((_, i) => i !== index);
-      URL.revokeObjectURL(prev[index].preview);
+      URL.revokeObjectURL(prev[index].preview); // Revoke the object URL to free memory
       return newImages;
     });
   };
@@ -134,7 +134,7 @@ export default function AdminUploadPage() {
 
     setUploading(true);
     setError(null);
-    setResponse(null);
+    setResponse(null); // Clear previous response
 
     try {
       // Convert images to base64 and create payload
@@ -184,7 +184,7 @@ export default function AdminUploadPage() {
         setError(data.errors?.[0]?.error || "Upload failed");
       } else {
         setResponse(data);
-        setImages([]);
+        setImages([]); // Empty the list
         setDatasetName("");
         setDatasetDescription("");
         router.push("/admin/datasets");
