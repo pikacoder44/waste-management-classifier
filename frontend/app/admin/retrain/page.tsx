@@ -16,7 +16,9 @@ interface TrainingStatus {
 export default function RetrainPage() {
   const DEFAULT_MAX_EPOCHS = 20;
   const [isLoading, setIsLoading] = useState(false);
-  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(null);
+  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(
+    null,
+  );
   const [showAcknowledgement, setShowAcknowledgement] = useState(false);
   const [showCompletion, setShowCompletion] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -52,6 +54,7 @@ export default function RetrainPage() {
           data.is_training || data.status === "completed";
         setShowAcknowledgement(shouldShowTrainingPanel);
 
+        // If training is ongoing, hide completion; if not, stop polling
         if (data.is_training) {
           setShowCompletion(false);
         } else {
@@ -61,7 +64,7 @@ export default function RetrainPage() {
         // Reset error count on successful fetch
         errorCountRef.current = 0;
 
-        // Show completion animation when training is done
+        // Show completion when training is done
         if (!data.is_training && data.status === "completed") {
           setShowCompletion(true);
         }
@@ -106,7 +109,7 @@ export default function RetrainPage() {
 
     setIsLoading(true);
     errorCountRef.current = 0; // Reset error counter
-    
+
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/retrain`,
@@ -141,30 +144,13 @@ export default function RetrainPage() {
 
   // Check training status on mount
   useEffect(() => {
-    fetchTrainingStatus();
-
-    // If backend reports an active training session, start polling immediately
-    const checkActiveSession = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/status`,
-          { method: "GET", credentials: "include" }
-        );
-        if (response.ok) {
-          const data: TrainingStatus = await response.json();
-          if (data.is_training) {
-            startPolling();
-          }
-        }
-      } catch (err) {
-        console.warn("Failed initial session check", err);
+    // Initial fetch to determine if training is already in progress
+    fetchTrainingStatus().then(() => {
+      if (trainingStatusRef.current?.is_training) { 
+        startPolling();
       }
-    };
-    checkActiveSession();
-
-    return () => {
-      stopPolling();
-    };
+    });
+    return () => stopPolling(); // user navigates away, stop polling to avoid memory leaks
   }, [fetchTrainingStatus, startPolling, stopPolling]);
 
   return (
