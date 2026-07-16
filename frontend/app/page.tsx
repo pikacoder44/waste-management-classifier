@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
 import { AuthContext } from "./context/AuthContext";
-import { getCategoryIcon, getCategoryColor } from "@/app/components/CategoryComponents";
+import { getCategoryIcon, getCategoryColorMain } from "@/app/components/CategoryComponents";
 import { HelpCircle } from "lucide-react";
 import formatDate from "@/app/utils/formatDate";
 
@@ -429,7 +429,7 @@ export default function Home() {
 
                       {/* Results Section - Right */}
                       <div
-                        className={`relative p-5 flex flex-col justify-center overflow-hidden ${result ? getCategoryColor(result).bg : "bg-white"}`}
+                        className={`relative p-5 flex flex-col justify-center overflow-hidden ${result ? getCategoryColorMain(result).bg : "bg-white"}`}
                       >
                         {/* Animated Background Accent */}
                         <div className="absolute inset-0 opacity-5">
@@ -445,7 +445,7 @@ export default function Home() {
                             </p>
                             <div className="flex items-center gap-3">
                               <div
-                                className={`p-3 rounded-xl shadow-lg transform transition-transform hover:scale-110 ${result ? getCategoryColor(result).badge : "bg-gray-200"}`}
+                                className={`p-3 rounded-xl shadow-lg transform transition-transform hover:scale-110 ${result ? getCategoryColorMain(result).badge : "bg-gray-200"}`}
                               >
                                 {result ? (
                                   getCategoryIcon(result)
@@ -455,12 +455,12 @@ export default function Home() {
                               </div>
                               <div>
                                 <h2
-                                  className={`text-3xl font-black capitalize mb-2 ${result ? getCategoryColor(result).text : "text-gray-700"}`}
+                                  className={`text-3xl font-black capitalize mb-2 ${result ? getCategoryColorMain(result).text : "text-gray-700"}`}
                                 >
                                   {result || "Unknown"}
                                 </h2>
                                 <div
-                                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm ${result ? getCategoryColor(result).badge + " " + getCategoryColor(result).text : "bg-gray-100 text-gray-700"}`}
+                                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm ${result ? getCategoryColorMain(result).badge + " " + getCategoryColorMain(result).text : "bg-gray-100 text-gray-700"}`}
                                 >
                                   <span className="w-2.5 h-2.5 rounded-full bg-current"></span>
                                   Detected
