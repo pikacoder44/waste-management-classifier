@@ -1,7 +1,7 @@
 "use client";
 
 interface ConfusionMatrixProps {
-  cacheKey?: string;
+  cacheKey?: string; // Optional cache key to force image refresh
 }
 
 export const ConfusionMatrix = ({ cacheKey = "" }: ConfusionMatrixProps) => {
