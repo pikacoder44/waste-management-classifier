@@ -28,39 +28,39 @@ const getCategoryIcon = (label: string) => {
 interface ColorScheme {
   bg: string;
   text: string;
-  badge: string;
+  border: string;
   split: (separator?: string | RegExp, limit?: number) => string[];
 }
 
 const getCategoryColor = (label: string): ColorScheme => {
-  const themes: Record<string, { bg: string; text: string; badge: string }> = {
+  const themes: Record<string, { bg: string; text: string; border: string }> = {
     cardboard: {
-      bg: "bg-amber-50",
+      bg: "bg-amber-200",
       text: "text-amber-900",
-      badge: "bg-amber-200",
+      border: "border-red-200",
     },
-    glass: { bg: "bg-blue-50", text: "text-blue-900", badge: "bg-blue-200" },
-    metal: { bg: "bg-gray-50", text: "text-gray-900", badge: "bg-gray-300" },
+    glass: { bg: "bg-blue-200", text: "text-blue-900", border: "border-blue-300" },
+    metal: { bg: "bg-gray-300", text: "text-gray-900", border: "border-gray-400" },
     paper: {
-      bg: "bg-yellow-50",
+      bg: "bg-yellow-200",
       text: "text-yellow-900",
-      badge: "bg-yellow-200",
+      border: "border-yellow-300",
     },
     plastic: {
-      bg: "bg-purple-50",
+      bg: "bg-purple-200",
       text: "text-purple-900",
-      badge: "bg-purple-200",
+      border: "border-purple-300",
     },
-    trash: { bg: "bg-red-50", text: "text-red-900", badge: "bg-red-200" },
+    trash: { bg: "bg-red-200", text: "text-red-900", border: "border-red-300" },
   };
 
   const activeTheme = themes[label.toLowerCase()] || {
     bg: "bg-gray-50",
     text: "text-gray-900",
-    badge: "bg-gray-300",
+    border: "border-gray-300",
   };
 
-  const combinedString = `${activeTheme.bg} ${activeTheme.text} ${activeTheme.badge}`;
+  const combinedString = `${activeTheme.bg} ${activeTheme.text} ${activeTheme.border}`;
 
   return {
     ...activeTheme,
