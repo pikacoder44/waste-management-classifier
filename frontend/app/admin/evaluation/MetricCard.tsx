@@ -1,6 +1,6 @@
 interface MetricCardProps {
-  label: string;
-  value: number; // 0-1 range (will be converted to percentage)
+  label: string; // metric name
+  value: number; // 0-1 range
   icon: string;
   color: string;
   bgColor: string;
@@ -17,7 +17,7 @@ export const MetricCard = ({
   borderColor,
   desc,
 }: MetricCardProps) => {
-  const percentage = (value * 100).toFixed(1);
+  const percentage = (value * 100).toFixed(1); // Convert to percentage - 1 decimal place
 
   return (
     <div
