@@ -39,40 +39,41 @@ export default function HistoryPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const fetchHistory = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history`,
-          {
-            method: "GET",
-            credentials: "include",
-          },
-        );
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/classification/history`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
 
-        if (response.status === 401) {
-          router.push("/auth/login");
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch history");
-        }
-
-        const data = await response.json();
-        setHistory(data.history || []);
-      } catch (err) {
-        console.error("Error fetching history:", err);
-        setError(err instanceof Error ? err.message : "Error fetching history");
-      } finally {
-        setIsLoading(false);
+      if (response.status === 401) {
+        router.push("/auth/login");
+        return;
       }
-    };
-    fetchHistory();
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch history");
+      }
+
+      const data = await response.json();
+      setHistory(data.history || []);
+    } catch (err) {
+      console.error("Error fetching history:", err);
+      setError(err instanceof Error ? err.message : "Error fetching history");
+    } finally {
+      setIsLoading(false);
+    }
   }, [router]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   const handleDelete = async (entryId: string) => {
     if (!confirm("Are you sure you want to delete this entry?")) return;
@@ -103,6 +104,10 @@ export default function HistoryPage() {
       setDeletingId(null);
     }
   };
+
+  const handleRetry = () => {
+  fetchHistory();
+};
 
   if (isLoading) {
     return (
