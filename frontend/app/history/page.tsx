@@ -11,6 +11,7 @@ import {
   getCategoryColor,
   getCategoryCardGradient,
   getCategoryHeaderGradient,
+  getConfidenceBarColor,
 } from "@/app/components/CategoryComponents";
 import formatDate  from "@/app/utils/formatDate";
 
@@ -240,23 +241,10 @@ export default function HistoryPage() {
                         {(item.confidence * 100).toFixed(1)}%
                       </p>
                     </div>
+                    {/* Confidence Bar */}
                     <div className="w-full bg-slate-200 rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          item.predictedLabel === "cardboard"
-                            ? "bg-amber-600"
-                            : item.predictedLabel === "glass"
-                              ? "bg-blue-600"
-                              : item.predictedLabel === "metal"
-                                ? "bg-gray-600"
-                                : item.predictedLabel === "paper"
-                                  ? "bg-yellow-600"
-                                  : item.predictedLabel === "plastic"
-                                    ? "bg-purple-600"
-                                    : item.predictedLabel === "trash"
-                                      ? "bg-red-600"
-                                      : "bg-gray-600"
-                        }`}
+                        className={`h-2 rounded-full transition-all duration-300 ${getConfidenceBarColor(item.predictedLabel)}`}
                         style={{ width: `${item.confidence * 100}%` }}
                       ></div>
                     </div>
