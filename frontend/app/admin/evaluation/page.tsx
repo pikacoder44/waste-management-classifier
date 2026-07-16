@@ -34,7 +34,7 @@ const Page = () => {
   const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
 
   // Fetch latest evaluation report
-  const fetchLatestEvaluation = async () => {
+  const fetchLatestEvaluation = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -72,9 +72,9 @@ const Page = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Poll evaluation status
+  // Get evaluation status and update progress bar
   const pollEvaluationStatus = useCallback(async () => {
     try {
       const response = await fetch(
@@ -97,9 +97,9 @@ const Page = () => {
       setEvalProgress(status.progress);
       setEvalMessage(status.message);
 
-      // If evaluation is complete (use authoritative status field), fetch the latest results
+      // If evaluation is complete, stop polling and fetch the latest results
       if (status.status === "completed") {
-        if (pollingIntervalRef.current) {
+        if (pollingIntervalRef.current) { // Clear the polling interval
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
@@ -112,7 +112,7 @@ const Page = () => {
         return;
       }
 
-      // If evaluation fails, stop polling and surface an explicit error
+      // If evaluation fails, stop polling and show error message
       if (status.status === "failed") {
         if (pollingIntervalRef.current) {
           clearInterval(pollingIntervalRef.current);
@@ -142,7 +142,7 @@ const Page = () => {
         }
       }
     }
-  }, []);
+  }, [fetchLatestEvaluation]);
 
   // Handle Run Evaluation button click
   const handleRunEvaluation = async () => {
@@ -154,7 +154,7 @@ const Page = () => {
     setEvalMessage("Starting evaluation...");
 
     try {
-      // Check backend status first to avoid duplicate jobs (backend-driven)
+      // Check backend status first to avoid duplicate jobs
       const statusResp = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
         {
@@ -162,11 +162,11 @@ const Page = () => {
           credentials: "include",
         },
       );
-
+      // If backend is already running evaluation, resume polling instead of starting a new one
       if (statusResp.ok) {
         const status: EvaluationStatus = await statusResp.json();
         if (status.is_evaluating) {
-          // Backend already running evaluation — restore polling UI
+          // Backend already running evaluation
           setIsRunningEval(true);
           setEvalProgress(status.progress);
           setEvalMessage(status.message || "Resuming evaluation...");
@@ -214,7 +214,7 @@ const Page = () => {
       if (!pollingIntervalRef.current) {
         pollingIntervalRef.current = setInterval(() => {
           pollEvaluationStatus();
-        }, 3000);
+        }, 3000); // Poll every 3 seconds
       }
     } catch (err) {
       console.error("Error starting evaluation:", err);
@@ -229,6 +229,7 @@ const Page = () => {
   useEffect(() => {
     const restoreStatus = async () => {
       try {
+        // Client status check
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/evaluation/status`,
           { method: "GET", credentials: "include" },
@@ -254,21 +255,19 @@ const Page = () => {
           }
         }
       } catch (e) {
-        // restore is best-effort; swallow errors
         console.warn("Failed to restore evaluation status", e);
       }
     };
 
     restoreStatus();
-
+    // Cleanup polling on unmount to prevent memory leaks
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pollEvaluationStatus]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-white to-emerald-50 text-slate-900 font-sans py-12 sm:py-16 lg:py-24 animate-page-enter">
