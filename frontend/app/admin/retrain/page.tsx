@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Loader2, Zap, CheckCircle, RotateCcw, BookOpen } from "lucide-react";
 
 interface TrainingStatus {
@@ -17,32 +16,23 @@ interface TrainingStatus {
 export default function RetrainPage() {
   const DEFAULT_MAX_EPOCHS = 20;
   const [isLoading, setIsLoading] = useState(false);
-  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(
-    null,
-  );
+  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(null);
   const [showAcknowledgement, setShowAcknowledgement] = useState(false);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const errorCountRef = useRef(0);
   const MAX_ERRORS = 3; // Stop polling after 3 consecutive errors
+  const trainingStatusRef = useRef<TrainingStatus | null>(null);
 
-  const stopPolling = () => {
+  // Stop polling function
+  const stopPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
-  };
+  }, []);
 
-  const startPolling = () => {
-    if (!pollingRef.current) {
-      pollingRef.current = setInterval(() => {
-        fetchTrainingStatus();
-      }, 3000);
-    }
-  };
-
-  // Fetch training status from the API
-  const fetchTrainingStatus = async () => {
+  const fetchTrainingStatus = useCallback(async () => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/status`,
@@ -55,6 +45,7 @@ export default function RetrainPage() {
       if (response.ok) {
         const data: TrainingStatus = await response.json();
         setTrainingStatus(data);
+        trainingStatusRef.current = data; // Sync ref
 
         // Keep page state aligned with backend training lifecycle
         const shouldShowTrainingPanel =
@@ -63,9 +54,6 @@ export default function RetrainPage() {
 
         if (data.is_training) {
           setShowCompletion(false);
-          if (!pollingRef.current) {
-            startPolling();
-          }
         } else {
           stopPolling();
         }
@@ -86,7 +74,8 @@ export default function RetrainPage() {
 
       // Stop polling after too many errors
       if (errorCountRef.current >= MAX_ERRORS) {
-        const wasTraining = trainingStatus?.is_training;
+        // Safe from stale closure because we read from the .current Ref!
+        const wasTraining = trainingStatusRef.current?.is_training;
         stopPolling();
 
         if (wasTraining) {
@@ -98,18 +87,26 @@ export default function RetrainPage() {
         }
       }
     }
-  };
+  }, [stopPolling]);
 
-  // Start model retraining
+  const startPolling = useCallback(() => {
+    if (!pollingRef.current) {
+      pollingRef.current = setInterval(() => {
+        fetchTrainingStatus();
+      }, 3000);
+    }
+  }, [fetchTrainingStatus]);
+
+  // Click handler for model retraining
   const handleRetrain = async () => {
-    // Guard against duplicate retrain requests while already training
+    // Guard against duplicate retrain requests
     if (trainingStatus?.is_training || pollingRef.current) {
       return;
     }
 
     setIsLoading(true);
-    // Reset error counter when starting a new retrain
-    errorCountRef.current = 0;
+    errorCountRef.current = 0; // Reset error counter
+    
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/retrain`,
@@ -142,17 +139,33 @@ export default function RetrainPage() {
     }
   };
 
-  // Check current training status on mount
+  // Check training status on mount
   useEffect(() => {
-    // Check current training status once when the page mounts
     fetchTrainingStatus();
+
+    // If backend reports an active training session, start polling immediately
+    const checkActiveSession = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/model/status`,
+          { method: "GET", credentials: "include" }
+        );
+        if (response.ok) {
+          const data: TrainingStatus = await response.json();
+          if (data.is_training) {
+            startPolling();
+          }
+        }
+      } catch (err) {
+        console.warn("Failed initial session check", err);
+      }
+    };
+    checkActiveSession();
 
     return () => {
       stopPolling();
     };
-    // Intentionally run once on mount to restore current training state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchTrainingStatus, startPolling, stopPolling]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter">
@@ -173,7 +186,7 @@ export default function RetrainPage() {
         {/* Main Content */}
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200 animate-fade-in-up [animation-delay:120ms]">
           {!showAcknowledgement ? (
-            // Initial State - Button
+            /* Initial State - Button */
             <div className="py-12 sm:py-16 px-4">
               <div className="text-center mb-12 animate-fade-in-up">
                 <div className="inline-flex p-6 bg-linear-to-br from-emerald-100 to-emerald-50 rounded-full mb-6 shadow-lg">
@@ -229,7 +242,7 @@ export default function RetrainPage() {
               </button>
             </div>
           ) : (
-            // Training In Progress - Status & Progress Bar
+            /* Training In Progress - Status & Progress Bar */
             <div className="space-y-8">
               {/* Acknowledgement Banner */}
               {!showCompletion && (
@@ -372,62 +385,6 @@ export default function RetrainPage() {
               )}
             </div>
           )}
-        </div>
-
-        {/* Info Box */}
-        <div className="mt-10 bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-6 sm:p-8 shadow-lg animate-fade-in-up [animation-delay:200ms]">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <div className="p-2 bg-blue-200 rounded-lg">
-              <BookOpen className="w-6 h-6 text-blue-700" />
-            </div>
-            What happens during retraining?
-          </h3>
-          <ul className="space-y-4 text-gray-700">
-            <li className="flex gap-4">
-              <span className="text-blue-600 font-bold text-2xl shrink-0">
-                ▸
-              </span>
-              <span className="font-medium">
-                Datasets from{" "}
-                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
-                  dataset/original
-                </code>{" "}
-                and{" "}
-                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
-                  dataset/custom
-                </code>{" "}
-                are combined
-              </span>
-            </li>
-            <li className="flex gap-4">
-              <span className="text-blue-600 font-bold text-2xl shrink-0">
-                ▸
-              </span>
-              <span className="font-medium">
-                Data is split into 70% training and 30% testing sets
-              </span>
-            </li>
-            <li className="flex gap-4">
-              <span className="text-blue-600 font-bold text-2xl shrink-0">
-                ▸
-              </span>
-              <span className="font-medium">
-                MobileNetV2 model is trained for up to 20 epochs with early
-                stopping
-              </span>
-            </li>
-            <li className="flex gap-4">
-              <span className="text-blue-600 font-bold text-2xl shrink-0">
-                ▸
-              </span>
-              <span className="font-medium">
-                Updated model is saved to{" "}
-                <code className="bg-white px-3 py-1 rounded-lg text-blue-700 font-mono text-sm font-bold shadow-sm">
-                  model/waste_classifier_model.keras
-                </code>
-              </span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
