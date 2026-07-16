@@ -254,7 +254,7 @@ export default function HistoryPage() {
                   <div className="mb-4">
                     <p className="text-slate-600 text-sm">
                       <span className="font-semibold">Inference Time:</span>{" "}
-                      {item.inferenceTime.toFixed(3)}s
+                      {item.inferenceTime.toFixed(3)} seconds
                     </p>
                   </div>
 
