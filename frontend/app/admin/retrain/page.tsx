@@ -48,6 +48,7 @@ export default function RetrainPage() {
         const data: TrainingStatus = await response.json();
         setTrainingStatus(data);
         trainingStatusRef.current = data; // Sync ref
+        errorCountRef.current = 0; // Reset error count on successful fetch
 
         // Keep page state aligned with backend training lifecycle
         const shouldShowTrainingPanel =
@@ -59,18 +60,13 @@ export default function RetrainPage() {
           setShowCompletion(false);
         } else {
           stopPolling();
+          if (data.status === "completed") {
+            setShowCompletion(true);
+          }
         }
-
-        // Reset error count on successful fetch
-        errorCountRef.current = 0;
-
-        // Show completion when training is done
-        if (!data.is_training && data.status === "completed") {
-          setShowCompletion(true);
-        }
-      } else {
-        throw new Error(`Status fetch failed: ${response.status}`);
+        return data.is_training;
       }
+
     } catch (error) {
       console.error("Error fetching training status:", error);
       errorCountRef.current += 1;
@@ -126,10 +122,7 @@ export default function RetrainPage() {
         setShowAcknowledgement(true);
         setShowCompletion(false);
         startPolling();
-        // Fetch initial status
-        setTimeout(() => {
-          fetchTrainingStatus();
-        }, 500);
+        fetchTrainingStatus(); // Immediately fetch status after starting training
       } else {
         const error = await response.json();
         alert(`Error: ${error.detail || "Failed to start training"}`);
@@ -144,14 +137,17 @@ export default function RetrainPage() {
 
   // Check training status on mount
   useEffect(() => {
-    // Initial fetch to determine if training is already in progress
-    fetchTrainingStatus().then(() => {
-      if (trainingStatusRef.current?.is_training) { 
-        startPolling();
-      }
-    });
-    return () => stopPolling(); // user navigates away, stop polling to avoid memory leaks
-  }, [fetchTrainingStatus, startPolling, stopPolling]);
+  const checkStatusAndSetup = async () => {
+    const isTrainingActive = await fetchTrainingStatus();
+    if (isTrainingActive) {
+      startPolling();
+    }
+  };
+
+  checkStatusAndSetup();
+
+  return () => stopPolling();
+}, [fetchTrainingStatus, startPolling, stopPolling]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-gray-50 via-gray-75 to-gray-100 px-4 py-8 sm:p-8 animate-page-enter">
@@ -287,9 +283,9 @@ export default function RetrainPage() {
                   />
                 </div>
               </div>
-
+              
               {/* Status Message */}
-              {trainingStatus && (
+              {!showCompletion && trainingStatus?.status === "completed" && (
                 <div className="bg-linear-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border border-emerald-200 shadow-sm animate-fade-in-up [animation-delay:100ms]">
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-emerald-100 rounded-lg shrink-0">
