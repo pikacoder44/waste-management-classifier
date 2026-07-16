@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -105,9 +105,6 @@ export default function HistoryPage() {
     }
   };
 
-  const handleRetry = () => {
-  fetchHistory();
-};
 
   if (isLoading) {
     return (
@@ -151,7 +148,7 @@ export default function HistoryPage() {
             <p className="text-red-700 font-semibold">Error</p>
             <p className="text-red-600">{error}</p>
             <button
-              onClick={handleRetry}
+              onClick={fetchHistory}
               className="mt-3 inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
             >
               Retry
