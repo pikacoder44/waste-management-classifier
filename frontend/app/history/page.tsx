@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "../components/Loader";
-import { Clock } from "lucide-react";
+import { Clock, CalendarDays } from "lucide-react";
 import {
   getCategoryIcon,
   getCategoryColor,
@@ -295,8 +295,9 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Timestamp */}
-                  <p className="text-slate-500 text-xs mb-4">
-                    📅 {formatDate(item.createdAt)}
+                  <p className="text-slate-500 text-xs mb-4 flex items-center">
+                    <CalendarDays className="inline-block mr-2 w-4 h-4"/>
+                    {formatDate(item.createdAt)}
                   </p>
 
                   {/* Delete Button */}
