@@ -68,6 +68,38 @@ const getCategoryColor = (label: string): ColorScheme => {
   };
 };
 
+const getCategoryColorMain = (
+  category: string,
+): { bg: string; text: string; badge: string } => {
+  const colors: Record<string, { bg: string; text: string; badge: string }> = {
+    cardboard: {
+      bg: "bg-amber-50",
+      text: "text-amber-700",
+      badge: "bg-amber-100",
+    },
+    glass: { bg: "bg-blue-50", text: "text-blue-700", badge: "bg-blue-100" },
+    metal: { bg: "bg-gray-50", text: "text-gray-700", badge: "bg-gray-100" },
+    paper: {
+      bg: "bg-yellow-50",
+      text: "text-yellow-700",
+      badge: "bg-yellow-100",
+    },
+    plastic: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      badge: "bg-purple-100",
+    },
+    trash: { bg: "bg-red-50", text: "text-red-700", badge: "bg-red-100" },
+  };
+  return (
+    colors[category.toLowerCase()] || {
+      bg: "bg-gray-50",
+      text: "text-gray-700",
+      badge: "bg-gray-100",
+    }
+  );
+};
+
 const getConfidenceBarColor = (label: string): string => {
   const colors: Record<string, string> = {
     cardboard: "bg-linear-to-r from-amber-400 via-amber-500 to-amber-600",
@@ -115,4 +147,5 @@ export {
   getConfidenceBarColor,
   getCategoryHeaderGradient,
   getCategoryCardGradient,
+  getCategoryColorMain
 };
