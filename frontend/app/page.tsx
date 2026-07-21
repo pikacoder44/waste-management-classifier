@@ -11,7 +11,6 @@ interface DisposalRecommendation {
   disposal_method: string;
   description: string;
   benefits: string;
-  alternatives?: string[] | null;
 }
 
 export default function Home() {
@@ -548,24 +547,6 @@ export default function Home() {
                                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                                   {disposalRecommendation.benefits}
                                 </p>
-
-                                {/* Optional Alternatives (kept but simplified) */}
-                                {disposalRecommendation.alternatives &&
-                                  disposalRecommendation.alternatives.length >
-                                    0 && (
-                                    <div className="mt-2">
-                                      <p className="text-xs font-semibold text-slate-600">
-                                        Alternatives
-                                      </p>
-                                      <ul className="text-xs text-slate-500 mt-1 space-y-1">
-                                        {disposalRecommendation.alternatives.map(
-                                          (alt, idx) => (
-                                            <li key={idx}>• {alt}</li>
-                                          ),
-                                        )}
-                                      </ul>
-                                    </div>
-                                  )}
                               </div>
                             )}
                           </div>
