@@ -167,7 +167,7 @@ export default function Home() {
     };
   }, []);
 
-  // Error handling with auto-dismiss after 5 seconds - for a pop-up error message
+  // Popup error modal for 5 seconds
   const showError = (message: string, isUnauthorized: boolean = false) => {
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
@@ -237,7 +237,6 @@ export default function Home() {
             "The file could not be processed. Please upload a valid image.",
           );
         } else {
-          console.log("Prediction result:", data);
           setResult(data.label);
           setConfidence(data.confidence);
           setInferenceTime(data.inferenceTime);
