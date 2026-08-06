@@ -12,9 +12,11 @@ from app.database.collections import model_evaluation_collection
 from app.services.admin_dataset_service import (
     validate_and_process_image,
     parse_file_paths_json,
-    save_image_file,
-    delete_stored_file,
     increment_version,
+)
+from app.services.cloudinary_image_service import (
+    upload_image_bytes,
+    delete_cloudinary_image,
 )
 from app.services.admin_model_service import (
     training_status,
@@ -76,29 +78,32 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
                 continue
 
             file_bytes = validated["file_bytes"]
-            file_ext = validated["file_ext"]
             label = validated["label"]
             filename = validated["filename"]
 
-            # Save the image file to the custom dataset directory
             try:
-                _, new_filename, normalized_file_path = save_image_file(
-                    label, file_bytes, file_ext
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                upload_result = upload_image_bytes(
+                    file_bytes,
+                    folder=f"datasets/{dataset_name}/{label}",
+                    public_id=f"{label}_{timestamp}",
+                    filename=filename,
                 )
 
                 all_file_paths.append(
                     {
-                        "filePath": normalized_file_path,
+                        "filePath": upload_result["secure_url"],
+                        "public_id": upload_result["public_id"],
                         "label": label,
                         "originalFilename": filename,
                     }
                 )
-                saved_file_paths.append(normalized_file_path)
+                saved_file_paths.append(upload_result["public_id"])
 
                 uploaded_results.append(
                     {
                         "originalFilename": filename,
-                        "savedFilename": new_filename,
+                        "savedFilename": upload_result["public_id"],
                         "label": label,
                         "status": "success",
                     }
@@ -141,7 +146,7 @@ async def upload_dataset(request: Request, payload: BatchUploadRequest):
     except Exception as e:
         for file_path in saved_file_paths:
             try:
-                delete_stored_file(file_path)
+                delete_cloudinary_image(file_path)
             except Exception as cleanup_error:
                 print(f"Rollback cleanup failed for {file_path}: {cleanup_error}")
 
@@ -175,13 +180,11 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
         # This will only run if there are images to delete
         if payload.images_to_delete is not None and len(payload.images_to_delete) > 0:
 
-            # Normalize the paths to delete
             paths_to_delete_normalized = set(payload.images_to_delete)
 
-            # Physically delete the files from storage
             for file_path in paths_to_delete_normalized:
                 try:
-                    delete_stored_file(file_path)
+                    delete_cloudinary_image(file_path)
                 except Exception as e:
                     print(f"Error deleting file {file_path}: {e}")
 
@@ -195,6 +198,10 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                         and item.get("filePath") in paths_to_delete_normalized
                     )
                     or (isinstance(item, str) and item in paths_to_delete_normalized)
+                    or (
+                        isinstance(item, dict)
+                        and item.get("public_id") in paths_to_delete_normalized
+                    )
                 )
             ]
             print(
@@ -212,18 +219,22 @@ async def update_dataset(request: Request, payload: UpdateDatasetRequest):
                     continue  # skip
 
                 file_bytes = validated["file_bytes"]
-                file_ext = validated["file_ext"]
                 label = validated["label"]
                 filename = validated["filename"]
 
                 try:
-                    _, _, normalized_file_path = save_image_file(
-                        label, file_bytes, file_ext
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                    upload_result = upload_image_bytes(
+                        file_bytes,
+                        folder=f"datasets/{requestedDataset.get('name', 'dataset')}/{label}",
+                        public_id=f"{label}_{timestamp}",
+                        filename=filename,
                     )
 
                     new_file_paths.append(
                         {
-                            "filePath": normalized_file_path,
+                            "filePath": upload_result["secure_url"],
+                            "public_id": upload_result["public_id"],
                             "label": label,
                             "originalFilename": filename,
                         }
@@ -324,12 +335,12 @@ def delete_dataset(request: Request, payload: DeleteDatasetRequest):
             try:
                 # File paths can be stored as dicts or strings.
                 if isinstance(file_info, dict):
-                    file_path = file_info.get("filePath")
+                    file_path = file_info.get("public_id") or file_info.get("filePath")
                 else:
                     file_path = file_info
 
                 if file_path:
-                    if delete_stored_file(file_path):
+                    if delete_cloudinary_image(file_path):
                         deleted_count += 1
             except Exception as file_error:
                 print(f"Failed to delete file {file_path}: {file_error}")
@@ -499,14 +510,11 @@ def delete_classification_entry_admin(entry_id: str, request: Request):
                 status_code=404, detail="Failed to delete classification entry"
             )
 
-        # Delete image file from local storage
+        # Delete image file from Cloudinary storage
         if entry.get("filePath"):
             try:
-                delete_stored_file(entry["filePath"])
-            except PermissionError:
-                print(f"Permission denied deleting file: {entry['filePath']}")
-                raise HTTPException(
-                    status_code=500, detail="Permission denied deleting image file"
+                delete_cloudinary_image(
+                    entry.get("cloudinaryPublicId") or entry["filePath"]
                 )
             except Exception as e:
                 print(f"Error deleting image file: {e}")

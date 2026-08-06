@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/dataset/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
   },
 };

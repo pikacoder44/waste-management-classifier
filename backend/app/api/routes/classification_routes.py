@@ -7,11 +7,13 @@ from app.models.waste_records import WasteRecords
 from app.database.collections import waste_records_collection
 from app.utils.db_helpers import sanitize_doc
 from app.utils.auth_utils import verify_user_from_request
+from app.services.cloudinary_image_service import (
+    upload_image_bytes,
+    delete_cloudinary_image,
+)
 from datetime import datetime
 import time
-import os
 from bson import ObjectId
-from pathlib import Path
 
 from app.services.recommendation_service import get_disposal_recommendation
 
@@ -41,10 +43,6 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Check if user is logged in and get their ID
         user_id = verify_user_from_request(request)
 
-        # Create a folder for this user's uploads
-        user_upload_dir = Path(f"uploads/{user_id}")
-        user_upload_dir.mkdir(parents=True, exist_ok=True)
-
         # image quality check and enhancement
         processing_result = ImageProcessingService.process_and_validate(image_bytes)
 
@@ -56,11 +54,6 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         if processing_result["was_enhanced"] and processing_result["warnings"]:
             print(f"[Classification] Note: {', '.join(processing_result['warnings'])}")
 
-        # Create a filename with current date and time
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        image_filename = f"{timestamp}.png"
-        image_path = user_upload_dir / image_filename
-
         # Get the final image (after enhancement if it happened)
         if processing_result["image_array"] is not None:
             final_image_bytes = ImageProcessingService.convert_to_bytes(
@@ -69,9 +62,13 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         else:
             final_image_bytes = image_bytes
 
-        # Save the image to disk
-        with open(image_path, "wb") as f:
-            f.write(final_image_bytes)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        cloudinary_result = upload_image_bytes(
+            final_image_bytes,
+            folder=f"classifications/{user_id}",
+            public_id=f"classification_{timestamp}",
+            filename=f"{timestamp}.png",
+        )
 
         # Resize and normalize image
         preprocessedImage = preprocess_image(final_image_bytes)
@@ -89,7 +86,8 @@ async def analyze_classification_result(file: UploadFile, request: Request):
         # Create a record of this classification result
         waste_record = WasteRecords(
             userId=user_id,
-            filePath=str(image_path),
+            filePath=cloudinary_result["secure_url"],
+            cloudinaryPublicId=cloudinary_result["public_id"],
             createdAt=datetime.now(),
             predictedLabel=predicted_class_label,
             confidence=confidence,
@@ -178,18 +176,11 @@ async def delete_classification_entry(entry_id: str, request: Request):
             print(f"Database error: {e}")
             raise HTTPException(status_code=503, detail="Database operation failed")
 
-        # Delete associated image file from disk
+        # Delete associated image from Cloudinary
         if entry.get("filePath"):
             try:
-                if os.path.exists(entry["filePath"]):
-                    os.remove(entry["filePath"])
-                    print(f"Deleted image file: {entry['filePath']}")
-                else:
-                    print(f"Image file not found: {entry['filePath']}")
-            except PermissionError:
-                print(f"Permission denied deleting file: {entry['filePath']}")
-                raise HTTPException(
-                    status_code=500, detail="Permission denied deleting image file"
+                delete_cloudinary_image(
+                    entry.get("cloudinaryPublicId") or entry.get("filePath")
                 )
             except Exception as e:
                 print(f"Failed to delete image file: {e}")

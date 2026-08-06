@@ -20,6 +20,11 @@ interface FileItem {
   label: string;
   originalFilename: string;
 }
+
+const resolveImageSrc = (filePath: string) =>
+  filePath.startsWith("http")
+    ? filePath
+    : `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath}`;
 interface UpdateDatasetPayload {
   dataset_id: string;
   new_name?: string;
@@ -427,7 +432,7 @@ const Page = ({ params }: { params: Promise<{ datasetId: string }> }) => {
                     const label =
                       typeof item === "object" ? item.label : "Unknown";
 
-                    const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath}`;
+                    const imageUrl = resolveImageSrc(filePath);
                     return (
                       <div
                         key={`existing-${index}`}

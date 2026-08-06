@@ -17,6 +17,14 @@ class ModelEvaluation(BaseModel):
     )
     recall: float = Field(..., ge=0.0, le=1.0, description="Weighted recall score")
     f1_score: float = Field(..., ge=0.0, le=1.0, description="Weighted F1 score")
+    confusionMatrixUrl: str | None = Field(
+        default=None,
+        description="Cloudinary secure URL for the generated confusion matrix image",
+    )
+    confusionMatrixPublicId: str | None = Field(
+        default=None,
+        description="Cloudinary public ID for the generated confusion matrix image",
+    )
 
     class Config:
         populate_by_name = True

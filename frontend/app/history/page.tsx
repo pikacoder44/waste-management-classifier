@@ -13,7 +13,7 @@ import {
   getCategoryHeaderGradient,
   getConfidenceBarColor,
 } from "@/app/components/CategoryComponents";
-import formatDate  from "@/app/utils/formatDate";
+import formatDate from "@/app/utils/formatDate";
 
 interface HistoryItem {
   _id: string;
@@ -32,6 +32,11 @@ interface HistoryItem {
         alternatives?: string[];
       };
 }
+
+const resolveImageSrc = (filePath: string) =>
+  filePath.startsWith("http")
+    ? filePath
+    : `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`;
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -105,7 +110,6 @@ export default function HistoryPage() {
       setDeletingId(null);
     }
   };
-
 
   if (isLoading) {
     return (
@@ -191,7 +195,7 @@ export default function HistoryPage() {
                 {/* Image Preview */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${item.filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`}
+                    src={resolveImageSrc(item.filePath)}
                     alt={item.predictedLabel}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -296,7 +300,7 @@ export default function HistoryPage() {
 
                   {/* Timestamp */}
                   <p className="text-slate-500 text-xs mb-4 flex items-center">
-                    <CalendarDays className="inline-block mr-2 w-4 h-4"/>
+                    <CalendarDays className="inline-block mr-2 w-4 h-4" />
                     {formatDate(item.createdAt)}
                   </p>
 

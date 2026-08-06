@@ -1,15 +1,11 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from pathlib import Path
 from app.api.routes import auth_routes
 from app.api.routes import classification_routes
 from app.api.routes import admin_routes
-
-BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 app = FastAPI(
     title="Waste Classifier API",
@@ -95,6 +91,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def root():
     return {"message": "Waste Classifier API is running"}
@@ -103,28 +100,3 @@ def root():
 app.include_router(auth_routes.router)
 app.include_router(classification_routes.router)
 app.include_router(admin_routes.router)
-
-
-dataset_path = BACKEND_ROOT / "dataset"
-if dataset_path.exists():
-    app.mount(
-        "/dataset", StaticFiles(directory=str(dataset_path)), name="dataset"
-    )  # mounts dataset directory as static files
-
-uploads_path = BACKEND_ROOT / "uploads"
-if not uploads_path.exists():
-    uploads_path.mkdir(parents=True, exist_ok=True)
-app.mount(
-    "/uploads", StaticFiles(directory=str(uploads_path)), name="uploads"
-)  # mounts uploads directory as static files
-
-
-evaluation_results_path = BACKEND_ROOT / "evaluation_results"
-if not evaluation_results_path.exists():
-    evaluation_results_path.mkdir(parents=True, exist_ok=True)
-
-app.mount(
-    "/evaluation_results",
-    StaticFiles(directory=str(evaluation_results_path)),
-    name="evaluation_results",
-)

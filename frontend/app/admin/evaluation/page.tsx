@@ -11,6 +11,7 @@ interface EvaluationData {
   precision: number;
   recall: number;
   f1_score: number;
+  confusionMatrixUrl?: string;
 }
 
 interface EvaluationStatus {
@@ -99,7 +100,8 @@ const Page = () => {
 
       // If evaluation is complete, stop polling and fetch the latest results
       if (status.status === "completed") {
-        if (pollingIntervalRef.current) { // Clear the polling interval
+        if (pollingIntervalRef.current) {
+          // Clear the polling interval
           clearInterval(pollingIntervalRef.current);
           pollingIntervalRef.current = null;
         }
@@ -472,7 +474,12 @@ const Page = () => {
         )}
 
         {/* Confusion Matrix */}
-        {data && <ConfusionMatrix cacheKey={data.evaluationDate} />}
+        {data && (
+          <ConfusionMatrix
+            cacheKey={data.evaluationDate}
+            imageUrl={data.confusionMatrixUrl}
+          />
+        )}
 
         {/* Performance Scorecard */}
         {data && (

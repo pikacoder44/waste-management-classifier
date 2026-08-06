@@ -6,7 +6,11 @@ from datetime import datetime
 class WasteRecords(BaseModel):
     userId: str  # logical foreign key to User model
     filePath: str = Field(
-        ..., description="Local file path where the uploaded image is stored"
+        ..., description="Cloudinary secure URL where the uploaded image is stored"
+    )
+    cloudinaryPublicId: Optional[str] = Field(
+        default=None,
+        description="Cloudinary public ID for the uploaded classification image",
     )
     createdAt: datetime = Field(default_factory=datetime.now)
     predictedLabel: str = Field(

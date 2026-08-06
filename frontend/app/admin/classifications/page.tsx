@@ -28,6 +28,11 @@ interface ClassificationEntry {
       };
 }
 
+const resolveImageSrc = (filePath: string) =>
+  filePath.startsWith("http")
+    ? filePath
+    : `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`;
+
 const Page = () => {
   const [classificationHistory, setClassificationHistory] = useState<
     ClassificationEntry[]
@@ -40,8 +45,7 @@ const Page = () => {
   const handleDownloadImage = async (filePath: string, wasteType: string) => {
     try {
       setDownloadingId(wasteType);
-      // Construct full URL like the Image component does
-      const fullUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/${filePath.replace(/\\/g, "/").replace(/^backend\//, "")}`;
+      const fullUrl = resolveImageSrc(filePath);
       const cacheBustedUrl = `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}download=${Date.now()}`;
       const response = await fetch(cacheBustedUrl, { cache: "no-store" });
       if (!response.ok) {
@@ -213,7 +217,7 @@ const Page = () => {
                 {/* Image */}
                 <div className="relative h-48 bg-slate-200 overflow-hidden group">
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${entry.filePath.replace(/\\\\/g, "/").replace(/^backend\\/, "")}`}
+                    src={resolveImageSrc(entry.filePath)}
                     alt={entry.predictedLabel}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"

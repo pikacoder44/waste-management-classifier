@@ -1,20 +1,21 @@
-import numpy as np
-from sklearn.metrics import classification_report, confusion_matrix
+import io
 from datetime import datetime
-from typing import Dict, Any, cast
-from bson import ObjectId
+from typing import Any, Dict, cast
+
 import matplotlib
+import numpy as np
+from bson import ObjectId
+from sklearn.metrics import classification_report, confusion_matrix
 
 # Use a headless backend so evaluation can render plots safely in background threads.
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from pathlib import Path
 
 from app.database.collections import model_evaluation_collection
 from app.models.model_evaluation import ModelEvaluation
+from app.services.cloudinary_image_service import upload_image_bytes
 
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
-BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 def evaluate_model(
@@ -30,8 +31,8 @@ def evaluate_model(
         training_status["message"] = "Generating predictions..."
         training_status["progress"] = 92
 
-    y_true = [] # Actual labels
-    y_pred = [] # Predicted labels
+    y_true = []  # Actual labels
+    y_pred = []  # Predicted labels
     batch_count = 0
     total_samples = 0
 
@@ -87,13 +88,13 @@ def evaluate_model(
         raise ValueError(
             f"No predictions or labels collected. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
         )
-    
+
     # Validate that the lengths of predictions and labels match
     if len(y_true) != len(y_pred):
         raise ValueError(
             f"Mismatch in predictions and labels length. y_true: {len(y_true)}, y_pred: {len(y_pred)}"
         )
-    
+
     # Generate classification report and confusion matrix
     try:
         class_report = cast(
@@ -132,10 +133,12 @@ def evaluate_model(
         training_status["message"] = "Evaluating: Saving confusion matrix..."
         training_status["progress"] = 96
 
-    # Generate and save confusion matrix image
+    # Generate and upload confusion matrix image
     try:
-        generate_confusion_matrix_image(conf_matrix, ALLOWED_LABELS)
-        print("\tConfusion matrix PNG saved")
+        confusion_matrix_result = generate_confusion_matrix_image(
+            conf_matrix, ALLOWED_LABELS
+        )
+        print("\tConfusion matrix uploaded to Cloudinary")
     except Exception as e:
         print(f"\tError generating confusion matrix image: {e}")
         raise
@@ -149,25 +152,23 @@ def evaluate_model(
         "precision": weighted_precision,
         "recall": weighted_recall,
         "f1_score": weighted_f1,
+        "confusionMatrixUrl": confusion_matrix_result["secure_url"],
+        "confusionMatrixPublicId": confusion_matrix_result["public_id"],
     }
     print("\tEvaluation document created")
 
     return evaluation_doc
 
 
-def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list) -> str:
-    # Generate and save confusion matrix image to backend/evaluation_results
+def generate_confusion_matrix_image(
+    conf_matrix: np.ndarray, class_labels: list
+) -> dict:
+    # Generate the confusion matrix image in memory and upload it to Cloudinary.
     try:
-        # Create backend directory
-        output_dir = BACKEND_ROOT / "evaluation_results"
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        output_path = output_dir / "confusionMatrix.png"
-
         print(f"-- Generating confusion matrix visualization...")
 
         # Create a blank graph
-        plt.figure(figsize=(10, 8))
+        figure = plt.figure(figsize=(10, 8))
 
         # Display confusion matrix as an image
         im = plt.imshow(conf_matrix, interpolation="nearest", cmap="Blues")
@@ -211,10 +212,21 @@ def generate_confusion_matrix_image(conf_matrix: np.ndarray, class_labels: list)
 
         plt.tight_layout()
 
-        # Save to backend directory (overwrites previous file automatically)
-        plt.savefig(output_path, dpi=100, bbox_inches="tight")
-        plt.close()
-        return str(output_path)
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format="png", dpi=100, bbox_inches="tight")
+        buffer.seek(0)
+
+        upload_result = upload_image_bytes(
+            buffer.read(),
+            folder="evaluation_results",
+            public_id=f"confusion_matrix_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}",
+            filename="confusionMatrix.png",
+        )
+        plt.close(figure)
+        return {
+            "secure_url": upload_result["secure_url"],
+            "public_id": upload_result["public_id"],
+        }
 
     except Exception as e:
         print(f"Failed to generate confusion matrix image: {e}")

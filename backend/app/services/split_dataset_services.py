@@ -1,152 +1,124 @@
-import os
-import shutil
-import random
-from datetime import datetime
 import json
+import os
+import random
+import shutil
+import tempfile
+from datetime import datetime
+from pathlib import Path
+
+from app.database.collections import dataset_collection
+from app.services.cloudinary_image_service import download_image_bytes
 
 ALLOWED_LABELS = ["cardboard", "paper", "metal", "glass", "plastic", "trash"]
-BASE_DATASET_PATH = "dataset/original"
-CUSTOM_DATASET_PATH = "dataset/custom"
+
+
+def _parse_dataset_file_paths(file_path_value: str | list) -> list[dict]:
+    if isinstance(file_path_value, list):
+        return [item for item in file_path_value if isinstance(item, dict)]
+
+    if not file_path_value:
+        return []
+
+    try:
+        parsed = json.loads(file_path_value)
+    except (ValueError, json.JSONDecodeError):
+        return []
+
+    if isinstance(parsed, list):
+        return [item for item in parsed if isinstance(item, dict)]
+
+    return []
+
+
+def _collect_cloudinary_images() -> dict[str, list[dict]]:
+    all_images = {label: [] for label in ALLOWED_LABELS}
+
+    for dataset in dataset_collection.find():
+        for item in _parse_dataset_file_paths(dataset.get("filePath", [])):
+            label = item.get("label")
+            file_url = item.get("filePath")
+            if label in all_images and file_url:
+                all_images[label].append(item)
+
+    return all_images
 
 
 def get_source_image_count():
-    # Get total count of images from original and custom datasets
+    # Count all dataset images stored in MongoDB.
     total = 0
-    for label in ALLOWED_LABELS:
-        # Count from original
-        original_path = os.path.join(BASE_DATASET_PATH, label)
-        if os.path.exists(original_path):
-            total += len(
-                [
-                    f
-                    for f in os.listdir(original_path)
-                    if os.path.isfile(os.path.join(original_path, f))
-                ]
-            )
-
-        # Count from custom
-        custom_path = os.path.join(CUSTOM_DATASET_PATH, label)
-        if os.path.exists(custom_path):
-            total += len(
-                [
-                    f
-                    for f in os.listdir(custom_path)
-                    if os.path.isfile(os.path.join(custom_path, f))
-                ]
-            )
-
+    for dataset in dataset_collection.find({}, {"imageCount": 1}):
+        try:
+            total += int(dataset.get("imageCount", 0))
+        except Exception:
+            continue
     return total
 
 
 def create_split_dataset(split_path: str, train_split: float = 0.7):
-
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
 
-    # Create directories
     for label in ALLOWED_LABELS:
         os.makedirs(os.path.join(train_dir, label), exist_ok=True)
         os.makedirs(os.path.join(test_dir, label), exist_ok=True)
 
-    # Merge images from both datasets - Holds images path
-    all_images = {label: [] for label in ALLOWED_LABELS}
+    all_images = _collect_cloudinary_images()
 
-    # Collect from original
     for label in ALLOWED_LABELS:
-        original_path = os.path.join(BASE_DATASET_PATH, label)
-        if os.path.exists(original_path):
-            for img_file in os.listdir(original_path):
-                img_path = os.path.join(original_path, img_file)
-                if os.path.isfile(img_path):
-                    all_images[label].append(img_path)
-
-    # Collect from custom
-    for label in ALLOWED_LABELS:
-        custom_path = os.path.join(CUSTOM_DATASET_PATH, label)
-        if os.path.exists(custom_path):
-            for img_file in os.listdir(custom_path):
-                img_path = os.path.join(custom_path, img_file)
-                if os.path.isfile(img_path):
-                    all_images[label].append(img_path)
-
-    # Split and copy
-    for label in ALLOWED_LABELS:
-        images = all_images[label]  # gather all images for each label
+        images = all_images[label]
         random.shuffle(images)
         split_index = int(len(images) * train_split)
 
-        # Copy train images to train directory
-        for img_path in images[:split_index]:
-            dest_path = os.path.join(train_dir, label, os.path.basename(img_path))
-            shutil.copy2(img_path, dest_path)
+        for image_item in images[:split_index]:
+            file_bytes = download_image_bytes(image_item["filePath"])
+            file_name = Path(
+                image_item.get("originalFilename")
+                or image_item.get("public_id")
+                or "image"
+            ).name
+            if "." not in file_name:
+                file_name = f"{file_name}.png"
+            dest_path = os.path.join(train_dir, label, file_name)
+            with open(dest_path, "wb") as file_handle:
+                file_handle.write(file_bytes)
 
-        # Copy test images to test directory
-        for img_path in images[split_index:]:
-            dest_path = os.path.join(test_dir, label, os.path.basename(img_path))
-            shutil.copy2(img_path, dest_path)
+        for image_item in images[split_index:]:
+            file_bytes = download_image_bytes(image_item["filePath"])
+            file_name = Path(
+                image_item.get("originalFilename")
+                or image_item.get("public_id")
+                or "image"
+            ).name
+            if "." not in file_name:
+                file_name = f"{file_name}.png"
+            dest_path = os.path.join(test_dir, label, file_name)
+            with open(dest_path, "wb") as file_handle:
+                file_handle.write(file_bytes)
 
     return {"train_dir": train_dir, "test_dir": test_dir}
 
 
 def ensure_split_dataset(split_type: str, train_split: float = 0.7):
-
     if split_type == "train":
-        split_path = "dataset/combined_temp"
+        split_path = tempfile.mkdtemp(prefix="waste_classifier_train_")
     elif split_type == "eval":
-        split_path = "dataset/eval_temp"
+        split_path = tempfile.mkdtemp(prefix="waste_classifier_eval_")
     else:
         raise ValueError("split_type must be 'train' or 'eval'")
 
     train_dir = os.path.join(split_path, "train")
     test_dir = os.path.join(split_path, "test")
-    metadata_file = os.path.join(
-        split_path, ".metadata.json"
-    )  # hidden file to store metadata about the split
 
-    # Check if split exists and is current
-    should_recreate = True
+    print(f"Creating fresh {split_type.upper()} split in temporary directory...")
+    create_split_dataset(split_path, train_split)
 
-    # Only trust the split if the metadata and split directories still exist
-    if (
-        os.path.exists(metadata_file)
-        and os.path.isdir(train_dir)
-        and os.path.isdir(test_dir)
-    ):
-        try:
-            with open(metadata_file, "r") as f:
-                metadata = json.load(f)
-
-            # Check if source data count matches
-            current_count = get_source_image_count()
-            if metadata.get("image_count") == current_count:
-                should_recreate = False
-                print(f"{split_type.upper()} split is current ({current_count} images)")
-            else:
-                print(
-                    f"{split_type.upper()} split outdated - current: {current_count}, cached: {metadata.get('image_count')}"
-                )
-        except Exception as e:
-            print(f"Error reading metadata: {e}, will recreate split")
-
-    if should_recreate:
-        # Remove old split if exists
-        if os.path.exists(split_path):
-            print(f"Removing outdated split from {split_path}...")
-            shutil.rmtree(split_path)
-
-        print(f"Creating fresh {split_type.upper()} split...")
-        create_split_dataset(split_path, train_split)
-
-        # Save metadata
-        image_count = get_source_image_count()
-        os.makedirs(split_path, exist_ok=True)
-        metadata = {
-            "created_at": datetime.now().isoformat(),
-            "image_count": image_count,
-            "train_split": train_split,
-        }
-        with open(metadata_file, "w") as f:
-            json.dump(metadata, f)
-        print(f"{split_type.upper()} split created successfully")
+    metadata = {
+        "created_at": datetime.now().isoformat(),
+        "image_count": get_source_image_count(),
+        "train_split": train_split,
+    }
+    metadata_file = os.path.join(split_path, ".metadata.json")
+    with open(metadata_file, "w") as file_handle:
+        json.dump(metadata, file_handle)
 
     return {"train_dir": train_dir, "test_dir": test_dir, "split_path": split_path}

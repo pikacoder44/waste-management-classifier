@@ -2,10 +2,16 @@
 
 interface ConfusionMatrixProps {
   cacheKey?: string; // Optional cache key to force image refresh
+  imageUrl?: string;
 }
 
-export const ConfusionMatrix = ({ cacheKey = "" }: ConfusionMatrixProps) => {
-  const imageUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/evaluation_results/confusionMatrix.png${cacheKey ? `?t=${encodeURIComponent(cacheKey)}` : ""}`;
+export const ConfusionMatrix = ({
+  cacheKey = "",
+  imageUrl,
+}: ConfusionMatrixProps) => {
+  const resolvedImageUrl = imageUrl
+    ? `${imageUrl}${cacheKey && imageUrl.includes("?") ? "&" : cacheKey ? "?" : ""}${cacheKey ? `t=${encodeURIComponent(cacheKey)}` : ""}`
+    : `${process.env.NEXT_PUBLIC_API_BASE_URL}/evaluation_results/confusionMatrix.png${cacheKey ? `?t=${encodeURIComponent(cacheKey)}` : ""}`;
 
   return (
     <div className="mt-12 animate-fade-in-up">
@@ -24,7 +30,7 @@ export const ConfusionMatrix = ({ cacheKey = "" }: ConfusionMatrixProps) => {
           <div className="w-full max-w-3xl rounded-xl overflow-hidden border-2 border-slate-300 bg-linear-to-br from-slate-50 to-slate-100 p-3 shadow-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageUrl}
+              src={resolvedImageUrl}
               alt="Confusion Matrix"
               className="w-full h-auto max-w-full"
             />
