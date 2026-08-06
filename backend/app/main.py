@@ -88,7 +88,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://https://waste-management-classifier-production-84b0.up.railway.app",
+        "https://vercel.com/pika-ops-projects/waste-management-classifier/HrJczqEKmXW6EokrCWSo1cuVj29J",
     ],
     allow_credentials=True,
     allow_methods=["*"],
