@@ -85,18 +85,16 @@ app.add_middleware(
 
 # CORS has to allow credentials so auth cookies work.
 app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=r"^http://(localhost|127\.0\.0\.1|localhost\.localhost)(:[0-9]+)?$",
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Content-Type",
-        "Authorization",
-        "X-CSRF-Token",
-        "X-Requested-With",
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.localhost",
+        "localhost:8000",
+        "127.0.0.1:8000",
+        "waste-management-classifier-production.up.railway.app",
+        "*.up.railway.app",
     ],
-    expose_headers=["Content-Length", "X-CSRF-Token"],
-    max_age=3600,  # Browser caches CORS permissions for 1 hour
 )
 
 
