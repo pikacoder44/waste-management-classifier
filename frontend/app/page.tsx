@@ -3,7 +3,10 @@ import { useEffect, useRef, useState, useContext } from "react";
 import Image from "next/image";
 import Loader from "./components/Loader";
 import { AuthContext } from "./context/AuthContext";
-import { getCategoryIcon, getCategoryColorMain } from "@/app/components/CategoryComponents";
+import {
+  getCategoryIcon,
+  getCategoryColorMain,
+} from "@/app/components/CategoryComponents";
 import { HelpCircle } from "lucide-react";
 import formatDate from "@/app/utils/formatDate";
 
@@ -158,7 +161,8 @@ export default function Home() {
     }, "image/jpeg");
   };
 
-  useEffect(() => { // Runs when page closes
+  useEffect(() => {
+    // Runs when page closes
     return () => {
       stopCamera();
       if (errorTimeoutRef.current) {
@@ -564,7 +568,7 @@ export default function Home() {
                                 🕐 Timestamp
                               </label>
                               <span className="text-xs font-bold text-slate-900">
-                                {formatDate(new Date())}
+                                {formatDate(new Date().toISOString())}
                               </span>
                             </div>
                           </div>
