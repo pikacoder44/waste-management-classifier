@@ -71,18 +71,6 @@ async def validation_exception_handler(request, exc: RequestValidationError):
     )
 
 
-# Only trust local hosts.
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=[
-        "localhost",
-        "127.0.0.1",
-        "*.localhost",
-        "localhost:8000",
-        "127.0.0.1:8000",
-    ],
-)
-
 # CORS has to allow credentials so auth cookies work.
 app.add_middleware(
     TrustedHostMiddleware,
