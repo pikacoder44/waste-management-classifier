@@ -71,7 +71,6 @@ async def validation_exception_handler(request, exc: RequestValidationError):
     )
 
 
-# CORS has to allow credentials so auth cookies work.
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=[
@@ -85,6 +84,16 @@ app.add_middleware(
     ],
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://YOUR-VERCEL-PROJECT.vercel.app",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def root():
