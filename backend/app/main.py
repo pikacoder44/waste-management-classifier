@@ -88,7 +88,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://YOUR-VERCEL-PROJECT.vercel.app",
+        "https://https://waste-management-classifier-production-84b0.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
