@@ -71,18 +71,18 @@ async def validation_exception_handler(request, exc: RequestValidationError):
     )
 
 
-# app.add_middleware(
-#     TrustedHostMiddleware,
-#     allowed_hosts=[
-#         "localhost",
-#         "127.0.0.1",
-#         "*.localhost",
-#         "localhost:8000",
-#         "127.0.0.1:8000",
-#         "waste-management-classifier-production.up.railway.app",
-#         "*.up.railway.app",
-#     ],
-# )
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.localhost",
+        "localhost:8000",
+        "127.0.0.1:8000",
+        "waste-management-classifier-production.up.railway.app",
+        "*.up.railway.app",
+    ],
+)
 
 app.add_middleware(
     CORSMiddleware,
