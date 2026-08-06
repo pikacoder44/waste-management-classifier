@@ -147,8 +147,8 @@ def loginUser(user: User):
         key="access_token",
         value=login_result["access_token"],
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
     return response_obj
@@ -158,6 +158,6 @@ def loginUser(user: User):
 def logoutUser():
     response_obj = JSONResponse({"message": "Logout successful"})
     response_obj.delete_cookie(
-        key="access_token", httponly=True, secure=False, samesite="lax", path="/"
+        key="access_token", httponly=True, secure=True, samesite="none", path="/"
     )
     return response_obj
